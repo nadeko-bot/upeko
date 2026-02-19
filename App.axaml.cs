@@ -34,6 +34,7 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+#pragma warning disable IL2026
     private void DisableAvaloniaDataAnnotationValidation()
     {
         var dataValidationPluginsToRemove =
@@ -44,4 +45,5 @@ public partial class App : Application
             BindingPlugins.DataValidators.Remove(plugin);
         }
     }
+#pragma warning restore IL2026
 }
