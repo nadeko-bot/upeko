@@ -1,13 +1,11 @@
-using Avalonia.ReactiveUI;
-using upeko.ViewModels;
+using Avalonia.Controls;
 
 namespace upeko.Views;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+public partial class MainWindow : Window
 {
     public MainWindow()
     {
         InitializeComponent();
     }
-
 }

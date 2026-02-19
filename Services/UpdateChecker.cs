@@ -267,6 +267,21 @@ namespace upeko.Services
                     {
                         return $"Error extracting tar.gz: {error}";
                     }
+
+                    // Make NadekoBot executable after downloading
+                    var nadekoPath = Path.Combine(extractPath, "NadekoBot");
+
+                    using var chmodProcess = new Process();
+                    chmodProcess.StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "chmod",
+                        Arguments = $"+x \"{nadekoPath}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    chmodProcess.Start();
+                    await chmodProcess.WaitForExitAsync();
                 }
 
                 OnDownloadProgress?.Invoke(1, "Extraction complete. Installing...");

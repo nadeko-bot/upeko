@@ -2,654 +2,391 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Avalonia.Media;
-using Avalonia.Interactivity;
-using ReactiveUI;
-using upeko.Services;
-using System.Windows.Input;
 using Avalonia.Controls;
-using AsyncImageLoader;
+using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using upeko.Models;
+using upeko.Services;
 
-namespace upeko.ViewModels
+namespace upeko.ViewModels;
+
+public partial class BotViewModel : ViewModelBase
 {
-    /// <summary>
-    /// ViewModel for bot management and interaction
-    /// </summary>
-    public partial class BotViewModel : ViewModelBase
+    private readonly BotModel _bot = null!;
+    public BotModel Bot => _bot;
+    public BotListViewModel Parent { get; } = null!;
+
+    [ObservableProperty]
+    private MainActivityState _state;
+
+    [ObservableProperty]
+    private bool _isProgressVisible;
+
+    [ObservableProperty]
+    private double _progressValue;
+
+    [ObservableProperty]
+    private string _progressTitle = "Downloading...";
+
+    [ObservableProperty]
+    private string _progressDetail = "Initializing...";
+
+    [ObservableProperty]
+    private string _progressPercent = "0%";
+
+    [ObservableProperty]
+    private bool _isCheckingForUpdates;
+
+    [ObservableProperty]
+    private bool _isEditingName;
+
+    [ObservableProperty]
+    private string _editedName = string.Empty;
+
+    private Process? _process;
+
+    public string BotPath
     {
-        #region Properties
-
-        private readonly BotModel _bot = null!;
-
-        public BotModel Bot
-            => _bot;
-
-        public BotListViewModel Parent { get; } = null!;
-
-        public string BotIcon
+        get => Bot.PathUri ?? string.Empty;
+        set
         {
-            get => _bot.IconUri ?? string.Empty;
-            set
-            {
-                _bot.IconUri = value;
-                Parent.UpdateBot(_bot);
+            _bot.PathUri = value;
+            Parent.UpdateBot(_bot);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ExecutablePath));
+        }
+    }
 
-                this.RaisePropertyChanged();
+    public string Name => Bot.Name;
+    public string DisplayInitial => string.IsNullOrEmpty(Name) ? "?" : Name[..1].ToUpper();
+    public string ExecutablePath => Path.Combine(BotPath, PlatformSpecific.GetExecutableName());
+    public bool IsRunning => State == MainActivityState.Running;
+    public bool IsReady => State == MainActivityState.Runnable || State == MainActivityState.Updatable;
+    public bool IsMissing => State == MainActivityState.Downloadable;
+    public bool ShowStartStop => IsRunning || IsReady;
+    public bool IsUpdateAvailable => UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
+    public bool IsBotDownloaded => !string.IsNullOrWhiteSpace(Bot?.Version);
+    public string UpdateButtonText => IsCheckingForUpdates ? "Checking..." : IsUpdateAvailable ? "Update" : "Check Updates";
+
+    public string StatusText => State switch
+    {
+        MainActivityState.Running => "Running",
+        MainActivityState.Runnable => "Ready",
+        MainActivityState.Updatable => "Update Available",
+        MainActivityState.Downloadable => "Not Downloaded",
+        _ => "Unknown"
+    };
+
+    public string? Version => Bot?.Version;
+
+    public BotViewModel()
+    {
+        UpdateChecker.Instance.OnDownloadProgress += OnDownloadProgress;
+        UpdateChecker.Instance.OnDownloadComplete += OnDownloadComplete;
+    }
+
+    public BotViewModel(BotListViewModel parent, BotModel model) : this()
+    {
+        _bot = model;
+        Parent = parent;
+        ReloadVersionFromPath();
+        UpdateCurrentActivity();
+    }
+
+    partial void OnStateChanged(MainActivityState value)
+    {
+        OnPropertyChanged(nameof(IsRunning));
+        OnPropertyChanged(nameof(IsReady));
+        OnPropertyChanged(nameof(IsMissing));
+        OnPropertyChanged(nameof(ShowStartStop));
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(UpdateButtonText));
+        OnPropertyChanged(nameof(IsUpdateAvailable));
+        OnPropertyChanged(nameof(IsBotDownloaded));
+    }
+
+    partial void OnIsCheckingForUpdatesChanged(bool value)
+    {
+        OnPropertyChanged(nameof(UpdateButtonText));
+    }
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        Parent?.RemoveNavigation();
+    }
+
+    [RelayCommand]
+    private void StartBot()
+    {
+        if (State != MainActivityState.Runnable && State != MainActivityState.Updatable)
+            return;
+
+        if (string.IsNullOrEmpty(ExecutablePath) || !File.Exists(ExecutablePath))
+            return;
+
+        _process = Process.Start(new ProcessStartInfo
+        {
+            FileName = ExecutablePath,
+            WorkingDirectory = BotPath,
+        });
+
+        _ = Task.Run(async () =>
+        {
+            if (_process is not null)
+                await _process.WaitForExitAsync();
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _process = null;
+                UpdateCurrentActivity();
+            });
+            _process?.Dispose();
+        });
+
+        UpdateCurrentActivity();
+    }
+
+    [RelayCommand]
+    private void StopBot()
+    {
+        if (State != MainActivityState.Running)
+            return;
+
+        using var p = _process;
+        _process = null;
+        try { p?.Kill(); } catch { }
+        UpdateCurrentActivity();
+    }
+
+    [RelayCommand]
+    private async Task UpdateBot()
+    {
+        if (!IsUpdateAvailable && IsBotDownloaded)
+        {
+            await CheckForUpdatesAsync();
+        }
+        else
+        {
+            await DownloadAndInstallBotAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void DownloadBot()
+    {
+        _ = DownloadAndInstallBotAsync();
+    }
+
+    [RelayCommand]
+    private void OpenFolder()
+    {
+        if (string.IsNullOrWhiteSpace(BotPath))
+            return;
+
+        var dataFolder = Path.Combine(BotPath, "data");
+        if (!Directory.Exists(dataFolder))
+            return;
+
+        Process.Start(PlatformSpecific.GetNameOfFileExplorer(), dataFolder);
+    }
+
+    [RelayCommand]
+    private void OpenCreds()
+    {
+        if (string.IsNullOrWhiteSpace(BotPath))
+            return;
+
+        var credsFile = Path.Combine(BotPath, "data", "creds.yml");
+        var credsExampleFile = Path.Combine(BotPath, "data", "creds_example.yml");
+        if (!File.Exists(credsFile))
+        {
+            if (!File.Exists(credsExampleFile))
+                return;
+            File.Copy(credsExampleFile, credsFile);
+        }
+
+        Process.Start(PlatformSpecific.GetNameOfFileExplorer(), Path.GetFullPath(credsFile));
+    }
+
+    [RelayCommand]
+    private async Task BrowsePath()
+    {
+        var topLevel = TopLevel.GetTopLevel(App.MainWindow);
+        if (topLevel == null) return;
+
+        var result = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Select Bot Path",
+            AllowMultiple = false
+        });
+
+        if (result.Count > 0)
+        {
+            BotPath = result[0].Path.LocalPath;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ChangeAvatar()
+    {
+        var topLevel = TopLevel.GetTopLevel(App.MainWindow);
+        if (topLevel == null) return;
+
+        var result = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select Avatar Image",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("Image Files")
+                {
+                    Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.gif" }
+                }
             }
+        });
+
+        if (result.Count > 0)
+        {
+            _bot.IconUri = new Uri(result[0].Path.LocalPath).ToString();
+            Parent?.UpdateBot(Bot);
+            OnPropertyChanged(nameof(Bot));
+        }
+    }
+
+    [RelayCommand]
+    private void ShowDeleteModal()
+    {
+        Parent?.RequestDelete(Bot.Name);
+    }
+
+    [RelayCommand]
+    private void EditName()
+    {
+        EditedName = Name;
+        IsEditingName = true;
+    }
+
+    [RelayCommand]
+    private void SaveName()
+    {
+        if (!string.IsNullOrWhiteSpace(EditedName) && EditedName != Name)
+        {
+            _bot.Name = EditedName;
+            Parent.UpdateBot(_bot);
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(DisplayInitial));
         }
 
-        public string BotPath
+        IsEditingName = false;
+    }
+
+    [RelayCommand]
+    private void CancelEditName()
+    {
+        EditedName = Name;
+        IsEditingName = false;
+    }
+
+    public void ReloadVersionFromPath()
+    {
+        if (string.IsNullOrWhiteSpace(BotPath))
+            return;
+
+        if (!File.Exists(ExecutablePath))
         {
-            get => Bot.PathUri ?? string.Empty;
-            set
+            Bot.Version = null;
+            return;
+        }
+
+        try
+        {
+            using var p = Process.Start(new ProcessStartInfo
             {
-                _bot.PathUri = value;
-                Parent.UpdateBot(_bot);
-                this.RaisePropertyChanged();
-                this.RaisePropertyChanged(nameof(ExecutablePath));
-            }
+                FileName = ExecutablePath,
+                Arguments = "--version",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+            });
+
+            var info = p?.StandardOutput.ReadToEnd();
+            Bot.Version = info?.Trim();
+        }
+        catch
+        {
+            Bot.Version = null;
         }
 
-        public string Name
-            => Bot.Name;
+        UpdateCurrentActivity();
+    }
 
-        public string ExecutablePath
-            => Path.Combine(BotPath, PlatformSpecific.GetExecutableName());
+    private void UpdateCurrentActivity()
+    {
+        if (!IsBotDownloaded)
+            State = MainActivityState.Downloadable;
+        else if (_process != null)
+            State = MainActivityState.Running;
+        else if (IsUpdateAvailable)
+            State = MainActivityState.Updatable;
+        else
+            State = MainActivityState.Runnable;
+    }
 
-        private MainActivityState _state;
-
-        public MainActivityState State
+    private async Task CheckForUpdatesAsync()
+    {
+        IsCheckingForUpdates = true;
+        try
         {
-            get => _state;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _state, value);
-                this.RaisePropertyChanged(nameof(IsRunning));
-                this.RaisePropertyChanged(nameof(IsBotDownloaded));
-                this.RaisePropertyChanged(nameof(IsNotDownloading));
-                this.RaisePropertyChanged(nameof(IsDownloading));
-                this.RaisePropertyChanged(nameof(UpdateButtonText));
-                this.RaisePropertyChanged(nameof(IsUpdateAvailable));
-                this.RaisePropertyChanged(nameof(CanStart));
-                this.RaisePropertyChanged(nameof(CanStop));
-            }
+            await UpdateChecker.Instance.CheckForUpdatesAsync();
+            UpdateCurrentActivity();
+            OnPropertyChanged(nameof(UpdateButtonText));
+            OnPropertyChanged(nameof(IsUpdateAvailable));
         }
-
-
-        private Process? _process;
-
-        public bool IsRunning
-            => _process != null;
-
-        public bool CanStart
-            => !IsRunning && (State == MainActivityState.Runnable || State == MainActivityState.Updatable);
-
-        public bool CanStop
-            => IsRunning && State == MainActivityState.Running;
-
-        public bool IsUpdateAvailable
-            => UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
-
-        public bool IsBotDownloaded
-            => !string.IsNullOrWhiteSpace(Bot?.Version);
-
-        public string UpdateButtonText
-            => IsBotDownloaded ? "Update" : "Download";
-
-        private bool _isDownloading;
-
-        public bool IsDownloading
+        finally
         {
-            get => _isDownloading;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _isDownloading, value);
-                this.RaisePropertyChanged(nameof(IsNotDownloading));
-            }
+            IsCheckingForUpdates = false;
         }
+    }
 
-        public bool IsNotDownloading
-            => !IsDownloading;
-
-        private double _downloadProgress;
-
-        public double DownloadProgress
+    private async Task DownloadAndInstallBotAsync()
+    {
+        try
         {
-            get => _downloadProgress;
-            set => this.RaiseAndSetIfChanged(ref _downloadProgress, value);
+            IsProgressVisible = true;
+            ProgressValue = 0;
+            ProgressPercent = "0%";
+            ProgressTitle = "Downloading...";
+            ProgressDetail = "Please wait, do not close the application.";
+
+            await UpdateChecker.Instance.DownloadAndInstallBotAsync(Bot.Name, BotPath);
         }
-
-        private string _downloadStatus = string.Empty;
-
-        public string DownloadStatus
+        catch (Exception ex)
         {
-            get => _downloadStatus;
-            set => this.RaiseAndSetIfChanged(ref _downloadStatus, value);
+            IsProgressVisible = false;
+            ProgressDetail = $"Error: {ex.Message}";
         }
+    }
 
-        private bool _deleteConfirm;
+    private void OnDownloadProgress(double progress, string status)
+    {
+        IsProgressVisible = true;
+        ProgressValue = progress * 100;
+        ProgressPercent = $"{(int)(progress * 100)}%";
+        ProgressTitle = status;
+    }
 
-        public bool DeleteConfirm
+    private void OnDownloadComplete(bool success, string version)
+    {
+        IsProgressVisible = false;
+        if (success)
         {
-            get => _deleteConfirm;
-            set => this.RaiseAndSetIfChanged(ref _deleteConfirm, value);
-        }
-
-        public string RunButtonText
-            => IsRunning ? "Stop" : "Start";
-
-        public string RunButtonIcon
-            => IsRunning
-                ? "M14,19H18V5H14M6,19H10V5H6V19Z" // Stop icon
-                : "M8,5.14V19.14L19,12.14L8,5.14Z"; // Play icon
-
-        public IBrush RunButtonBackground
-            => IsRunning
-                ? new SolidColorBrush(Color.Parse("#E74C3C")) // Red for stop
-                : new SolidColorBrush(Color.Parse("#2ECC71")); // Green for start
-
-
-        public string Status
-            => State switch
-            {
-                MainActivityState.Running => "Running",
-                MainActivityState.Runnable => "Ready",
-                MainActivityState.Updatable => "Update Available",
-                MainActivityState.Downloadable => "Not Downloaded",
-                _ => "Unknown"
-            };
-
-        public IBrush StatusColor
-            => State switch
-            {
-                MainActivityState.Running => new SolidColorBrush(Color.Parse("#2ECC71")), // Green
-                MainActivityState.Runnable => new SolidColorBrush(Color.Parse("#3498DB")), // Blue
-                MainActivityState.Updatable => new SolidColorBrush(Color.Parse("#F39C12")), // Orange
-                MainActivityState.Downloadable => new SolidColorBrush(Color.Parse("#95A5A6")), // Gray
-                _ => new SolidColorBrush(Color.Parse("#95A5A6")) // Gray
-            };
-
-        public string? Version
-            => Bot?.Version;
-
-        public IAsyncImageLoader ImageLoader { get; }
-
-        // Added property for editing mode
-        private bool _isEditingName;
-        public bool IsEditingName
-        {
-            get => _isEditingName;
-            set => this.RaiseAndSetIfChanged(ref _isEditingName, value);
-        }
-
-        // Added property for temporarily storing the new name
-        private string _editedName = string.Empty;
-        public string EditedName
-        {
-            get => _editedName;
-            set => this.RaiseAndSetIfChanged(ref _editedName, value);
-        }
-
-        #endregion
-
-        #region Commands
-
-        public ICommand BackCommand { get; }
-        public ICommand SelectBotPathCommand { get; }
-        public ICommand DeleteIntentCommand { get; }
-        public ICommand DeleteBotCommand { get; }
-        public ICommand DeleteCancelCommand { get; }
-        public ICommand OpenDataFolderCommand { get; }
-        public ICommand OpenCredsFileCommand { get; }
-        public ICommand StartCommand { get; }
-        public ICommand StopCommand { get; }
-        public ICommand CheckForUpdatesCommand { get; }
-        public ICommand UpdateCommand { get; }
-        public ICommand SelectAvatarCommand { get; }
-        // Added commands for name editing
-        public ICommand EditNameCommand { get; }
-        public ICommand SaveNameCommand { get; }
-        public ICommand CancelEditNameCommand { get; }
-
-        #endregion
-
-        #region Constructor
-
-        public BotViewModel()
-        {
-            ImageLoader = App.Services.GetService(typeof(IAsyncImageLoader)) as IAsyncImageLoader
-                          ?? throw new InvalidOperationException("Failed to resolve IImageLoaderService");
-
-            DeleteIntentCommand = ReactiveCommand.Create(ExecuteDeleteIntentCommand);
-            DeleteBotCommand = ReactiveCommand.Create(ExecuteDeleteBotCommand);
-            DeleteCancelCommand = ReactiveCommand.Create(ExecuteDeleteCancelCommand);
-            OpenDataFolderCommand = ReactiveCommand.Create(OpenDataClick);
-            OpenCredsFileCommand = ReactiveCommand.Create(OpenCredsClick);
-            StartCommand = ReactiveCommand.Create(ExecuteStartCommand);
-            StopCommand = ReactiveCommand.Create(ExecuteStopCommand);
-            CheckForUpdatesCommand = ReactiveCommand.Create(ExecuteCheckForUpdatesCommand);
-            UpdateCommand = ReactiveCommand.Create(UpdateButtonClick);
-            BackCommand = ReactiveCommand.Create(ExecuteBackCommand);
-            SelectBotPathCommand = ReactiveCommand.Create(ExecuteSelectBotPathCommand);
-            SelectAvatarCommand = ReactiveCommand.Create(ExecuteSelectAvatarCommand);
-            // Initialize name editing commands
-            EditNameCommand = ReactiveCommand.Create(ExecuteEditNameCommand);
-            SaveNameCommand = ReactiveCommand.Create(ExecuteSaveNameCommand);
-            CancelEditNameCommand = ReactiveCommand.Create(ExecuteCancelEditNameCommand);
-
-
-            UpdateChecker.Instance.OnDownloadProgress += OnDownloadProgress;
-            UpdateChecker.Instance.OnDownloadComplete += OnDownloadComplete;
-        }
-
-        public BotViewModel(BotListViewModel parent, BotModel model) : this()
-        {
-            _bot = model;
-            Parent = parent;
             ReloadVersionFromPath();
             UpdateCurrentActivity();
         }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Checks whether there's a valid Bot file inside the selected folder, and updates the version if there is
-        /// </summary>
-        public void ReloadVersionFromPath()
+        else
         {
-            if (string.IsNullOrWhiteSpace(BotPath))
-                return;
-
-            if (!File.Exists(ExecutablePath))
-            {
-                Bot.Version = null;
-                return;
-            }
-
-            try
-            {
-                Debug.WriteLine(ExecutablePath);
-                using var p = Process.Start(new ProcessStartInfo()
-                {
-                    FileName = ExecutablePath,
-                    Arguments = "--version",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                });
-
-                var info = p?.StandardOutput.ReadToEnd();
-                Bot.Version = info?.Trim();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                Bot.Version = null;
-                return;
-            }
-
-            UpdateCurrentActivity();
+            ProgressDetail = $"Download failed: {version}";
         }
-
-        /// <summary>
-        /// Updates the current activity state based on the bot's status
-        /// </summary>
-        private void UpdateCurrentActivity()
-        {
-            if (!IsBotDownloaded)
-                State = MainActivityState.Downloadable;
-            else if (IsRunning)
-                State = MainActivityState.Running;
-            else if (IsUpdateAvailable)
-                State = MainActivityState.Updatable;
-            else
-                State = MainActivityState.Runnable;
-        }
-
-        /// <summary>
-        /// Called when a new version is found by the UpdateChecker
-        /// </summary>
-        private void OnNewVersionFound(ReleaseModel newVer)
-        {
-            UpdateCurrentActivity();
-        }
-
-        /// <summary>
-        /// Downloads the latest version and installs it
-        /// </summary>
-        private async Task DownloadAndInstallBotAsync()
-        {
-            try
-            {
-                // Reset download state
-                IsDownloading = true;
-                DownloadProgress = 0;
-                DownloadStatus = "Preparing to download...";
-
-                // Start the download
-                await UpdateChecker.Instance.DownloadAndInstallBotAsync(
-                    Bot.Name,
-                    BotPath
-                );
-
-                IsDownloading = false;
-                ReloadVersionFromPath();
-                UpdateCurrentActivity();
-
-                // Success will be handled by the OnDownloadComplete handler
-            }
-            catch (Exception ex)
-            {
-                // Handle failure directly if exception occurs
-                IsDownloading = false;
-                DownloadStatus = $"Error: {ex.Message}";
-
-                // Log the exception
-                Console.WriteLine($"Error downloading installer: {ex}");
-            }
-        }
-
-        /// <summary>
-        /// Called to delete this bot from the updater
-        /// </summary>
-        /// <param name="wipe">Whether to wipe the folder from the disk too.</param>
-        public void Delete(bool wipe)
-        {
-            if (string.IsNullOrWhiteSpace(BotPath))
-                return;
-
-            Parent.RemoveBot(this);
-        }
-
-        /// <summary>
-        /// Download the bot, if able
-        /// </summary>
-        public async Task Download()
-        {
-            if (State != MainActivityState.Downloadable && !IsUpdateAvailable)
-            {
-                throw new InvalidOperationException("Bot is already downloaded");
-            }
-
-            UpdateCurrentActivity();
-            await DownloadAndInstallBotAsync();
-        }
-
-        /// <summary>
-        /// Update the bot, if able
-        /// </summary>
-        public async Task Update()
-        {
-            if (State != MainActivityState.Updatable && State != MainActivityState.Downloadable)
-            {
-                throw new InvalidOperationException("No update is available.");
-            }
-
-            UpdateCurrentActivity();
-            await DownloadAndInstallBotAsync();
-        }
-
-        /// <summary>
-        /// Run the bot, if able
-        /// </summary>
-        public void Run()
-        {
-            if (State != MainActivityState.Runnable && State != MainActivityState.Updatable)
-            {
-                throw new InvalidOperationException(
-                    "You can't run this bot. You either haven't downloaded it, or it's already running.");
-            }
-
-            if (string.IsNullOrEmpty(ExecutablePath) || !File.Exists(ExecutablePath))
-            {
-                throw new InvalidOperationException("Executable path is invalid or does not exist.");
-            }
-
-            _process = Process.Start(new ProcessStartInfo
-            {
-                FileName = ExecutablePath,
-                WorkingDirectory = BotPath,
-            });
-
-            _ = Task.Run(async () =>
-            {
-                if (_process is not null)
-                    await _process.WaitForExitAsync();
-                // Use dispatcher to update UI thread
-                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    _process = null;
-                    UpdateCurrentActivity();
-                });
-
-                _process?.Dispose();
-            });
-
-            UpdateCurrentActivity();
-        }
-
-        /// <summary>
-        /// Stop the bot, if running
-        /// </summary>
-        public void Stop()
-        {
-            if (State != MainActivityState.Running)
-            {
-                throw new InvalidOperationException("You can't stop the bot, it's not running.");
-            }
-
-            using var p = _process;
-            _process = null;
-            try
-            {
-                p?.Kill();
-            }
-            catch
-            {
-            }
-
-            UpdateCurrentActivity();
-        }
-
-        #endregion
-
-        #region UI Event Handlers
-
-        private void UpdateButtonClick()
-        {
-            if (IsUpdateAvailable)
-            {
-                _ = Update();
-            }
-            else if (!IsBotDownloaded)
-            {
-                _ = Download();
-            }
-        }
-
-        private void ExecuteStartCommand()
-        {
-            Run();
-        }
-
-        private void ExecuteStopCommand()
-        {
-            Stop();
-        }
-
-        private async Task OnUpdateButtonClick(object sender, RoutedEventArgs e)
-        {
-            // This method appears to be referencing UI elements that aren't defined in the ViewModel
-            // Keeping the method signature for compatibility, but implementation should be adjusted
-            await UpdateChecker.Instance.CheckForUpdatesAsync();
-        }
-
-        private void OpenCredsClick()
-        {
-            if (string.IsNullOrWhiteSpace(BotPath))
-                return;
-
-            var credsFile = Path.Combine(BotPath, "data", "creds.yml");
-            var credsExampleFile = Path.Combine(BotPath, "data", "creds_example.yml");
-            if (!File.Exists(credsFile))
-            {
-                if (!File.Exists(credsExampleFile))
-                {
-                    return;
-                }
-
-                File.Copy(credsExampleFile, credsFile);
-            }
-
-            Process.Start(PlatformSpecific.GetNameOfFileExplorer(), Path.GetFullPath(credsFile));
-        }
-
-        private void OpenDataClick()
-        {
-            if (string.IsNullOrWhiteSpace(BotPath))
-                return;
-
-            var dataFolder = Path.Combine(BotPath, "data");
-            if (!Directory.Exists(dataFolder))
-            {
-                return;
-            }
-
-            Process.Start(PlatformSpecific.GetNameOfFileExplorer(), dataFolder);
-        }
-
-        private void ExecuteBackCommand()
-        {
-            Parent?.NavigateBack();
-        }
-
-        private async Task ExecuteSelectBotPathCommand()
-        {
-            var dialog = new OpenFolderDialog()
-            {
-                Directory = BotPath
-            };
-
-            var result = await dialog.ShowAsync(App.MainWindow);
-
-            if (result == null)
-                return;
-
-            BotPath = result;
-        }
-
-        private void ExecuteDeleteIntentCommand()
-        {
-            DeleteConfirm = true;
-        }
-
-        private void ExecuteDeleteBotCommand()
-        {
-            Delete(true);
-            DeleteConfirm = false;
-        }
-
-        private void ExecuteDeleteCancelCommand()
-        {
-            DeleteConfirm = false;
-        }
-
-        private bool _canCheckForUpdates = true;
-
-        public bool CanCheckForUpdates
-        {
-            get => _canCheckForUpdates;
-            set => this.RaiseAndSetIfChanged(ref _canCheckForUpdates, value);
-        }
-
-        private async Task ExecuteCheckForUpdatesCommand()
-        {
-            CanCheckForUpdates = false;
-            try
-            {
-                await UpdateChecker.Instance.CheckForUpdatesAsync();
-            }
-            finally
-            {
-                CanCheckForUpdates = true;
-            }
-        }
-
-        private void OnDownloadProgress(double progress, string status)
-        {
-            DownloadProgress = progress;
-            DownloadStatus = status;
-            IsDownloading = true;
-        }
-
-        private void OnDownloadComplete(bool success, string version)
-        {
-            IsDownloading = false;
-
-            if (success)
-            {
-                // Reload the version information
-                ReloadVersionFromPath();
-            }
-            else
-            {
-                // Handle download failure
-                DownloadStatus = $"Download failed: {version}";
-            }
-        }
-
-        private async void ExecuteSelectAvatarCommand()
-        {
-            var dialogService = new DialogService();
-            var selectedImage = await dialogService.ShowImagePickerAsync("Select Avatar Image");
-
-            if (!string.IsNullOrEmpty(selectedImage))
-            {
-                // Convert local file path to a file:// URI
-                var fileUri = new Uri(selectedImage).ToString();
-                BotIcon = fileUri;
-
-                // Save the changes to persist the new icon path
-                Parent?.UpdateBot(Bot);
-            }
-        }
-
-        /// <summary>
-        /// Starts editing the bot name
-        /// </summary>
-        private void ExecuteEditNameCommand()
-        {
-            EditedName = Name;
-            IsEditingName = true;
-        }
-
-        /// <summary>
-        /// Saves the edited name to the bot model
-        /// </summary>
-        private void ExecuteSaveNameCommand()
-        {
-            if (!string.IsNullOrWhiteSpace(EditedName) && EditedName != Name)
-            {
-                _bot.Name = EditedName;
-                Parent.UpdateBot(_bot);
-                this.RaisePropertyChanged(nameof(Name));
-            }
-            
-            IsEditingName = false;
-        }
-
-        /// <summary>
-        /// Cancels the name editing process
-        /// </summary>
-        private void ExecuteCancelEditNameCommand()
-        {
-            EditedName = Name;
-            IsEditingName = false;
-        }
-
-        #endregion
     }
 }

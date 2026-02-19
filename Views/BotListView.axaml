@@ -1,59 +1,170 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:upeko.ViewModels"
+             xmlns:conv="using:upeko.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:upeko.ViewModels"
-             xmlns:views="clr-namespace:upeko.Views"
-             mc:Ignorable="d"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="upeko.Views.BotListView"
-             x:DataType="viewModels:BotListViewModel"
-             Height="400">
-    <ContentControl Content="{Binding CurrentPage}">
-        <ContentControl.DataTemplates>
-            <DataTemplate DataType="{x:Type viewModels:BotListViewModel}">
-                <Grid RowDefinitions="Auto,*">
-                    <StackPanel
-                        Grid.Row="0"
-                        Spacing="32"
-                        HorizontalAlignment="Center"
-                        Orientation="Horizontal">
+             x:DataType="vm:BotListViewModel">
+
+    <UserControl.Resources>
+        <conv:StatusToDotColorConverter x:Key="StatusDotColor"/>
+        <conv:StatusToPillBackgroundConverter x:Key="StatusPillBg"/>
+        <conv:StatusToPillForegroundConverter x:Key="StatusPillFg"/>
+        <conv:StatusToTextConverter x:Key="StatusText"/>
+    </UserControl.Resources>
+
+    <StackPanel Spacing="0">
+        <!-- Header -->
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,32">
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Instances" FontSize="24" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimary}"
+                           Margin="0,0,0,4"/>
+                <TextBlock Text="Manage your NadekoBot deployments" FontSize="13"
+                           Foreground="{DynamicResource TextSecondary}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                <Button Classes="btn-ghost" Command="{Binding ShowChangelogCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Viewbox Width="16" Height="16">
+                            <Path Data="M9 12H15M9 16H15M17 21H7A2 2 0 0 1 5 19V5A2 2 0 0 1 7 3H12.586A1 1 0 0 1 13.293 3.293L18.707 8.707A1 1 0 0 1 19 9.414V19A2 2 0 0 1 17 21Z"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="1.5"
+                                  StrokeLineCap="Round" StrokeJoin="Round"/>
+                        </Viewbox>
+                        <TextBlock Text="Changelog" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
-                        <ItemsControl ItemsSource="{Binding AllItems}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="2" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <ContentControl Content="{Binding}" Height="200">
-                                        <ContentControl.DataTemplates>
-                                            <DataTemplate DataType="{x:Type viewModels:BotItemViewModel}">
-                                                <views:BotListItem />
-                                            </DataTemplate>
-                                            <DataTemplate DataType="{x:Type viewModels:AddButtonViewModel}">
-                                                <Button
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    Margin="5, 0, 5, 0"
-                                                    Padding="10"
-                                                    BorderThickness="1"
-                                                    Command="{Binding AddCommand}">
-                                                    <PathIcon Data="{StaticResource plus}" />
-                                                </Button>
-                                            </DataTemplate>
-                                        </ContentControl.DataTemplates>
-                                    </ContentControl>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModels:BotViewModel}">
-                <views:BotView />
-            </DataTemplate>
-        </ContentControl.DataTemplates>
-    </ContentControl>
+                </Button>
+                <Button Classes="btn-secondary" Command="{Binding AddBotCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Viewbox Width="16" Height="16">
+                            <Path Data="M12 4V20M20 12H4"
+                                  Stroke="{DynamicResource BtnSecondaryFg}" StrokeThickness="1.5"
+                                  StrokeLineCap="Round" StrokeJoin="Round"/>
+                        </Viewbox>
+                        <TextBlock Text="Add Instance" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Bot List -->
+        <Border IsVisible="{Binding !IsEmpty}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                ClipToBounds="True">
+            <ItemsControl ItemsSource="{Binding Bots}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:BotViewModel">
+                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+                        <Button Classes="list-row"
+                                Command="{Binding $parent[ItemsControl].((vm:BotListViewModel)DataContext).SelectBotCommand}"
+                                CommandParameter="{Binding}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <!-- Avatar -->
+                                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="6"
+                                        Background="{DynamicResource TertiaryBackground}"
+                                        BorderBrush="{DynamicResource BorderColor}"
+                                        BorderThickness="1"
+                                        Margin="0,0,16,0">
+                                    <TextBlock Text="{Binding DisplayInitial}"
+                                               FontSize="13" FontWeight="Bold"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Name + Version + Path -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium"
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                        <Border IsVisible="{Binding IsBotDownloaded}"
+                                                BorderBrush="{DynamicResource BorderColorStrong}"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                Padding="6,1"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Version, StringFormat=v{0}}"
+                                                       FontSize="11"
+                                                       FontFamily="JetBrains Mono,Consolas,monospace"
+                                                       Foreground="{DynamicResource TextTertiary}"/>
+                                        </Border>
+                                        <Border IsVisible="{Binding IsUpdateAvailable}"
+                                                Background="{DynamicResource AccentBgSubtle}"
+                                                CornerRadius="4"
+                                                Padding="8,2"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="Update" FontSize="11" FontWeight="Medium"
+                                                       Foreground="{DynamicResource AccentColor}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding BotPath}" FontSize="11"
+                                               Foreground="{DynamicResource TextTertiary}"
+                                               FontFamily="JetBrains Mono,Consolas,monospace"/>
+                                </StackPanel>
+
+                                <!-- Status area -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12"
+                                            VerticalAlignment="Center">
+                                    <!-- Status pill -->
+                                    <Border CornerRadius="999" Padding="10,4"
+                                            Background="{Binding State, Converter={StaticResource StatusPillBg}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Ellipse Width="8" Height="8"
+                                                     Fill="{Binding State, Converter={StaticResource StatusDotColor}}"/>
+                                            <TextBlock Text="{Binding State, Converter={StaticResource StatusText}}"
+                                                       FontSize="12" FontWeight="Medium"
+                                                       Foreground="{Binding State, Converter={StaticResource StatusPillFg}}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Chevron -->
+                                    <Viewbox Width="16" Height="16">
+                                        <Path Data="M9 5L16 12L9 19"
+                                              Stroke="{DynamicResource TextTertiary}" StrokeThickness="1.5"
+                                              StrokeLineCap="Round" StrokeJoin="Round"/>
+                                    </Viewbox>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+        <!-- Empty State -->
+        <Border IsVisible="{Binding IsEmpty}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="64"
+                HorizontalAlignment="Stretch">
+            <StackPanel HorizontalAlignment="Center" Spacing="4">
+                <Border Width="48" Height="48" CornerRadius="24"
+                        Background="{DynamicResource TertiaryBackground}"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,16">
+                    <Viewbox Width="24" Height="24">
+                        <Path Data="M19 11H5M19 11A2 2 0 0 1 21 13V18A2 2 0 0 1 19 20H5A2 2 0 0 1 3 18V13A2 2 0 0 1 5 11M19 11V9A2 2 0 0 0 17 7M5 11V9A2 2 0 0 1 7 7M7 7V5A2 2 0 0 1 9 3H15A2 2 0 0 1 17 5V7M7 7H17"
+                              Stroke="{DynamicResource TextTertiary}" StrokeThickness="1.5"
+                              StrokeLineCap="Round" StrokeJoin="Round"/>
+                    </Viewbox>
+                </Border>
+                <TextBlock Text="No Instances Found" FontSize="18" FontWeight="Medium"
+                           Foreground="{DynamicResource TextPrimary}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Get started by creating a new bot instance." FontSize="13"
+                           Foreground="{DynamicResource TextSecondary}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+                <Button Classes="btn-primary" HorizontalAlignment="Center"
+                        Command="{Binding AddBotCommand}"
+                        Content="Create Instance"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
 </UserControl>

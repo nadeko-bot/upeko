@@ -1,356 +1,325 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:upeko.ViewModels"
+             xmlns:conv="using:upeko.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:upeko.ViewModels"
-             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
-             mc:Ignorable="d"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
              x:Class="upeko.Views.BotView"
-             x:DataType="viewModels:BotViewModel">
-    <Grid RowDefinitions="Auto,*,Auto">
-        <!-- Header -->
-        <Border Grid.Row="0"
-                BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="20">
+             x:DataType="vm:BotViewModel">
+
+    <UserControl.Resources>
+        <conv:StatusToDotColorConverter x:Key="StatusDotColor"/>
+        <conv:StatusToPillBackgroundConverter x:Key="StatusPillBg"/>
+        <conv:StatusToPillForegroundConverter x:Key="StatusPillFg"/>
+        <conv:NullToStringConverter x:Key="NullToStr"/>
+    </UserControl.Resources>
+
+    <StackPanel Spacing="0">
+        <!-- Back Button -->
+        <Button Classes="btn-ghost" HorizontalAlignment="Left" Margin="0,0,0,24"
+                Command="{Binding GoBackCommand}" Padding="0" MinHeight="0">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Viewbox Width="16" Height="16">
+                    <Path Data="M15 19L8 12L15 5"
+                          Stroke="{DynamicResource TextSecondary}" StrokeThickness="1.5"
+                          StrokeLineCap="Round" StrokeJoin="Round"/>
+                </Viewbox>
+                <TextBlock Text="Back to Instances" FontSize="13"
+                           Foreground="{DynamicResource TextSecondary}"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Header Section -->
+        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1"
+                Padding="0,0,0,32" Margin="0,0,0,40">
             <Grid ColumnDefinitions="Auto,*,Auto">
-                <Border Grid.Column="0"
-                        CornerRadius="32"
-                        Width="64"
-                        Height="64"
-                        Margin="0,0,20,0"
-                        ClipToBounds="True"
-                        Cursor="Hand">
+                <!-- Avatar (clickable to change) -->
+                <Border Grid.Column="0" Width="80" Height="80" CornerRadius="8"
+                        Background="{DynamicResource TertiaryBackground}"
+                        BorderBrush="{DynamicResource BorderColor}"
+                        BorderThickness="1"
+                        Margin="0,0,24,0"
+                        ClipToBounds="True">
                     <Panel>
-                        <asyncImageLoader:AdvancedImage
-                            Source="{Binding BotIcon}"
-                            Loader="{Binding ImageLoader}"
-                            Stretch="UniformToFill"
-                            Width="64"
-                            Height="64" />
+                        <TextBlock Text="{Binding DisplayInitial}"
+                                   FontSize="28" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextTertiary}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
                         <Button Background="Transparent"
-                                Width="64"
-                                Height="64"
+                                Width="80" Height="80"
                                 Padding="0"
                                 BorderThickness="0"
-                                Command="{Binding SelectAvatarCommand}"
-                                ToolTip.Tip="Click to change avatar image" />
+                                CornerRadius="8"
+                                Cursor="Hand"
+                                Command="{Binding ChangeAvatarCommand}"
+                                ToolTip.Tip="Click to change avatar"/>
                     </Panel>
                 </Border>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                    <!-- Name display with edit mode handling -->
+
+                <!-- Name + Meta -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="4">
+                    <!-- Name display with edit mode -->
                     <Grid>
-                        <!-- Regular name display (shown when not editing) -->
-                        <TextBlock Text="{Binding Name}"
-                                   FontSize="24"
-                                   FontWeight="SemiBold"
+                        <!-- Regular name display (click to edit) -->
+                        <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimary}"
+                                   Margin="0,0,0,2"
                                    IsVisible="{Binding !IsEditingName}"
                                    Cursor="Hand"
-                                   Tapped="OnNameTapped">
-                            <TextBlock.Transitions>
-                                <Transitions>
-                                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
-                                </Transitions>
-                            </TextBlock.Transitions>
-                        </TextBlock>
-                        
-                        <!-- Name editing mode (shown when editing) -->
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsEditingName}">
-                            <TextBox Text="{Binding EditedName}" 
-                                     MinWidth="150"
-                                     FontSize="24"
+                                   Tapped="OnNameTapped"
+                                   ToolTip.Tip="Click to rename"/>
+
+                        <!-- Name editing mode -->
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsEditingName}"
+                                    Margin="0,0,0,2">
+                            <TextBox Text="{Binding EditedName}"
+                                     MinWidth="200"
+                                     FontSize="20"
                                      VerticalAlignment="Center"
                                      VerticalContentAlignment="Center">
-                                <TextBox.Transitions>
-                                    <Transitions>
-                                        <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
-                                    </Transitions>
-                                </TextBox.Transitions>
                                 <TextBox.KeyBindings>
                                     <KeyBinding Gesture="Enter" Command="{Binding SaveNameCommand}"/>
                                     <KeyBinding Gesture="Escape" Command="{Binding CancelEditNameCommand}"/>
                                 </TextBox.KeyBindings>
                             </TextBox>
-                            <Button Command="{Binding SaveNameCommand}"
-                                    Margin="4,0,0,0"
-                                    Padding="8,4"
-                                    VerticalAlignment="Center">
-                                <PathIcon Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" Width="16" Height="16"/>
+                            <Button Classes="btn-ghost" Padding="6" Margin="4,0,0,0"
+                                    Command="{Binding SaveNameCommand}"
+                                    VerticalAlignment="Center"
+                                    ToolTip.Tip="Save">
+                                <Viewbox Width="16" Height="16">
+                                    <Path Data="M20 6L9 17L4 12"
+                                          Stroke="{DynamicResource AccentColor}" StrokeThickness="2"
+                                          StrokeLineCap="Round" StrokeJoin="Round"/>
+                                </Viewbox>
                             </Button>
-                            <Button Command="{Binding CancelEditNameCommand}"
-                                    Margin="4,0,0,0"
-                                    Padding="8,4"
-                                    VerticalAlignment="Center">
-                                <PathIcon Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" Width="16" Height="16"/>
+                            <Button Classes="btn-ghost" Padding="6" Margin="2,0,0,0"
+                                    Command="{Binding CancelEditNameCommand}"
+                                    VerticalAlignment="Center"
+                                    ToolTip.Tip="Cancel">
+                                <Viewbox Width="16" Height="16">
+                                    <Path Data="M18 6L6 18M6 6L18 18"
+                                          Stroke="{DynamicResource TextTertiary}" StrokeThickness="2"
+                                          StrokeLineCap="Round" StrokeJoin="Round"/>
+                                </Viewbox>
                             </Button>
                         </StackPanel>
                     </Grid>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Background="{Binding StatusColor}"
-                                CornerRadius="4"
-                                Padding="8,4">
-                            <TextBlock Text="{Binding Status}"
-                                       FontSize="12" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Background="{DynamicResource TertiaryBackground}"
+                                CornerRadius="4" Padding="8,2">
+                            <TextBlock Text="{Binding Bot.Guid}" FontSize="11"
+                                       FontFamily="JetBrains Mono,Consolas,monospace"
+                                       Foreground="{DynamicResource TextSecondary}"/>
                         </Border>
-                        <TextBlock Text="{Binding Version}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Version" FontSize="13"
+                                       Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="{Binding Version, Converter={StaticResource NullToStr}}"
+                                       FontSize="13"
+                                       FontFamily="JetBrains Mono,Consolas,monospace"
+                                       Foreground="{DynamicResource TextSecondary}"/>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
-                <Button Grid.Column="2"
-                        Command="{Binding BackCommand}"
-                        BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                        BorderThickness="1"
-                        CornerRadius="4"
-                        Padding="12,8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
-                                  Width="16" Height="16" />
-                        <TextBlock Text="Back" />
+
+                <!-- Status Pill -->
+                <Border Grid.Column="2" VerticalAlignment="Center"
+                        CornerRadius="999" Padding="10,4"
+                        Background="{Binding State, Converter={StaticResource StatusPillBg}}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Ellipse Width="8" Height="8"
+                                 Fill="{Binding State, Converter={StaticResource StatusDotColor}}"/>
+                        <TextBlock Text="{Binding StatusText}"
+                                   FontSize="12" FontWeight="Medium"
+                                   Foreground="{Binding State, Converter={StaticResource StatusPillFg}}"/>
                     </StackPanel>
-                </Button>
+                </Border>
             </Grid>
         </Border>
 
-        <!-- Content -->
-        <TabControl Grid.Row="1" Margin="0" Padding="0">
-            <TabItem Header="Information">
-                <ScrollViewer>
-                    <Border Padding="2, 5, 2, 5">
-                        <StackPanel Spacing="20">
-                            <StackPanel>
-                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto"
-                                      Margin="0,0,0,20">
-                                    <Border Grid.Row="0" Grid.Column="0"
-                                            Padding="2,4"
-                                            Margin="0,0,6,4"
-                                            CornerRadius="4"
-                                            Width="120">
-                                    </Border>
-                                    <Border Grid.Row="0" Grid.Column="1"
-                                            Padding="12,8"
-                                            Margin="0,0,0,4"
-                                            CornerRadius="4">
-                                        <TextBlock Text="{Binding Bot.Guid}" 
-                                                   FontFamily="Consolas, Menlo, Monaco, 'Courier New', monospace" 
-                                                   FontSize="10" 
-                                                   TextWrapping="Wrap" />
-                                    </Border>
-                                    <Border Grid.Row="1" Grid.Column="0"
-                                            Padding="2,4"
-                                            Margin="0,0,6,4"
-                                            CornerRadius="4"
-                                            Width="120">
-                                        <TextBlock Text="Version"
-                                                   FontWeight="SemiBold"
-                                                   HorizontalAlignment="Left" />
-                                    </Border>
-                                    <Border Grid.Row="1" Grid.Column="1"
-                                            Padding="12,8"
-                                            Margin="0,0,0,4"
-                                            CornerRadius="4">
-                                        <TextBlock Text="{Binding Version}" />
-                                    </Border>
+        <!-- Content Grid -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                                    <Border Grid.Row="2" Grid.Column="0"
-                                            Padding="2,4"
-                                            Margin="0,0,6,4"
-                                            CornerRadius="4"
-                                            Width="120">
-                                        <TextBlock Text="Location"
-                                                   FontWeight="SemiBold"
-                                                   HorizontalAlignment="Left" />
-                                    </Border>
-                                    <Border Grid.Row="2" Grid.Column="1"
-                                            BorderThickness="1"
-                                            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
-                                            CornerRadius="4">
-                                        <TextBlock Text="{Binding BotPath}"
-                                                   VerticalAlignment="Center"
-                                                   Padding="2, 0"
-                                                   FontSize="10"
-                                                   TextWrapping="Wrap" />
-                                    </Border>
-
-                                    <Border Grid.Row="2" Grid.Column="2"
-                                            Padding="4,4"
-                                            Margin="2"
-                                            CornerRadius="4">
-                                        <Button Command="{Binding SelectBotPathCommand}"
-                                                ToolTip.Tip="Select Bot Location">
-                                            <PathIcon
-                                                Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
-                                                Width="16" Height="16" />
-                                        </Button>
-                                    </Border>
-                                </Grid>
+            <!-- Left Column -->
+            <StackPanel Grid.Column="0" Spacing="24">
+                <!-- Configuration Card -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1"
+                                Padding="16">
+                            <TextBlock Text="Configuration" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                        </Border>
+                        <Border Padding="16">
+                            <StackPanel Spacing="16">
+                                <!-- Path input -->
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="INSTALL PATH" FontSize="11" FontWeight="Medium"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               LetterSpacing="1"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0" Classes="input" IsReadOnly="True"
+                                                 Text="{Binding BotPath}"
+                                                 FontFamily="JetBrains Mono,Consolas,monospace"
+                                                 FontSize="11"/>
+                                        <Button Grid.Column="1" Classes="btn-ghost" Content="Browse"
+                                                Command="{Binding BrowsePathCommand}"
+                                                Margin="8,0,0,0"/>
+                                    </Grid>
+                                </StackPanel>
                             </StackPanel>
-
-                            <StackPanel>
-                                <TextBlock Text="Configuration"
-                                           FontSize="18"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,12" />
-
-                                <Border
-                                    CornerRadius="4"
-                                    Padding="12"
-                                    BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                                    BorderThickness="1">
-                                    <StackPanel Spacing="8">
-                                        <Button x:Name="DeleteBotButton" Content="Delete Bot"
-                                                IsVisible="{Binding !DeleteConfirm}"
-                                                Command="{Binding DeleteIntentCommand}" />
-                                        <StackPanel x:Name="DeleteConfirmationPanel"
-                                                    Orientation="Vertical"
-                                                    IsVisible="{Binding DeleteConfirm}">
-                                            <Border
-                                                BorderThickness="1"
-                                                BorderBrush="{DynamicResource SystemErrorTextColor}"
-                                                Padding="4">
-                                                <TextBlock
-                                                    TextWrapping="Wrap"
-                                                    Text="This will delete your bot and all of its data. This action is irreversible. Are you sure?" />
-                                            </Border>
-                                            <StackPanel Orientation="Horizontal"
-                                                        HorizontalAlignment="Center"
-                                                        Margin="0,8,0,0">
-                                                <Button x:Name="ConfirmButton" Content="Confirm"
-                                                        Command="{Binding DeleteBotCommand}" />
-                                                <Button x:Name="CancelButton" Content="Cancel"
-                                                        Command="{Binding DeleteCancelCommand}" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
-
-        <!-- Footer -->
-        <Border Grid.Row="2"
-                BorderThickness="0,1,0,0"
-                Padding="20, 5, 20, 2">
-            <Grid ColumnDefinitions="*,Auto">
-                <!-- Download Progress Overlay -->
-                <Border Grid.ColumnSpan="2"
-                        Padding="20"
-                        IsVisible="{Binding IsDownloading}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="{Binding DownloadStatus}"
-                                   HorizontalAlignment="Center"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-                        <ProgressBar Value="{Binding DownloadProgress}"
-                                     Minimum="0"
-                                     Maximum="1"
-                                     Height="8"
-                                     Foreground="{DynamicResource NotificationCardSuccessBackgroundBrush}"
-                                     CornerRadius="4" />
-                        <TextBlock Text="Please wait while the bot is being downloaded and installed..."
-                                   HorizontalAlignment="Center"
-                                   FontSize="12"
-                                   Opacity="0.7" />
+                        </Border>
                     </StackPanel>
                 </Border>
 
-                <!-- Normal Buttons (hidden during download) -->
-                <StackPanel Grid.Column="0"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Left"
-                            Spacing="12"
-                            IsVisible="{Binding IsNotDownloading}">
-                    <StackPanel Orientation="Vertical" Spacing="8">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Command="{Binding OpenDataFolderCommand}"
-                                    BorderThickness="1"
-                                    Padding="8,8"
-                                    CornerRadius="4"
-                                    ToolTip.Tip="Open data Folder">
-                                <PathIcon
-                                    Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
-                                    Width="16" Height="16" />
-                            </Button>
-                            <Button Command="{Binding OpenCredsFileCommand}"
-                                    BorderThickness="1"
-                                    Padding="8,8"
-                                    CornerRadius="4"
-                                    ToolTip.Tip="Open creds.yml">
-                                <PathIcon
-                                    Data="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"
-                                    Width="16" Height="16" />
-                            </Button>
-                        </StackPanel>
-                        <!-- Start Button -->
-                        <Button Command="{Binding StartCommand}"
-                                IsEnabled="{Binding IsBotDownloaded}"
-                                IsVisible="{Binding CanStart}"
-                                BorderBrush="{DynamicResource NotificationCardSuccessBackgroundBrush}"
-                                BorderThickness="1"
-                                Padding="15,10"
-                                CornerRadius="4"
-                                Width="120">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" Width="16" Height="16"
-                                          Foreground="{DynamicResource NotificationCardSuccessBackgroundBrush}"
-                                          />
-                                <TextBlock Text="Start" />
-                            </StackPanel>
-                        </Button>
-                        <!-- Stop Button -->
-                        <Button Command="{Binding StopCommand}"
-                                IsVisible="{Binding CanStop}"
-                                BorderBrush="{DynamicResource SystemErrorTextColor}"
-                                BorderThickness="1"
-                                Padding="15,10"
-                                CornerRadius="4"
-                                Width="120">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="M14,19H18V5H14M6,19H10V5H6V19Z" Width="16" Height="16"
-                                          Foreground="{DynamicResource SystemErrorTextColor}"/>
-                                <TextBlock Text="Stop" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </StackPanel>
+                <!-- Actions Card -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1"
+                                Padding="16">
+                            <TextBlock Text="Actions" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                        </Border>
 
-                <StackPanel Grid.Column="1"
-                            Orientation="Vertical"
-                            HorizontalAlignment="Right"
-                            Spacing="8"
-                            IsVisible="{Binding IsNotDownloading}">
-                    <Button Command="{Binding CheckForUpdatesCommand}"
-                            IsEnabled="{Binding CanCheckForUpdates}"
-                            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
-                            BorderThickness="1"
-                            Padding="8, 6"
-                            CornerRadius="4"
-                            HorizontalAlignment="Right">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <PathIcon
-                                Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
-                                Width="16" Height="16" />
-                            <TextBlock Text="Check for Updates" FontSize="12" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding UpdateCommand}"
-                            IsEnabled="{Binding IsUpdateAvailable}"
-                            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
-                            BorderThickness="1"
-                            Padding="8, 6"
-                            CornerRadius="4">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <PathIcon
-                                Data="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"
-                                Width="16" Height="16" />
-                            <TextBlock Text="{Binding UpdateButtonText}" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
-    </Grid>
+                        <!-- Action Buttons -->
+                        <Border Padding="16" IsVisible="{Binding !IsProgressVisible}">
+                            <StackPanel>
+                                <!-- Running: Stop button -->
+                                <Button Classes="btn-danger" IsVisible="{Binding IsRunning}"
+                                        Content="Stop Instance"
+                                        Command="{Binding StopBotCommand}"
+                                        HorizontalAlignment="Stretch"/>
+
+                                <!-- Ready: Start + Update -->
+                                <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding IsReady}">
+                                    <Button Grid.Column="0" Classes="btn-primary"
+                                            Content="Start"
+                                            Command="{Binding StartBotCommand}"
+                                            HorizontalAlignment="Stretch"/>
+                                    <Button Grid.Column="2" Classes="btn-ghost"
+                                            Command="{Binding UpdateBotCommand}"
+                                            IsEnabled="{Binding !IsCheckingForUpdates}"
+                                            HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="8"
+                                                    HorizontalAlignment="Center">
+                                            <Viewbox Width="14" Height="14">
+                                                <Path Data="M17.65 6.35C16.2 4.9 14.21 4 12 4A8 8 0 0 0 4 12A8 8 0 0 0 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18A6 6 0 0 1 6 12A6 6 0 0 1 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z"
+                                                      Fill="{DynamicResource TextSecondary}"/>
+                                            </Viewbox>
+                                            <TextBlock Text="{Binding UpdateButtonText}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <!-- Missing: Download -->
+                                <Button Classes="btn-primary" IsVisible="{Binding IsMissing}"
+                                        Content="Download &amp; Install"
+                                        Command="{Binding DownloadBotCommand}"
+                                        HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Progress Panel -->
+                        <Border Padding="16" IsVisible="{Binding IsProgressVisible}">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding ProgressTitle}"
+                                               FontSize="13" FontWeight="Medium"
+                                               Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding ProgressPercent}"
+                                               FontSize="13"
+                                               FontFamily="JetBrains Mono,Consolas,monospace"
+                                               Foreground="{DynamicResource TextSecondary}"/>
+                                </Grid>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressValue}"
+                                             Height="6" CornerRadius="3"
+                                             Foreground="{DynamicResource AccentColor}"
+                                             Background="{DynamicResource TertiaryBackground}"/>
+                                <TextBlock Text="{Binding ProgressDetail}" FontSize="11"
+                                           Foreground="{DynamicResource TextTertiary}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Right Column (Sidebar) -->
+            <StackPanel Grid.Column="2" Spacing="24">
+                <!-- Shortcuts Card -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1"
+                                Padding="16">
+                            <TextBlock Text="Shortcuts" FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                        </Border>
+                        <Border Padding="8">
+                            <StackPanel Spacing="0">
+                                <!-- Data Folder -->
+                                <Button Classes="shortcut-btn" Command="{Binding OpenFolderCommand}">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <Viewbox Grid.Column="0" Width="20" Height="20" Margin="0,0,12,0">
+                                            <Path Data="M3 7V17A2 2 0 0 0 5 19H19A2 2 0 0 0 21 17V9A2 2 0 0 0 19 7H13L11 5H5A2 2 0 0 0 3 7Z"
+                                                  Stroke="{DynamicResource TextTertiary}" StrokeThickness="1.5"
+                                                  StrokeLineCap="Round" StrokeJoin="Round"/>
+                                        </Viewbox>
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Text="Data Folder" FontSize="13" FontWeight="Medium"
+                                                       Foreground="{DynamicResource TextPrimary}"/>
+                                            <TextBlock Text="Open in file manager" FontSize="11"
+                                                       Foreground="{DynamicResource TextTertiary}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Button>
+                                <!-- Creds -->
+                                <Button Classes="shortcut-btn" Command="{Binding OpenCredsCommand}">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <Viewbox Grid.Column="0" Width="20" Height="20" Margin="0,0,12,0">
+                                            <Path Data="M9 12H15M9 16H15M17 21H7A2 2 0 0 1 5 19V5A2 2 0 0 1 7 3H12.586A1 1 0 0 1 13.293 3.293L18.707 8.707A1 1 0 0 1 19 9.414V19A2 2 0 0 1 17 21Z"
+                                                  Stroke="{DynamicResource TextTertiary}" StrokeThickness="1.5"
+                                                  StrokeLineCap="Round" StrokeJoin="Round"/>
+                                        </Viewbox>
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Text="creds.yml" FontSize="13" FontWeight="Medium"
+                                                       Foreground="{DynamicResource TextPrimary}"/>
+                                            <TextBlock Text="Open configuration" FontSize="11"
+                                                       Foreground="{DynamicResource TextTertiary}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Danger Zone -->
+                <Border BorderBrush="{DynamicResource ErrorBorderSubtle}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Background="{DynamicResource ErrorBgSubtle}"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="DANGER ZONE" FontSize="11" FontWeight="Medium"
+                                   Foreground="{DynamicResource ErrorColor}"
+                                   LetterSpacing="1"/>
+                        <TextBlock Text="Deleting this instance will remove all associated data and configuration files."
+                                   FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondary}"/>
+                        <Button Classes="btn-danger-sm" Content="Delete Instance"
+                                Command="{Binding ShowDeleteModalCommand}"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
 </UserControl>

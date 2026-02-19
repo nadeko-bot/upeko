@@ -1,15 +1,239 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="upeko.App"
              xmlns:local="using:upeko"
+             x:Class="upeko.App"
              RequestedThemeVariant="Light">
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-  
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="AppBackground" Color="#ffffff"/>
+                    <SolidColorBrush x:Key="SecondaryBackground" Color="#fafafa"/>
+                    <SolidColorBrush x:Key="TertiaryBackground" Color="#f5f5f5"/>
+                    <SolidColorBrush x:Key="TextPrimary" Color="#000000"/>
+                    <SolidColorBrush x:Key="TextSecondary" Color="#666666"/>
+                    <SolidColorBrush x:Key="TextTertiary" Color="#999999"/>
+                    <SolidColorBrush x:Key="BorderColor" Color="#eaeaea"/>
+                    <SolidColorBrush x:Key="BorderColorStrong" Color="#d6d6d6"/>
+                    <SolidColorBrush x:Key="AccentColor" Color="#0070f3"/>
+                    <SolidColorBrush x:Key="SuccessColor" Color="#50e3c2"/>
+                    <SolidColorBrush x:Key="WarningColor" Color="#f5a623"/>
+                    <SolidColorBrush x:Key="ErrorColor" Color="#e5484d"/>
+                    <SolidColorBrush x:Key="HoverBackground" Color="#05000000"/>
+                    <SolidColorBrush x:Key="CardShadowColor" Color="#0a000000"/>
+                    <SolidColorBrush x:Key="ModalBackdrop" Color="#66000000"/>
+                    <SolidColorBrush x:Key="BtnSecondaryBg" Color="#000000"/>
+                    <SolidColorBrush x:Key="BtnSecondaryFg" Color="#ffffff"/>
+                    <SolidColorBrush x:Key="AccentBgSubtle" Color="#190070f3"/>
+                    <SolidColorBrush x:Key="ErrorBgSubtle" Color="#0de5484d"/>
+                    <SolidColorBrush x:Key="ErrorBorderSubtle" Color="#33e5484d"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="AppBackground" Color="#000000"/>
+                    <SolidColorBrush x:Key="SecondaryBackground" Color="#111111"/>
+                    <SolidColorBrush x:Key="TertiaryBackground" Color="#1a1a1a"/>
+                    <SolidColorBrush x:Key="TextPrimary" Color="#ffffff"/>
+                    <SolidColorBrush x:Key="TextSecondary" Color="#888888"/>
+                    <SolidColorBrush x:Key="TextTertiary" Color="#555555"/>
+                    <SolidColorBrush x:Key="BorderColor" Color="#222222"/>
+                    <SolidColorBrush x:Key="BorderColorStrong" Color="#333333"/>
+                    <SolidColorBrush x:Key="AccentColor" Color="#3291ff"/>
+                    <SolidColorBrush x:Key="SuccessColor" Color="#50e3c2"/>
+                    <SolidColorBrush x:Key="WarningColor" Color="#f5a623"/>
+                    <SolidColorBrush x:Key="ErrorColor" Color="#e5484d"/>
+                    <SolidColorBrush x:Key="HoverBackground" Color="#0dffffff"/>
+                    <SolidColorBrush x:Key="CardShadowColor" Color="#66000000"/>
+                    <SolidColorBrush x:Key="ModalBackdrop" Color="#66000000"/>
+                    <SolidColorBrush x:Key="BtnSecondaryBg" Color="#ffffff"/>
+                    <SolidColorBrush x:Key="BtnSecondaryFg" Color="#000000"/>
+                    <SolidColorBrush x:Key="AccentBgSubtle" Color="#193291ff"/>
+                    <SolidColorBrush x:Key="ErrorBgSubtle" Color="#0de5484d"/>
+                    <SolidColorBrush x:Key="ErrorBorderSubtle" Color="#33e5484d"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="Styles/BotItem.axaml"/>
+
+        <!-- Card Style -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="ClipToBounds" Value="True"/>
+        </Style>
+
+        <!-- Ghost Button -->
+        <Style Selector="Button.btn-ghost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+
+        <!-- Primary Button -->
+        <Style Selector="Button.btn-primary">
+            <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+
+        <!-- Secondary Button -->
+        <Style Selector="Button.btn-secondary">
+            <Setter Property="Background" Value="{DynamicResource BtnSecondaryBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BtnSecondaryFg}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-secondary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BtnSecondaryBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BtnSecondaryFg}"/>
+            <Setter Property="Opacity" Value="0.85"/>
+        </Style>
+
+        <!-- Danger Button -->
+        <Style Selector="Button.btn-danger">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ErrorColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ErrorColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ErrorColor}"/>
+        </Style>
+
+        <!-- Themed TextBox -->
+        <Style Selector="TextBox.input">
+            <Setter Property="Background" Value="{DynamicResource TertiaryBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="TextBox.input:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+        </Style>
+
+        <!-- Small ghost button -->
+        <Style Selector="Button.btn-ghost-sm">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-ghost-sm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+
+        <!-- Shortcut button -->
+        <Style Selector="Button.shortcut-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.shortcut-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource TertiaryBackground}"/>
+        </Style>
+
+        <!-- List row -->
+        <Style Selector="Button.list-row">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.list-row:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource TertiaryBackground}"/>
+        </Style>
+
+        <!-- Small danger button -->
+        <Style Selector="Button.btn-danger-sm">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ErrorColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-danger-sm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ErrorColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ErrorColor}"/>
+        </Style>
     </Application.Styles>
 </Application>
