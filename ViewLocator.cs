@@ -1,29 +1,23 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using upeko.ViewModels;
+using upeko.Views;
 
 namespace upeko;
 
 public class ViewLocator : IDataTemplate
 {
-
     public Control? Build(object? param)
     {
         if (param is null)
             return null;
-        
-        var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
-#pragma warning disable IL2057
-        var type = Type.GetType(name);
-#pragma warning restore IL2057
 
-        if (type != null)
+        return param switch
         {
-            return (Control)Activator.CreateInstance(type)!;
-        }
-        
-        return new TextBlock { Text = "Not Found: " + name };
+            BotListViewModel => new BotListView(),
+            BotViewModel => new BotView(),
+            _ => new TextBlock { Text = "Not Found: " + param.GetType().FullName }
+        };
     }
 
     public bool Match(object? data)
