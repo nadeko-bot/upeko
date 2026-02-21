@@ -16,5 +16,7 @@ namespace upeko.Models
         public bool MinimizeToTray { get; set; } = true;
 
         public string Language { get; set; } = "en-US";
+
+        public bool IsDarkTheme { get; set; } = false;
     }
 }

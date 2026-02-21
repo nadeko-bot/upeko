@@ -104,12 +104,14 @@ public partial class MainWindowViewModel : ViewModelBase
         _botListViewModel = new BotListViewModel(this);
         _currentView = _botListViewModel;
         _minimizeToTray = _botListViewModel.GetConfig().MinimizeToTray;
-        _selectedLanguageOption = LanguageOptions.First(l => l.Code == _botListViewModel.GetConfig().Language);
+        _selectedLanguageOption = LanguageOptions.FirstOrDefault(l => l.Code == _botListViewModel.GetConfig().Language)
+            ?? LanguageOptions.First();
 
         _currentVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0.0";
 
-        var currentVariant = Application.Current?.ActualThemeVariant;
-        _isDarkTheme = currentVariant == ThemeVariant.Dark;
+        _isDarkTheme = _botListViewModel.GetConfig().IsDarkTheme;
+        if (Application.Current != null)
+            Application.Current.RequestedThemeVariant = _isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
 
         _ffmpegViewModel.PropertyChanged += (_, e) =>
         {
@@ -148,6 +150,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _botListViewModel.SaveConfig();
     }
 
+    partial void OnIsDarkThemeChanged(bool value)
+    {
+        var config = _botListViewModel.GetConfig();
+        config.IsDarkTheme = value;
+        _botListViewModel.SaveConfig();
+    }
+
     partial void OnSelectedLanguageOptionChanged(LanguageOption value)
     {
         if (value is null) return;
@@ -178,9 +187,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsDarkTheme = !IsDarkTheme;
         if (Application.Current != null)
-        {
             Application.Current.RequestedThemeVariant = IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
-        }
     }
 
     [RelayCommand]
