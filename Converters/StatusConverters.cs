@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using upeko.Services;
 
 namespace upeko.Converters;
 
@@ -75,18 +76,19 @@ public class StatusToTextConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        var loc = LocalizationService.Instance;
         if (value is MainActivityState status)
         {
             return status switch
             {
-                MainActivityState.Running => "Running",
-                MainActivityState.Runnable => "Ready",
-                MainActivityState.Updatable => "Update Available",
-                MainActivityState.Downloadable => "Not Downloaded",
-                _ => "Unknown"
+                MainActivityState.Running => loc["Status_Running"],
+                MainActivityState.Runnable => loc["Status_Ready"],
+                MainActivityState.Updatable => loc["Status_UpdateAvailable"],
+                MainActivityState.Downloadable => loc["Status_NotDownloaded"],
+                _ => loc["Status_Unknown"]
             };
         }
-        return "Unknown";
+        return loc["Status_Unknown"];
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

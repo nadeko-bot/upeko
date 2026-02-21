@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+    <!-- App / MainWindow -->
+    <x:String x:Key="App_Name">Upeko</x:String>
+    <x:String x:Key="MainWindow_Title">Upeko — Менеджер ботов</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">Сворачивать в трей при закрытии</x:String>
+    <x:String x:Key="MainWindow_ToggleThemeTip">Сменить тему</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">Присоединиться к Discord Nadeko Bot</x:String>
+    <x:String x:Key="MainWindow_NewerVersion">Новая версия</x:String>
+    <x:String x:Key="MainWindow_NewerVersionTip">Нажмите, чтобы скачать последнюю версию Upeko</x:String>
+
+    <!-- Delete Modal -->
+    <x:String x:Key="Modal_DeleteTitle">Удалить экземпляр</x:String>
+    <x:String x:Key="Modal_DeletePrefix">Вы уверены, что хотите удалить </x:String>
+    <x:String x:Key="Modal_DeleteSuffix">? Это действие нельзя отменить.</x:String>
+    <x:String x:Key="Modal_Cancel">Отмена</x:String>
+    <x:String x:Key="Modal_Delete">Удалить</x:String>
+
+    <!-- Exit Modal -->
+    <x:String x:Key="Modal_ExitTitle">Боты всё ещё работают</x:String>
+    <x:String x:Key="Modal_ExitSuffix"> бот(ов) всё ещё работают. Закрытие Upeko остановит все запущенные боты. Вы уверены, что хотите выйти?</x:String>
+    <x:String x:Key="Modal_QuitAnyway">Выйти в любом случае</x:String>
+
+    <!-- Tray -->
+    <x:String x:Key="Tray_Show">Показать Upeko</x:String>
+    <x:String x:Key="Tray_Exit">Выход</x:String>
+    <x:String x:Key="Tray_Tooltip">Upeko</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko свёрнут в трей и продолжит работу в фоновом режиме</x:String>
+
+    <!-- Bot List View -->
+    <x:String x:Key="BotList_PageTitle">Экземпляры</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Управляйте вашими развёртываниями NadekoBot</x:String>
+    <x:String x:Key="BotList_Changelog">Журнал изменений</x:String>
+    <x:String x:Key="BotList_AddInstance">Добавить экземпляр</x:String>
+    <x:String x:Key="BotList_Start">Запустить</x:String>
+    <x:String x:Key="BotList_Stop">Остановить</x:String>
+    <x:String x:Key="BotList_Download">Скачать</x:String>
+    <x:String x:Key="BotList_Update">Обновить</x:String>
+    <x:String x:Key="BotList_EmptyTitle">Экземпляры не найдены</x:String>
+    <x:String x:Key="BotList_EmptySubtitle">Начните с создания нового экземпляра бота.</x:String>
+    <x:String x:Key="BotList_CreateInstance">Создать экземпляр</x:String>
+
+    <!-- Bot View -->
+    <x:String x:Key="BotView_BackToInstances">Назад к экземплярам</x:String>
+    <x:String x:Key="BotView_ChangeAvatarTip">Нажмите, чтобы сменить аватар</x:String>
+    <x:String x:Key="BotView_ClickToRenameTip">Нажмите, чтобы переименовать</x:String>
+    <x:String x:Key="BotView_SaveTip">Сохранить</x:String>
+    <x:String x:Key="BotView_CancelTip">Отмена</x:String>
+    <x:String x:Key="BotView_Configuration">Конфигурация</x:String>
+    <x:String x:Key="BotView_InstallPath">ПУТЬ УСТАНОВКИ</x:String>
+    <x:String x:Key="BotView_Browse">Обзор</x:String>
+    <x:String x:Key="BotView_Actions">Действия</x:String>
+    <x:String x:Key="BotView_StopInstance">Остановить экземпляр</x:String>
+    <x:String x:Key="BotView_Start">Запустить</x:String>
+    <x:String x:Key="BotView_DownloadInstall">Скачать и установить</x:String>
+    <x:String x:Key="BotView_CancelDownload">Отменить загрузку</x:String>
+    <x:String x:Key="BotView_Shortcuts">Ярлыки</x:String>
+    <x:String x:Key="BotView_DataFolder">Папка данных</x:String>
+    <x:String x:Key="BotView_OpenInFileManager">Открыть в файловом менеджере</x:String>
+    <x:String x:Key="BotView_OpenConfiguration">Открыть конфигурацию</x:String>
+    <x:String x:Key="BotView_DangerZone">ОПАСНАЯ ЗОНА</x:String>
+    <x:String x:Key="BotView_DangerDescription">Удаление этого экземпляра приведёт к удалению всех связанных данных и файлов конфигурации.</x:String>
+    <x:String x:Key="BotView_DeleteInstance">Удалить экземпляр</x:String>
+    <x:String x:Key="BotView_SelectBotPath">Выберите путь бота</x:String>
+    <x:String x:Key="BotView_SelectAvatarImage">Выберите изображение аватара</x:String>
+    <x:String x:Key="BotView_ImageFiles">Файлы изображений</x:String>
+
+    <!-- Status Text -->
+    <x:String x:Key="Status_Running">Работает</x:String>
+    <x:String x:Key="Status_Ready">Готов</x:String>
+    <x:String x:Key="Status_UpdateAvailable">Доступно обновление</x:String>
+    <x:String x:Key="Status_NotDownloaded">Не загружен</x:String>
+    <x:String x:Key="Status_Unknown">Неизвестно</x:String>
+
+    <!-- Update Button -->
+    <x:String x:Key="BotView_Checking">Проверка...</x:String>
+    <x:String x:Key="BotView_UpdateButton">Обновить</x:String>
+    <x:String x:Key="BotView_CheckUpdates">Проверить обновления</x:String>
+
+    <!-- Download Progress -->
+    <x:String x:Key="Progress_Downloading">Загрузка...</x:String>
+    <x:String x:Key="Progress_Initializing">Инициализация...</x:String>
+    <x:String x:Key="Progress_PleaseWait">Подождите, не закрывайте приложение.</x:String>
+    <x:String x:Key="Progress_Stalled">Приостановлено</x:String>
+    <x:String x:Key="Progress_Calculating">Вычисление...</x:String>
+
+    <!-- Dependency Status -->
+    <x:String x:Key="Dep_Checking">проверка</x:String>
+    <x:String x:Key="Dep_Installed">установлен</x:String>
+    <x:String x:Key="Dep_Missing">отсутствует</x:String>
+
+    <!-- Toast Messages -->
+    <x:String x:Key="Toast_InstanceCreated">Экземпляр создан</x:String>
+    <x:String x:Key="Toast_InstanceDeleted">Экземпляр удалён</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Восстановлено из резервной копии</x:String>
+    <x:String x:Key="Toast_InstallingFfmpeg">Установка ffmpeg...</x:String>
+    <x:String x:Key="Toast_InstallingYtdlp">Установка yt-dlp...</x:String>
+    <x:String x:Key="Toast_ResumingBots">Возобновление {0} бот(ов)...</x:String>
+</ResourceDictionary>

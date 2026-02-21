@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 
 namespace upeko.ViewModels
 {
@@ -45,10 +46,12 @@ namespace upeko.ViewModels
         {
             if (State == DepState.NotInstalled)
             {
+                Log.Information("Installing dependency: {Name}", Name);
                 State = DepState.Checking;
 
                 var success = await InternalInstallAsync();
                 State = success ? DepState.Installed : DepState.NotInstalled;
+                Log.Information("Dependency {Name} install result: {Status}", Name, StatusString);
 
                 return;
             }
@@ -62,6 +65,7 @@ namespace upeko.ViewModels
             State = DepState.Checking;
             var newState = await InternalCheckAsync();
             State = newState;
+            Log.Information("Dependency {Name}: {Status}", Name, StatusString);
         }
 
         protected abstract Task<DepState> InternalCheckAsync();

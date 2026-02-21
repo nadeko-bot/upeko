@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -8,15 +10,23 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using upeko.Models;
 using upeko.Services;
 
 namespace upeko.ViewModels;
 
+public record LanguageOption(string Code, string DisplayName);
+
 public partial class MainWindowViewModel : ViewModelBase
 {
     private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
     private const string UpEkoReleaseUrl = "https://github.com/nadeko-bot/upeko/releases";
+
+    private static readonly System.Net.Http.HttpClient _httpClient = new()
+    {
+        DefaultRequestHeaders = { { "User-Agent", "Upeko-Update-Checker" } }
+    };
 
     [ObservableProperty]
     private ViewModelBase _currentView;
@@ -48,6 +58,22 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _deleteModalBotName = string.Empty;
 
+    [ObservableProperty]
+    private bool _isExitModalOpen;
+
+    [ObservableProperty]
+    private int _runningBotCount;
+
+    [ObservableProperty]
+    private bool _minimizeToTray = true;
+
+    [ObservableProperty]
+    private LanguageOption _selectedLanguageOption;
+
+    public List<LanguageOption> LanguageOptions { get; } = LocalizationService.Languages
+        .Select(kv => new LanguageOption(kv.Key, kv.Value))
+        .ToList();
+
     private readonly BotListViewModel _botListViewModel;
     private readonly FfmpegDepViewModel _ffmpegViewModel;
     private readonly YtdlDepViewModel _ytdlpViewModel;
@@ -56,6 +82,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public string CurrentVersion => _currentVersion;
 
+    public string DeleteModalMessage =>
+        $"{Loc["Modal_DeletePrefix"]}{DeleteModalBotName}{Loc["Modal_DeleteSuffix"]}";
+
+    public string ExitModalMessage =>
+        $"{RunningBotCount}{Loc["Modal_ExitSuffix"]}";
+
+    /// <summary>
+    /// Raised when the ViewModel wants the window to close.
+    /// MainWindow subscribes to this in OnDataContextChanged.
+    /// </summary>
+    public Action? CloseRequested { get; set; }
+
+    public ConfigModel GetConfig() => _botListViewModel.GetConfig();
+
     public MainWindowViewModel()
     {
         _ffmpegViewModel = new FfmpegDepViewModel();
@@ -63,6 +103,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _botListViewModel = new BotListViewModel(this);
         _currentView = _botListViewModel;
+        _minimizeToTray = _botListViewModel.GetConfig().MinimizeToTray;
+        _selectedLanguageOption = LanguageOptions.First(l => l.Code == _botListViewModel.GetConfig().Language);
 
         _currentVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0.0";
 
@@ -80,6 +122,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 YtdlpStatus = _ytdlpViewModel.StatusString;
         };
 
+        LocalizationService.Instance.LanguageChanged += OnLanguageChanged;
+
         Dispatcher.UIThread.InvokeAsync(async () =>
         {
             await Task.Delay(1000);
@@ -88,6 +132,45 @@ public partial class MainWindowViewModel : ViewModelBase
 
             await CheckForUpEkoUpdatesAsync();
         });
+    }
+
+    private void OnLanguageChanged()
+    {
+        OnPropertyChanged(nameof(Loc));
+        OnPropertyChanged(nameof(DeleteModalMessage));
+        OnPropertyChanged(nameof(ExitModalMessage));
+    }
+
+    partial void OnMinimizeToTrayChanged(bool value)
+    {
+        var config = _botListViewModel.GetConfig();
+        config.MinimizeToTray = value;
+        _botListViewModel.SaveConfig();
+    }
+
+    partial void OnSelectedLanguageOptionChanged(LanguageOption value)
+    {
+        if (value is null) return;
+        LocalizationService.Instance.SetLanguage(value.Code);
+        var config = _botListViewModel.GetConfig();
+        config.Language = value.Code;
+        _botListViewModel.SaveConfig();
+    }
+
+    partial void OnDeleteModalBotNameChanged(string value)
+    {
+        OnPropertyChanged(nameof(DeleteModalMessage));
+    }
+
+    partial void OnRunningBotCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(ExitModalMessage));
+    }
+
+    [RelayCommand]
+    private void ToggleMinimizeToTray()
+    {
+        MinimizeToTray = !MinimizeToTray;
     }
 
     [RelayCommand]
@@ -176,8 +259,38 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _botListViewModel.RemoveBot(detail);
             NavigateToList();
-            ShowToast("Instance deleted", "success");
+            ShowToast(Loc["Toast_InstanceDeleted"], "success");
         }
+    }
+
+    public bool RequestExit()
+    {
+        var running = 0;
+        foreach (var bot in _botListViewModel.Bots)
+        {
+            if (bot.IsRunning)
+                running++;
+        }
+
+        if (running == 0)
+            return true;
+
+        RunningBotCount = running;
+        IsExitModalOpen = true;
+        return false;
+    }
+
+    [RelayCommand]
+    private void CancelExit()
+    {
+        IsExitModalOpen = false;
+    }
+
+    [RelayCommand]
+    private void ConfirmExit()
+    {
+        IsExitModalOpen = false;
+        CloseRequested?.Invoke();
     }
 
     [RelayCommand]
@@ -185,12 +298,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (dep == "ffmpeg" && _ffmpegViewModel.IsNotInstalled)
         {
-            ShowToast("Installing ffmpeg...", "info");
+            ShowToast(Loc["Toast_InstallingFfmpeg"], "info");
             _ = _ffmpegViewModel.InstallAsync();
         }
         else if (dep == "ytdlp" && _ytdlpViewModel.IsNotInstalled)
         {
-            ShowToast("Installing yt-dlp...", "info");
+            ShowToast(Loc["Toast_InstallingYtdlp"], "info");
             _ = _ytdlpViewModel.InstallAsync();
         }
     }
@@ -199,10 +312,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            var httpClient = new System.Net.Http.HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Upeko-Update-Checker");
-
-            var response = await httpClient.GetAsync("https://api.github.com/repos/nadeko-bot/upeko/releases/latest");
+            var response = await _httpClient.GetAsync("https://api.github.com/repos/nadeko-bot/upeko/releases/latest");
             response.EnsureSuccessStatusCode();
 
             var newRelease = await response.Content.ReadFromJsonAsync(SourceJsonSerializer.Default.ReleaseModel);
@@ -211,11 +321,15 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 var latestVersion = newRelease.TagName?.TrimStart('v') ?? "1.0.0.0";
                 IsUpEkoUpdateAvailable = CompareVersions(_currentVersion, latestVersion) < 0;
+                if (IsUpEkoUpdateAvailable)
+                    Log.Information("Upeko update available: {Latest} (current: {Current})", latestVersion, _currentVersion);
+                else
+                    Log.Information("Upeko is up to date: {Current}", _currentVersion);
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error checking for updates: {ex.Message}");
+            Log.Error(ex, "Error checking for Upeko updates");
             IsUpEkoUpdateAvailable = false;
         }
     }

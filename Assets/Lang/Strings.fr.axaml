@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+    <!-- App / MainWindow -->
+    <x:String x:Key="App_Name">Upeko</x:String>
+    <x:String x:Key="MainWindow_Title">Upeko — Gestionnaire de Bots</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">Réduire dans la barre des tâches à la fermeture</x:String>
+    <x:String x:Key="MainWindow_ToggleThemeTip">Changer de thème</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">Rejoindre le Discord Nadeko Bot</x:String>
+    <x:String x:Key="MainWindow_NewerVersion">Nouvelle version</x:String>
+    <x:String x:Key="MainWindow_NewerVersionTip">Cliquer pour télécharger la dernière version d'upeko</x:String>
+
+    <!-- Delete Modal -->
+    <x:String x:Key="Modal_DeleteTitle">Supprimer l'instance</x:String>
+    <x:String x:Key="Modal_DeletePrefix">Êtes-vous sûr de vouloir supprimer </x:String>
+    <x:String x:Key="Modal_DeleteSuffix"> ? Cette action est irréversible.</x:String>
+    <x:String x:Key="Modal_Cancel">Annuler</x:String>
+    <x:String x:Key="Modal_Delete">Supprimer</x:String>
+
+    <!-- Exit Modal -->
+    <x:String x:Key="Modal_ExitTitle">Des bots sont encore en cours d'exécution</x:String>
+    <x:String x:Key="Modal_ExitSuffix"> bot(s) sont encore en cours d'exécution. Fermer Upeko arrêtera tous les bots. Voulez-vous vraiment quitter ?</x:String>
+    <x:String x:Key="Modal_QuitAnyway">Quitter quand même</x:String>
+
+    <!-- Tray -->
+    <x:String x:Key="Tray_Show">Afficher Upeko</x:String>
+    <x:String x:Key="Tray_Exit">Quitter</x:String>
+    <x:String x:Key="Tray_Tooltip">Upeko</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko a été réduit dans la barre des tâches et continuera de fonctionner en arrière-plan</x:String>
+
+    <!-- Bot List View -->
+    <x:String x:Key="BotList_PageTitle">Instances</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Gérez vos déploiements NadekoBot</x:String>
+    <x:String x:Key="BotList_Changelog">Journal des modifications</x:String>
+    <x:String x:Key="BotList_AddInstance">Ajouter une instance</x:String>
+    <x:String x:Key="BotList_Start">Démarrer</x:String>
+    <x:String x:Key="BotList_Stop">Arrêter</x:String>
+    <x:String x:Key="BotList_Download">Télécharger</x:String>
+    <x:String x:Key="BotList_Update">Mettre à jour</x:String>
+    <x:String x:Key="BotList_EmptyTitle">Aucune instance trouvée</x:String>
+    <x:String x:Key="BotList_EmptySubtitle">Commencez par créer une nouvelle instance de bot.</x:String>
+    <x:String x:Key="BotList_CreateInstance">Créer une instance</x:String>
+
+    <!-- Bot View -->
+    <x:String x:Key="BotView_BackToInstances">Retour aux instances</x:String>
+    <x:String x:Key="BotView_ChangeAvatarTip">Cliquer pour changer l'avatar</x:String>
+    <x:String x:Key="BotView_ClickToRenameTip">Cliquer pour renommer</x:String>
+    <x:String x:Key="BotView_SaveTip">Enregistrer</x:String>
+    <x:String x:Key="BotView_CancelTip">Annuler</x:String>
+    <x:String x:Key="BotView_Configuration">Configuration</x:String>
+    <x:String x:Key="BotView_InstallPath">CHEMIN D'INSTALLATION</x:String>
+    <x:String x:Key="BotView_Browse">Parcourir</x:String>
+    <x:String x:Key="BotView_Actions">Actions</x:String>
+    <x:String x:Key="BotView_StopInstance">Arrêter l'instance</x:String>
+    <x:String x:Key="BotView_Start">Démarrer</x:String>
+    <x:String x:Key="BotView_DownloadInstall">Télécharger et installer</x:String>
+    <x:String x:Key="BotView_CancelDownload">Annuler le téléchargement</x:String>
+    <x:String x:Key="BotView_Shortcuts">Raccourcis</x:String>
+    <x:String x:Key="BotView_DataFolder">Dossier de données</x:String>
+    <x:String x:Key="BotView_OpenInFileManager">Ouvrir dans le gestionnaire de fichiers</x:String>
+    <x:String x:Key="BotView_OpenConfiguration">Ouvrir la configuration</x:String>
+    <x:String x:Key="BotView_DangerZone">ZONE DE DANGER</x:String>
+    <x:String x:Key="BotView_DangerDescription">La suppression de cette instance entraînera la suppression de toutes les données et fichiers de configuration associés.</x:String>
+    <x:String x:Key="BotView_DeleteInstance">Supprimer l'instance</x:String>
+    <x:String x:Key="BotView_SelectBotPath">Sélectionner le chemin du bot</x:String>
+    <x:String x:Key="BotView_SelectAvatarImage">Sélectionner une image d'avatar</x:String>
+    <x:String x:Key="BotView_ImageFiles">Fichiers image</x:String>
+
+    <!-- Status Text -->
+    <x:String x:Key="Status_Running">En cours</x:String>
+    <x:String x:Key="Status_Ready">Prêt</x:String>
+    <x:String x:Key="Status_UpdateAvailable">Mise à jour disponible</x:String>
+    <x:String x:Key="Status_NotDownloaded">Non téléchargé</x:String>
+    <x:String x:Key="Status_Unknown">Inconnu</x:String>
+
+    <!-- Update Button -->
+    <x:String x:Key="BotView_Checking">Vérification...</x:String>
+    <x:String x:Key="BotView_UpdateButton">Mettre à jour</x:String>
+    <x:String x:Key="BotView_CheckUpdates">Vérifier les mises à jour</x:String>
+
+    <!-- Download Progress -->
+    <x:String x:Key="Progress_Downloading">Téléchargement...</x:String>
+    <x:String x:Key="Progress_Initializing">Initialisation...</x:String>
+    <x:String x:Key="Progress_PleaseWait">Veuillez patienter, ne fermez pas l'application.</x:String>
+    <x:String x:Key="Progress_Stalled">En pause</x:String>
+    <x:String x:Key="Progress_Calculating">Calcul...</x:String>
+
+    <!-- Dependency Status -->
+    <x:String x:Key="Dep_Checking">vérification</x:String>
+    <x:String x:Key="Dep_Installed">installé</x:String>
+    <x:String x:Key="Dep_Missing">manquant</x:String>
+
+    <!-- Toast Messages -->
+    <x:String x:Key="Toast_InstanceCreated">Instance créée</x:String>
+    <x:String x:Key="Toast_InstanceDeleted">Instance supprimée</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Récupéré à partir de la sauvegarde</x:String>
+    <x:String x:Key="Toast_InstallingFfmpeg">Installation de ffmpeg...</x:String>
+    <x:String x:Key="Toast_InstallingYtdlp">Installation de yt-dlp...</x:String>
+    <x:String x:Key="Toast_ResumingBots">Reprise de {0} bot(s)...</x:String>
+</ResourceDictionary>

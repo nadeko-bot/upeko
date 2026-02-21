@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using upeko.Models;
 using upeko.Services;
 
@@ -14,6 +15,7 @@ namespace upeko.ViewModels;
 public partial class BotViewModel : ViewModelBase
 {
     private readonly BotModel _bot = null!;
+    private bool _isDownloading;
     public BotModel Bot => _bot;
     public BotListViewModel Parent { get; } = null!;
 
@@ -39,10 +41,22 @@ public partial class BotViewModel : ViewModelBase
     private bool _isCheckingForUpdates;
 
     [ObservableProperty]
+    private string? _diskSpaceInfo;
+
+    [ObservableProperty]
     private bool _isEditingName;
 
     [ObservableProperty]
     private string _editedName = string.Empty;
+
+    [ObservableProperty]
+    private string _downloadSpeed = string.Empty;
+
+    [ObservableProperty]
+    private string _downloadEta = string.Empty;
+
+    [ObservableProperty]
+    private string _downloadBytes = string.Empty;
 
     private Process? _process;
 
@@ -65,17 +79,17 @@ public partial class BotViewModel : ViewModelBase
     public bool IsReady => State == MainActivityState.Runnable || State == MainActivityState.Updatable;
     public bool IsMissing => State == MainActivityState.Downloadable;
     public bool ShowStartStop => IsRunning || IsReady;
-    public bool IsUpdateAvailable => UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
+    public bool IsUpdateAvailable => IsBotDownloaded && UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
     public bool IsBotDownloaded => !string.IsNullOrWhiteSpace(Bot?.Version);
-    public string UpdateButtonText => IsCheckingForUpdates ? "Checking..." : IsUpdateAvailable ? "Update" : "Check Updates";
+    public string UpdateButtonText => IsCheckingForUpdates ? Loc["BotView_Checking"] : IsUpdateAvailable ? Loc["BotView_UpdateButton"] : Loc["BotView_CheckUpdates"];
 
     public string StatusText => State switch
     {
-        MainActivityState.Running => "Running",
-        MainActivityState.Runnable => "Ready",
-        MainActivityState.Updatable => "Update Available",
-        MainActivityState.Downloadable => "Not Downloaded",
-        _ => "Unknown"
+        MainActivityState.Running => Loc["Status_Running"],
+        MainActivityState.Runnable => Loc["Status_Ready"],
+        MainActivityState.Updatable => Loc["Status_UpdateAvailable"],
+        MainActivityState.Downloadable => Loc["Status_NotDownloaded"],
+        _ => Loc["Status_Unknown"]
     };
 
     public string? Version => Bot?.Version;
@@ -84,14 +98,27 @@ public partial class BotViewModel : ViewModelBase
     {
         UpdateChecker.Instance.OnDownloadProgress += OnDownloadProgress;
         UpdateChecker.Instance.OnDownloadComplete += OnDownloadComplete;
+        UpdateChecker.Instance.OnDownloadCancelled += OnDownloadCancelled;
+
+        LocalizationService.Instance.LanguageChanged += () =>
+        {
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(UpdateButtonText));
+            OnPropertyChanged(nameof(Loc));
+        };
     }
 
     public BotViewModel(BotListViewModel parent, BotModel model) : this()
     {
         _bot = model;
         Parent = parent;
-        ReloadVersionFromPath();
-        UpdateCurrentActivity();
+        _ = InitAsync();
+    }
+
+    private async Task InitAsync()
+    {
+        await ReloadVersionFromPathAsync();
+        _ = InitDiskSpaceAsync();
     }
 
     partial void OnStateChanged(MainActivityState value)
@@ -126,11 +153,15 @@ public partial class BotViewModel : ViewModelBase
         if (string.IsNullOrEmpty(ExecutablePath) || !File.Exists(ExecutablePath))
             return;
 
+        Log.Information("Starting bot {BotName}", Bot.Name);
         _process = Process.Start(new ProcessStartInfo
         {
             FileName = ExecutablePath,
             WorkingDirectory = BotPath,
         });
+
+        _bot.WasRunning = true;
+        Parent.UpdateBot(_bot);
 
         _ = Task.Run(async () =>
         {
@@ -139,6 +170,10 @@ public partial class BotViewModel : ViewModelBase
             await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
             {
                 _process = null;
+
+                _bot.WasRunning = false;
+                Parent?.UpdateBot(_bot);
+
                 UpdateCurrentActivity();
             });
             _process?.Dispose();
@@ -153,9 +188,14 @@ public partial class BotViewModel : ViewModelBase
         if (State != MainActivityState.Running)
             return;
 
+        Log.Information("Stopping bot {BotName}", Bot.Name);
+        _bot.WasRunning = false;
+        Parent.UpdateBot(_bot);
+
         using var p = _process;
         _process = null;
-        try { p?.Kill(); } catch { }
+        try { p?.Kill(); }
+        catch (Exception ex) { Log.Warning(ex, "Failed to kill bot process {BotName}", Bot.Name); }
         UpdateCurrentActivity();
     }
 
@@ -176,6 +216,13 @@ public partial class BotViewModel : ViewModelBase
     private void DownloadBot()
     {
         _ = DownloadAndInstallBotAsync();
+    }
+
+    [RelayCommand]
+    private void CancelDownload()
+    {
+        Log.Information("Cancelling download for {BotName}", Bot.Name);
+        UpdateChecker.Instance.CancelDownload();
     }
 
     [RelayCommand]
@@ -217,7 +264,7 @@ public partial class BotViewModel : ViewModelBase
 
         var result = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Select Bot Path",
+            Title = Loc["BotView_SelectBotPath"],
             AllowMultiple = false
         });
 
@@ -235,11 +282,11 @@ public partial class BotViewModel : ViewModelBase
 
         var result = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select Avatar Image",
+            Title = Loc["BotView_SelectAvatarImage"],
             AllowMultiple = false,
             FileTypeFilter = new[]
             {
-                new FilePickerFileType("Image Files")
+                new FilePickerFileType(Loc["BotView_ImageFiles"])
                 {
                     Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.gif" }
                 }
@@ -288,7 +335,7 @@ public partial class BotViewModel : ViewModelBase
         IsEditingName = false;
     }
 
-    public void ReloadVersionFromPath()
+    public async Task ReloadVersionFromPathAsync()
     {
         if (string.IsNullOrWhiteSpace(BotPath))
             return;
@@ -296,28 +343,42 @@ public partial class BotViewModel : ViewModelBase
         if (!File.Exists(ExecutablePath))
         {
             Bot.Version = null;
+            OnPropertyChanged(nameof(Version));
+            UpdateCurrentActivity();
             return;
         }
 
         try
         {
-            using var p = Process.Start(new ProcessStartInfo
+            var version = await Task.Run(async () =>
             {
-                FileName = ExecutablePath,
-                Arguments = "--version",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
+                using var p = Process.Start(new ProcessStartInfo
+                {
+                    FileName = ExecutablePath,
+                    Arguments = "--version",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                });
+
+                if (p is null) return null;
+
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var info = await p.StandardOutput.ReadToEndAsync(cts.Token);
+                await p.WaitForExitAsync(cts.Token);
+                return info?.Trim();
             });
 
-            var info = p?.StandardOutput.ReadToEnd();
-            Bot.Version = info?.Trim();
+            Bot.Version = version;
+            if (version is not null)
+                Log.Information("Detected bot version {Version} for {BotName}", version, Bot.Name);
         }
         catch
         {
             Bot.Version = null;
         }
 
+        OnPropertyChanged(nameof(Version));
         UpdateCurrentActivity();
     }
 
@@ -342,6 +403,7 @@ public partial class BotViewModel : ViewModelBase
             UpdateCurrentActivity();
             OnPropertyChanged(nameof(UpdateButtonText));
             OnPropertyChanged(nameof(IsUpdateAvailable));
+            _ = UpdateDiskSpaceInfoAsync();
         }
         finally
         {
@@ -349,44 +411,148 @@ public partial class BotViewModel : ViewModelBase
         }
     }
 
+    private async Task InitDiskSpaceAsync()
+    {
+        if (UpdateChecker.Instance.LatestRelease is null)
+            await UpdateChecker.Instance.CheckForUpdatesAsync();
+        await UpdateDiskSpaceInfoAsync();
+    }
+
+    private async Task UpdateDiskSpaceInfoAsync()
+    {
+        try
+        {
+            var info = await Task.Run(() =>
+            {
+                var release = UpdateChecker.Instance.LatestRelease;
+                if (release?.Assets is null || release.Assets.Length == 0)
+                    return null;
+
+                var assetName = $"{PlatformSpecific.GetOS()}-{PlatformSpecific.GetArchitecture()}";
+                var asset = Array.Find(release.Assets, a => a.Name?.Contains(assetName) == true);
+                if (asset is null || asset.Size <= 0)
+                    return null;
+
+                var requiredBytes = asset.Size * 4 + 100_000_000L;
+                var fullPath = Path.GetFullPath(string.IsNullOrWhiteSpace(BotPath) ? "." : BotPath);
+
+                var availableBytes = DiskSpace.GetAvailableBytes(fullPath);
+                if (availableBytes is null)
+                    return null;
+
+                return new { Required = requiredBytes, Available = availableBytes.Value };
+            });
+
+            if (info is null)
+            {
+                DiskSpaceInfo = null;
+                return;
+            }
+
+            DiskSpaceInfo = $"~{FormatBytes(info.Required)} required  ·  {FormatBytes(info.Available)} available";
+        }
+        catch
+        {
+            DiskSpaceInfo = null;
+        }
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        return bytes switch
+        {
+            >= 1_073_741_824 => $"{bytes / 1_073_741_824.0:F1} GB",
+            >= 1_048_576 => $"{bytes / 1_048_576.0:F0} MB",
+            _ => $"{bytes / 1024.0:F0} KB"
+        };
+    }
+
     private async Task DownloadAndInstallBotAsync()
     {
         try
         {
+            Log.Information("Starting download for {BotName} at {BotPath}", Bot.Name, BotPath);
+            _isDownloading = true;
             IsProgressVisible = true;
             ProgressValue = 0;
             ProgressPercent = "0%";
-            ProgressTitle = "Downloading...";
-            ProgressDetail = "Please wait, do not close the application.";
+            ProgressTitle = Loc["Progress_Downloading"];
+            ProgressDetail = Loc["Progress_PleaseWait"];
 
             await UpdateChecker.Instance.DownloadAndInstallBotAsync(Bot.Name, BotPath);
         }
         catch (Exception ex)
         {
+            _isDownloading = false;
             IsProgressVisible = false;
             ProgressDetail = $"Error: {ex.Message}";
         }
     }
 
-    private void OnDownloadProgress(double progress, string status)
+    private void OnDownloadProgress(DownloadProgressInfo info)
     {
+        if (!_isDownloading) return;
         IsProgressVisible = true;
-        ProgressValue = progress * 100;
-        ProgressPercent = $"{(int)(progress * 100)}%";
-        ProgressTitle = status;
+        ProgressValue = info.Progress * 100;
+        ProgressPercent = $"{(int)(info.Progress * 100)}%";
+        ProgressTitle = info.Status;
+        DownloadSpeed = FormatSpeed(info.SpeedBytesPerSec);
+        DownloadBytes = FormatBytes(info.BytesDownloaded, info.TotalBytes);
+        DownloadEta = FormatEta(info.EtaSeconds);
     }
 
-    private void OnDownloadComplete(bool success, string version)
+    private async void OnDownloadComplete(bool success, string version)
     {
+        if (!_isDownloading) return;
+        _isDownloading = false;
         IsProgressVisible = false;
+        DownloadSpeed = string.Empty;
+        DownloadEta = string.Empty;
+        DownloadBytes = string.Empty;
         if (success)
         {
-            ReloadVersionFromPath();
-            UpdateCurrentActivity();
+            Log.Information("Download completed for {BotName}", Bot.Name);
+            await ReloadVersionFromPathAsync();
         }
         else
         {
+            Log.Error("Download failed for {BotName}: {Error}", Bot.Name, version);
             ProgressDetail = $"Download failed: {version}";
         }
+    }
+
+    private string FormatSpeed(double bytesPerSec)
+    {
+        if (bytesPerSec <= 0) return Loc["Progress_Stalled"];
+        return bytesPerSec >= 1_048_576
+            ? $"{bytesPerSec / 1_048_576:F1} MB/s"
+            : $"{bytesPerSec / 1_024:F0} KB/s";
+    }
+
+    private static string FormatBytes(long downloaded, long? total)
+    {
+        var dl = downloaded / 1_048_576.0;
+        if (!total.HasValue) return $"{dl:F1} MB";
+        var tot = total.Value / 1_048_576.0;
+        return $"{dl:F1} / {tot:F1} MB";
+    }
+
+    private string FormatEta(double? etaSeconds)
+    {
+        if (!etaSeconds.HasValue) return Loc["Progress_Calculating"];
+        var s = (int)etaSeconds.Value;
+        if (s < 0) return Loc["Progress_Calculating"];
+        if (s < 60) return $"{s}s";
+        if (s < 3600) return $"{s / 60}m {s % 60}s";
+        return $"{s / 3600}h {s % 3600 / 60}m";
+    }
+
+    private void OnDownloadCancelled()
+    {
+        if (!_isDownloading) return;
+        Log.Information("Download cancelled for {BotName}", Bot.Name);
+        _isDownloading = false;
+        IsProgressVisible = false;
+        UpdateCurrentActivity();
     }
 }

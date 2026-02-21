@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using upeko.Models;
 using upeko.Services;
 
@@ -24,11 +28,18 @@ public partial class BotListViewModel : ViewModelBase
         _main = main;
         _botRepository = new JsonBotRepository();
 
+        if (_botRepository.RecoveredFromBackup)
+            _main.ShowToast(Loc["Toast_RecoveredFromBackup"], "info");
+
         Bots = new ObservableCollection<BotViewModel>();
         LoadBots();
 
         UpdateEmpty();
         Bots.CollectionChanged += (_, _) => UpdateEmpty();
+
+        LocalizationService.Instance.LanguageChanged += () => OnPropertyChanged(nameof(Loc));
+
+        _ = Dispatcher.UIThread.InvokeAsync(ResumeSessionAsync);
     }
 
     private void LoadBots()
@@ -38,6 +49,32 @@ public partial class BotListViewModel : ViewModelBase
         foreach (var botModel in botModels)
         {
             Bots.Add(new BotViewModel(this, botModel));
+        }
+    }
+
+    private async Task ResumeSessionAsync()
+    {
+        await Task.Delay(1000);
+
+        var botsToResume = new List<BotViewModel>();
+        foreach (var bot in Bots)
+        {
+            if (bot.Bot.WasRunning && bot.IsReady)
+                botsToResume.Add(bot);
+        }
+
+        if (botsToResume.Count == 0)
+            return;
+
+        Log.Information("Resuming {Count} bot(s) from previous session", botsToResume.Count);
+        _main.ShowToast(string.Format(Loc["Toast_ResumingBots"], botsToResume.Count));
+
+        foreach (var bot in botsToResume)
+        {
+            bot.StartBotCommand.Execute(null);
+
+            if (bot != botsToResume[^1])
+                await Task.Delay(3000);
         }
     }
 
@@ -73,7 +110,8 @@ public partial class BotListViewModel : ViewModelBase
 
         _botRepository.AddBot(botModel);
         Bots.Add(new BotViewModel(this, botModel));
-        _main.ShowToast("Instance created", "success");
+        Log.Information("Created bot instance {BotName} at {BotPath}", botModel.Name, defaultPath);
+        _main.ShowToast(Loc["Toast_InstanceCreated"], "success");
     }
 
     [RelayCommand]
@@ -93,6 +131,7 @@ public partial class BotListViewModel : ViewModelBase
 
     public void RemoveBot(BotViewModel botViewModel)
     {
+        Log.Information("Deleted bot instance {BotName}", botViewModel.Bot.Name);
         _botRepository.RemoveBot(botViewModel.Bot);
         Bots.Remove(botViewModel);
     }
@@ -106,4 +145,8 @@ public partial class BotListViewModel : ViewModelBase
     {
         _main.RequestDelete(botName);
     }
+
+    public ConfigModel GetConfig() => _botRepository.GetConfig();
+
+    public void SaveConfig() => _botRepository.SaveConfig();
 }

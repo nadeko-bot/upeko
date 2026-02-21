@@ -5,6 +5,8 @@ namespace upeko.Services
 {
     public interface IBotRepository
     {
+        bool RecoveredFromBackup { get; }
+
         /// <summary>
         /// Gets the current configuration
         /// </summary>

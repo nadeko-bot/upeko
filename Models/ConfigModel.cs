@@ -12,5 +12,9 @@ namespace upeko.Models
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "upeko",
             "bots");
+
+        public bool MinimizeToTray { get; set; } = true;
+
+        public string Language { get; set; } = "en-US";
     }
 }

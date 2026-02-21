@@ -215,6 +215,19 @@
             <Setter Property="Background" Value="{DynamicResource TertiaryBackground}"/>
         </Style>
 
+        <!-- Icon button (compact, for inline actions) -->
+        <Style Selector="Button.btn-icon">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.btn-icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+        </Style>
+
         <!-- Small danger button -->
         <Style Selector="Button.btn-danger-sm">
             <Setter Property="Background" Value="Transparent"/>

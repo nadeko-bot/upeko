@@ -6,4 +6,8 @@ obj
 bin
 upeko/
 ideas/
+*.log*
+
+.factory/
+.pipeline/
 AGENTS.md

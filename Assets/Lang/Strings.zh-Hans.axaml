@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+    <!-- App / MainWindow -->
+    <x:String x:Key="App_Name">Upeko</x:String>
+    <x:String x:Key="MainWindow_Title">Upeko — 机器人管理器</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">关闭时最小化到托盘</x:String>
+    <x:String x:Key="MainWindow_ToggleThemeTip">切换主题</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">加入 Nadeko Bot Discord</x:String>
+    <x:String x:Key="MainWindow_NewerVersion">新版本</x:String>
+    <x:String x:Key="MainWindow_NewerVersionTip">点击下载最新版本的 Upeko</x:String>
+
+    <!-- Delete Modal -->
+    <x:String x:Key="Modal_DeleteTitle">删除实例</x:String>
+    <x:String x:Key="Modal_DeletePrefix">确定要删除 </x:String>
+    <x:String x:Key="Modal_DeleteSuffix"> 吗？此操作无法撤消。</x:String>
+    <x:String x:Key="Modal_Cancel">取消</x:String>
+    <x:String x:Key="Modal_Delete">删除</x:String>
+
+    <!-- Exit Modal -->
+    <x:String x:Key="Modal_ExitTitle">机器人仍在运行</x:String>
+    <x:String x:Key="Modal_ExitSuffix"> 个机器人仍在运行。关闭 Upeko 将停止所有正在运行的机器人。确定要退出吗？</x:String>
+    <x:String x:Key="Modal_QuitAnyway">仍然退出</x:String>
+
+    <!-- Tray -->
+    <x:String x:Key="Tray_Show">显示 Upeko</x:String>
+    <x:String x:Key="Tray_Exit">退出</x:String>
+    <x:String x:Key="Tray_Tooltip">Upeko</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko 已最小化到托盘，将在后台继续运行</x:String>
+
+    <!-- Bot List View -->
+    <x:String x:Key="BotList_PageTitle">实例</x:String>
+    <x:String x:Key="BotList_PageSubtitle">管理您的 NadekoBot 部署</x:String>
+    <x:String x:Key="BotList_Changelog">更新日志</x:String>
+    <x:String x:Key="BotList_AddInstance">添加实例</x:String>
+    <x:String x:Key="BotList_Start">启动</x:String>
+    <x:String x:Key="BotList_Stop">停止</x:String>
+    <x:String x:Key="BotList_Download">下载</x:String>
+    <x:String x:Key="BotList_Update">更新</x:String>
+    <x:String x:Key="BotList_EmptyTitle">未找到实例</x:String>
+    <x:String x:Key="BotList_EmptySubtitle">通过创建新的机器人实例开始使用。</x:String>
+    <x:String x:Key="BotList_CreateInstance">创建实例</x:String>
+
+    <!-- Bot View -->
+    <x:String x:Key="BotView_BackToInstances">返回实例列表</x:String>
+    <x:String x:Key="BotView_ChangeAvatarTip">点击更换头像</x:String>
+    <x:String x:Key="BotView_ClickToRenameTip">点击重命名</x:String>
+    <x:String x:Key="BotView_SaveTip">保存</x:String>
+    <x:String x:Key="BotView_CancelTip">取消</x:String>
+    <x:String x:Key="BotView_Configuration">配置</x:String>
+    <x:String x:Key="BotView_InstallPath">安装路径</x:String>
+    <x:String x:Key="BotView_Browse">浏览</x:String>
+    <x:String x:Key="BotView_Actions">操作</x:String>
+    <x:String x:Key="BotView_StopInstance">停止实例</x:String>
+    <x:String x:Key="BotView_Start">启动</x:String>
+    <x:String x:Key="BotView_DownloadInstall">下载并安装</x:String>
+    <x:String x:Key="BotView_CancelDownload">取消下载</x:String>
+    <x:String x:Key="BotView_Shortcuts">快捷方式</x:String>
+    <x:String x:Key="BotView_DataFolder">数据文件夹</x:String>
+    <x:String x:Key="BotView_OpenInFileManager">在文件管理器中打开</x:String>
+    <x:String x:Key="BotView_OpenConfiguration">打开配置</x:String>
+    <x:String x:Key="BotView_DangerZone">危险区域</x:String>
+    <x:String x:Key="BotView_DangerDescription">删除此实例将移除所有相关数据和配置文件。</x:String>
+    <x:String x:Key="BotView_DeleteInstance">删除实例</x:String>
+    <x:String x:Key="BotView_SelectBotPath">选择机器人路径</x:String>
+    <x:String x:Key="BotView_SelectAvatarImage">选择头像图片</x:String>
+    <x:String x:Key="BotView_ImageFiles">图片文件</x:String>
+
+    <!-- Status Text -->
+    <x:String x:Key="Status_Running">运行中</x:String>
+    <x:String x:Key="Status_Ready">就绪</x:String>
+    <x:String x:Key="Status_UpdateAvailable">有可用更新</x:String>
+    <x:String x:Key="Status_NotDownloaded">未下载</x:String>
+    <x:String x:Key="Status_Unknown">未知</x:String>
+
+    <!-- Update Button -->
+    <x:String x:Key="BotView_Checking">检查中...</x:String>
+    <x:String x:Key="BotView_UpdateButton">更新</x:String>
+    <x:String x:Key="BotView_CheckUpdates">检查更新</x:String>
+
+    <!-- Download Progress -->
+    <x:String x:Key="Progress_Downloading">下载中...</x:String>
+    <x:String x:Key="Progress_Initializing">初始化中...</x:String>
+    <x:String x:Key="Progress_PleaseWait">请等待，不要关闭应用程序。</x:String>
+    <x:String x:Key="Progress_Stalled">已暂停</x:String>
+    <x:String x:Key="Progress_Calculating">计算中...</x:String>
+
+    <!-- Dependency Status -->
+    <x:String x:Key="Dep_Checking">检查中</x:String>
+    <x:String x:Key="Dep_Installed">已安装</x:String>
+    <x:String x:Key="Dep_Missing">缺失</x:String>
+
+    <!-- Toast Messages -->
+    <x:String x:Key="Toast_InstanceCreated">实例已创建</x:String>
+    <x:String x:Key="Toast_InstanceDeleted">实例已删除</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">已从备份恢复</x:String>
+    <x:String x:Key="Toast_InstallingFfmpeg">正在安装 ffmpeg...</x:String>
+    <x:String x:Key="Toast_InstallingYtdlp">正在安装 yt-dlp...</x:String>
+    <x:String x:Key="Toast_ResumingBots">正在恢复 {0} 个机器人...</x:String>
+</ResourceDictionary>

@@ -5,12 +5,16 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Serilog;
 using upeko.Models;
 
 namespace upeko.Services
 {
     public class JsonBotRepository : IBotRepository
     {
+        public bool RecoveredFromBackup { get; private set; }
+        private const int MaxBackups = 5;
+
         private readonly string _legacyBotsJsonPath;
 
         private readonly string _configFilePath;
@@ -34,22 +38,31 @@ namespace upeko.Services
 
         private void InitializeConfig()
         {
-            // Check if upeko.json exists in the application directory
             if (File.Exists(_configFilePath))
             {
-                try
+                var config = TryLoadConfig(_configFilePath);
+                if (config is not null)
                 {
-                    var json = File.ReadAllText(_configFilePath);
-                    var config = JsonSerializer.Deserialize(json,
-                        SourceJsonSerializer.Default.ConfigModel);
-                    _config = config ?? new ConfigModel();
-
+                    _config = config;
                     return;
                 }
-                catch (Exception)
+
+                Log.Warning("Primary config corrupted, attempting recovery from backups");
+                for (var i = 1; i <= MaxBackups; i++)
                 {
-                    // todo: Show an error message box
+                    var backupPath = $"{_configFilePath}.bak.{i}";
+                    var backupConfig = TryLoadConfig(backupPath);
+                    if (backupConfig is not null)
+                    {
+                        _config = backupConfig;
+                        RecoveredFromBackup = true;
+                        Log.Information("Recovered config from backup {BackupPath}", backupPath);
+                        SaveConfig();
+                        return;
+                    }
                 }
+
+                Log.Warning("All config backups failed, starting with fresh config");
             }
 
             // Check if bots.json exists in the NadekoBotUpdater folder
@@ -81,7 +94,7 @@ namespace upeko.Services
                 {
                     // If there's an error reading the file, continue to the next option
                     // todo: Show an error message box
-                    Console.WriteLine($"Error migrating legacy bots: {ex.Message}");
+                    Log.Error(ex, "Error migrating legacy bots");
                 }
             }
 
@@ -158,12 +171,12 @@ namespace upeko.Services
                     }
 
                     // 5. Mark migration as complete (optional: could set a flag in the bot model)
-                    Console.WriteLine($"Successfully migrated legacy data for bot at {botPath}");
+                    Log.Information("Successfully migrated legacy data for bot at {BotPath}", botPath);
                 }
                 catch (Exception ex)
                 {
                     // Log the error but continue with other bots
-                    Console.WriteLine($"Error migrating bot at {botPath}: {ex.Message}");
+                    Log.Error(ex, "Error migrating bot at {BotPath}", botPath);
                 }
             }
         }
@@ -212,21 +225,63 @@ namespace upeko.Services
         {
             try
             {
-                // Ensure the directory exists
                 var directory = Path.GetDirectoryName(_configFilePath)!;
                 if (!Directory.Exists(directory))
-                {
                     Directory.CreateDirectory(directory);
-                }
 
-                // Serialize and save the config
                 var json = JsonSerializer.Serialize(_config, SourceJsonSerializer.Default.ConfigModel);
-                File.WriteAllText(_configFilePath, json);
+                var tempPath = _configFilePath + ".tmp";
+
+                File.WriteAllText(tempPath, json);
+
+                if (File.Exists(_configFilePath))
+                    RotateBackups();
+
+                File.Move(tempPath, _configFilePath, overwrite: true);
             }
             catch (Exception ex)
             {
-                // Log the error or handle it as needed
-                Console.WriteLine($"Error saving config: {ex.Message}");
+                Log.Error(ex, "Error saving config");
+            }
+        }
+
+        private void RotateBackups()
+        {
+            try
+            {
+                var lastBackup = $"{_configFilePath}.bak.{MaxBackups}";
+                if (File.Exists(lastBackup))
+                    File.Delete(lastBackup);
+
+                for (var i = MaxBackups - 1; i >= 1; i--)
+                {
+                    var src = $"{_configFilePath}.bak.{i}";
+                    var dst = $"{_configFilePath}.bak.{i + 1}";
+                    if (File.Exists(src))
+                        File.Move(src, dst);
+                }
+
+                File.Copy(_configFilePath, $"{_configFilePath}.bak.1");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error rotating backups");
+            }
+        }
+
+        private static ConfigModel? TryLoadConfig(string path)
+        {
+            if (!File.Exists(path))
+                return null;
+
+            try
+            {
+                var json = File.ReadAllText(path);
+                return JsonSerializer.Deserialize(json, SourceJsonSerializer.Default.ConfigModel);
+            }
+            catch
+            {
+                return null;
             }
         }
     }

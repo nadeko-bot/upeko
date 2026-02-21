@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+    <!-- App / MainWindow -->
+    <x:String x:Key="App_Name">Upeko</x:String>
+    <x:String x:Key="MainWindow_Title">Upeko — Bot Manager</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">Minimize to tray on close</x:String>
+    <x:String x:Key="MainWindow_ToggleThemeTip">Toggle theme</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">Join the Nadeko Bot Discord</x:String>
+    <x:String x:Key="MainWindow_NewerVersion">Newer Version</x:String>
+    <x:String x:Key="MainWindow_NewerVersionTip">Click to download the latest version of upeko</x:String>
+
+    <!-- Delete Modal -->
+    <x:String x:Key="Modal_DeleteTitle">Delete Instance</x:String>
+    <x:String x:Key="Modal_DeletePrefix">Are you sure you want to delete </x:String>
+    <x:String x:Key="Modal_DeleteSuffix">? This cannot be undone.</x:String>
+    <x:String x:Key="Modal_Cancel">Cancel</x:String>
+    <x:String x:Key="Modal_Delete">Delete</x:String>
+
+    <!-- Exit Modal -->
+    <x:String x:Key="Modal_ExitTitle">Bots Are Still Running</x:String>
+    <x:String x:Key="Modal_ExitSuffix"> bot(s) are still running. Closing Upeko will stop all running bots. Are you sure you want to quit?</x:String>
+    <x:String x:Key="Modal_QuitAnyway">Quit Anyway</x:String>
+
+    <!-- Tray -->
+    <x:String x:Key="Tray_Show">Show Upeko</x:String>
+    <x:String x:Key="Tray_Exit">Exit</x:String>
+    <x:String x:Key="Tray_Tooltip">Upeko</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko has been moved to tray and will run in the background</x:String>
+
+    <!-- Bot List View -->
+    <x:String x:Key="BotList_PageTitle">Instances</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Manage your NadekoBot deployments</x:String>
+    <x:String x:Key="BotList_Changelog">Changelog</x:String>
+    <x:String x:Key="BotList_AddInstance">Add Instance</x:String>
+    <x:String x:Key="BotList_Start">Start</x:String>
+    <x:String x:Key="BotList_Stop">Stop</x:String>
+    <x:String x:Key="BotList_Download">Download</x:String>
+    <x:String x:Key="BotList_Update">Update</x:String>
+    <x:String x:Key="BotList_EmptyTitle">No Instances Found</x:String>
+    <x:String x:Key="BotList_EmptySubtitle">Get started by creating a new bot instance.</x:String>
+    <x:String x:Key="BotList_CreateInstance">Create Instance</x:String>
+
+    <!-- Bot View -->
+    <x:String x:Key="BotView_BackToInstances">Back to Instances</x:String>
+    <x:String x:Key="BotView_ChangeAvatarTip">Click to change avatar</x:String>
+    <x:String x:Key="BotView_ClickToRenameTip">Click to rename</x:String>
+    <x:String x:Key="BotView_SaveTip">Save</x:String>
+    <x:String x:Key="BotView_CancelTip">Cancel</x:String>
+    <x:String x:Key="BotView_Configuration">Configuration</x:String>
+    <x:String x:Key="BotView_InstallPath">INSTALL PATH</x:String>
+    <x:String x:Key="BotView_Browse">Browse</x:String>
+    <x:String x:Key="BotView_Actions">Actions</x:String>
+    <x:String x:Key="BotView_StopInstance">Stop Instance</x:String>
+    <x:String x:Key="BotView_Start">Start</x:String>
+    <x:String x:Key="BotView_DownloadInstall">Download &amp; Install</x:String>
+    <x:String x:Key="BotView_CancelDownload">Cancel Download</x:String>
+    <x:String x:Key="BotView_Shortcuts">Shortcuts</x:String>
+    <x:String x:Key="BotView_DataFolder">Data Folder</x:String>
+    <x:String x:Key="BotView_OpenInFileManager">Open in file manager</x:String>
+    <x:String x:Key="BotView_OpenConfiguration">Open configuration</x:String>
+    <x:String x:Key="BotView_DangerZone">DANGER ZONE</x:String>
+    <x:String x:Key="BotView_DangerDescription">Deleting this instance will remove all associated data and configuration files.</x:String>
+    <x:String x:Key="BotView_DeleteInstance">Delete Instance</x:String>
+    <x:String x:Key="BotView_SelectBotPath">Select Bot Path</x:String>
+    <x:String x:Key="BotView_SelectAvatarImage">Select Avatar Image</x:String>
+    <x:String x:Key="BotView_ImageFiles">Image Files</x:String>
+
+    <!-- Status Text -->
+    <x:String x:Key="Status_Running">Running</x:String>
+    <x:String x:Key="Status_Ready">Ready</x:String>
+    <x:String x:Key="Status_UpdateAvailable">Update Available</x:String>
+    <x:String x:Key="Status_NotDownloaded">Not Downloaded</x:String>
+    <x:String x:Key="Status_Unknown">Unknown</x:String>
+
+    <!-- Update Button -->
+    <x:String x:Key="BotView_Checking">Checking...</x:String>
+    <x:String x:Key="BotView_UpdateButton">Update</x:String>
+    <x:String x:Key="BotView_CheckUpdates">Check Updates</x:String>
+
+    <!-- Download Progress -->
+    <x:String x:Key="Progress_Downloading">Downloading...</x:String>
+    <x:String x:Key="Progress_Initializing">Initializing...</x:String>
+    <x:String x:Key="Progress_PleaseWait">Please wait, do not close the application.</x:String>
+    <x:String x:Key="Progress_Stalled">Stalled</x:String>
+    <x:String x:Key="Progress_Calculating">Calculating...</x:String>
+
+    <!-- Dependency Status -->
+    <x:String x:Key="Dep_Checking">checking</x:String>
+    <x:String x:Key="Dep_Installed">installed</x:String>
+    <x:String x:Key="Dep_Missing">missing</x:String>
+
+    <!-- Toast Messages -->
+    <x:String x:Key="Toast_InstanceCreated">Instance created</x:String>
+    <x:String x:Key="Toast_InstanceDeleted">Instance deleted</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Recovered from backup</x:String>
+    <x:String x:Key="Toast_InstallingFfmpeg">Installing ffmpeg...</x:String>
+    <x:String x:Key="Toast_InstallingYtdlp">Installing yt-dlp...</x:String>
+    <x:String x:Key="Toast_ResumingBots">Resuming {0} bot(s)...</x:String>
+</ResourceDictionary>

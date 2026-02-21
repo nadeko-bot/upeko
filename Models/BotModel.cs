@@ -16,6 +16,8 @@ namespace upeko.Models
         public string? Version { get; set; }
 
         public string? PathUri { get; set; }
+
+        public bool WasRunning { get; set; }
     }
 
     [JsonSerializable(typeof(BotModel))]

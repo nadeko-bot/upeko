@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+    <!-- App / MainWindow -->
+    <x:String x:Key="App_Name">Upeko</x:String>
+    <x:String x:Key="MainWindow_Title">Upeko — Gestor de Bots</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">Minimizar a la bandeja al cerrar</x:String>
+    <x:String x:Key="MainWindow_ToggleThemeTip">Cambiar tema</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">Unirse al Discord de Nadeko Bot</x:String>
+    <x:String x:Key="MainWindow_NewerVersion">Nueva versión</x:String>
+    <x:String x:Key="MainWindow_NewerVersionTip">Haz clic para descargar la última versión de Upeko</x:String>
+
+    <!-- Delete Modal -->
+    <x:String x:Key="Modal_DeleteTitle">Eliminar instancia</x:String>
+    <x:String x:Key="Modal_DeletePrefix">¿Estás seguro de que quieres eliminar </x:String>
+    <x:String x:Key="Modal_DeleteSuffix">? Esta acción no se puede deshacer.</x:String>
+    <x:String x:Key="Modal_Cancel">Cancelar</x:String>
+    <x:String x:Key="Modal_Delete">Eliminar</x:String>
+
+    <!-- Exit Modal -->
+    <x:String x:Key="Modal_ExitTitle">Los bots siguen ejecutándose</x:String>
+    <x:String x:Key="Modal_ExitSuffix"> bot(s) siguen ejecutándose. Cerrar Upeko detendrá todos los bots en ejecución. ¿Estás seguro de que quieres salir?</x:String>
+    <x:String x:Key="Modal_QuitAnyway">Salir de todos modos</x:String>
+
+    <!-- Tray -->
+    <x:String x:Key="Tray_Show">Mostrar Upeko</x:String>
+    <x:String x:Key="Tray_Exit">Salir</x:String>
+    <x:String x:Key="Tray_Tooltip">Upeko</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko se ha movido a la bandeja del sistema y seguirá ejecutándose en segundo plano</x:String>
+
+    <!-- Bot List View -->
+    <x:String x:Key="BotList_PageTitle">Instancias</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Administra tus implementaciones de NadekoBot</x:String>
+    <x:String x:Key="BotList_Changelog">Registro de cambios</x:String>
+    <x:String x:Key="BotList_AddInstance">Agregar instancia</x:String>
+    <x:String x:Key="BotList_Start">Iniciar</x:String>
+    <x:String x:Key="BotList_Stop">Detener</x:String>
+    <x:String x:Key="BotList_Download">Descargar</x:String>
+    <x:String x:Key="BotList_Update">Actualizar</x:String>
+    <x:String x:Key="BotList_EmptyTitle">No se encontraron instancias</x:String>
+    <x:String x:Key="BotList_EmptySubtitle">Comienza creando una nueva instancia de bot.</x:String>
+    <x:String x:Key="BotList_CreateInstance">Crear instancia</x:String>
+
+    <!-- Bot View -->
+    <x:String x:Key="BotView_BackToInstances">Volver a instancias</x:String>
+    <x:String x:Key="BotView_ChangeAvatarTip">Haz clic para cambiar el avatar</x:String>
+    <x:String x:Key="BotView_ClickToRenameTip">Haz clic para renombrar</x:String>
+    <x:String x:Key="BotView_SaveTip">Guardar</x:String>
+    <x:String x:Key="BotView_CancelTip">Cancelar</x:String>
+    <x:String x:Key="BotView_Configuration">Configuración</x:String>
+    <x:String x:Key="BotView_InstallPath">RUTA DE INSTALACIÓN</x:String>
+    <x:String x:Key="BotView_Browse">Examinar</x:String>
+    <x:String x:Key="BotView_Actions">Acciones</x:String>
+    <x:String x:Key="BotView_StopInstance">Detener instancia</x:String>
+    <x:String x:Key="BotView_Start">Iniciar</x:String>
+    <x:String x:Key="BotView_DownloadInstall">Descargar e instalar</x:String>
+    <x:String x:Key="BotView_CancelDownload">Cancelar descarga</x:String>
+    <x:String x:Key="BotView_Shortcuts">Accesos directos</x:String>
+    <x:String x:Key="BotView_DataFolder">Carpeta de datos</x:String>
+    <x:String x:Key="BotView_OpenInFileManager">Abrir en el explorador de archivos</x:String>
+    <x:String x:Key="BotView_OpenConfiguration">Abrir configuración</x:String>
+    <x:String x:Key="BotView_DangerZone">ZONA DE PELIGRO</x:String>
+    <x:String x:Key="BotView_DangerDescription">Eliminar esta instancia eliminará todos los datos y archivos de configuración asociados.</x:String>
+    <x:String x:Key="BotView_DeleteInstance">Eliminar instancia</x:String>
+    <x:String x:Key="BotView_SelectBotPath">Seleccionar ruta del bot</x:String>
+    <x:String x:Key="BotView_SelectAvatarImage">Seleccionar imagen de avatar</x:String>
+    <x:String x:Key="BotView_ImageFiles">Archivos de imagen</x:String>
+
+    <!-- Status Text -->
+    <x:String x:Key="Status_Running">En ejecución</x:String>
+    <x:String x:Key="Status_Ready">Listo</x:String>
+    <x:String x:Key="Status_UpdateAvailable">Actualización disponible</x:String>
+    <x:String x:Key="Status_NotDownloaded">No descargado</x:String>
+    <x:String x:Key="Status_Unknown">Desconocido</x:String>
+
+    <!-- Update Button -->
+    <x:String x:Key="BotView_Checking">Verificando...</x:String>
+    <x:String x:Key="BotView_UpdateButton">Actualizar</x:String>
+    <x:String x:Key="BotView_CheckUpdates">Buscar actualizaciones</x:String>
+
+    <!-- Download Progress -->
+    <x:String x:Key="Progress_Downloading">Descargando...</x:String>
+    <x:String x:Key="Progress_Initializing">Inicializando...</x:String>
+    <x:String x:Key="Progress_PleaseWait">Espere, no cierre la aplicación.</x:String>
+    <x:String x:Key="Progress_Stalled">Detenido</x:String>
+    <x:String x:Key="Progress_Calculating">Calculando...</x:String>
+
+    <!-- Dependency Status -->
+    <x:String x:Key="Dep_Checking">verificando</x:String>
+    <x:String x:Key="Dep_Installed">instalado</x:String>
+    <x:String x:Key="Dep_Missing">faltante</x:String>
+
+    <!-- Toast Messages -->
+    <x:String x:Key="Toast_InstanceCreated">Instancia creada</x:String>
+    <x:String x:Key="Toast_InstanceDeleted">Instancia eliminada</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Recuperado de la copia de seguridad</x:String>
+    <x:String x:Key="Toast_InstallingFfmpeg">Instalando ffmpeg...</x:String>
+    <x:String x:Key="Toast_InstallingYtdlp">Instalando yt-dlp...</x:String>
+    <x:String x:Key="Toast_ResumingBots">Reanudando {0} bot(s)...</x:String>
+</ResourceDictionary>

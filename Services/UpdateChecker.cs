@@ -1,10 +1,12 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using System.Diagnostics;
+using Serilog;
 using upeko.Models;
 
 namespace upeko.Services
@@ -43,6 +45,7 @@ namespace upeko.Services
         #region Properties and Fields
 
         private readonly HttpClient _httpClient;
+        private Task<string?>? _checkTask;
         private const string GitHubApiUrl = "https://api.github.com/repos/nadeko-bot/nadekobot/releases/latest";
 
         /// <summary>
@@ -59,12 +62,21 @@ namespace upeko.Services
         /// <summary>
         /// Event triggered during download progress.
         /// </summary>
-        public event Action<double, string>? OnDownloadProgress;
+        public event Action<DownloadProgressInfo>? OnDownloadProgress;
 
         /// <summary>
         /// Event triggered when download is complete.
         /// </summary>
         public event Action<bool, string>? OnDownloadComplete;
+
+        /// <summary>
+        /// Event triggered when download is cancelled.
+        /// </summary>
+        public event Action? OnDownloadCancelled;
+
+        private CancellationTokenSource? _downloadCts;
+
+        public bool IsDownloading => _downloadCts is not null;
 
         #endregion
 
@@ -122,7 +134,16 @@ namespace upeko.Services
         /// Checks for updates from GitHub API.
         /// </summary>
         /// <returns>Null if successful, error message if failed.</returns>
-        public async Task<string?> CheckForUpdatesAsync()
+        public Task<string?> CheckForUpdatesAsync()
+        {
+            if (_checkTask is { IsCompleted: false })
+                return _checkTask;
+
+            _checkTask = CheckForUpdatesCore();
+            return _checkTask;
+        }
+
+        private async Task<string?> CheckForUpdatesCore()
         {
             try
             {
@@ -133,27 +154,34 @@ namespace upeko.Services
                 if (newRelease != null && (LatestRelease == null || LatestRelease.TagName != newRelease.TagName))
                 {
                     LatestRelease = newRelease;
+                    Log.Information("New NadekoBot version found: {Version}", newRelease.TagName);
                     OnNewVersionFound?.Invoke(newRelease);
                 }
 
-                return null; // Success
+                Log.Information("Checked for NadekoBot updates, latest: {Version}", LatestVersion);
+                return null;
             }
             catch (Exception ex)
             {
-                return ex.ToString(); // Return error message
+                Log.Error(ex, "Failed to check for NadekoBot updates");
+                return ex.ToString();
             }
         }
 
-        /// <summary>
-        /// Downloads and installs the bot.
-        /// </summary>
-        /// <param name="botName">The name of the bot.</param>
-        /// <param name="botPath">The path where the bot should be installed.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        public void CancelDownload()
+        {
+            _downloadCts?.Cancel();
+        }
+
         public async Task<string?> DownloadAndInstallBotAsync(string botName, string botPath)
         {
             if (string.IsNullOrWhiteSpace(botPath))
                 throw new ArgumentNullException(nameof(botPath));
+
+            _downloadCts?.Dispose();
+            _downloadCts = new CancellationTokenSource();
+            var ct = _downloadCts.Token;
+            string? tempDir = null;
 
             try
             {
@@ -187,6 +215,31 @@ namespace upeko.Services
                     return $"Could not find download for {assetName}.";
                 }
 
+                // Check available disk space before downloading
+                var archiveSize = asset.Size > 0 ? asset.Size : 100_000_000L;
+                var requiredBytes = archiveSize * 4 + 100_000_000L;
+                try
+                {
+                    var fullPath = Path.GetFullPath(botPath);
+                    var root = Path.GetPathRoot(fullPath);
+                    if (!string.IsNullOrEmpty(root))
+                    {
+                        var driveInfo = new DriveInfo(root);
+                        if (driveInfo.AvailableFreeSpace < requiredBytes)
+                        {
+                            var required = requiredBytes / 1_048_576.0;
+                            var available = driveInfo.AvailableFreeSpace / 1_048_576.0;
+                            OnDownloadComplete?.Invoke(false,
+                                $"Not enough disk space. Required: {required:F0} MB, Available: {available:F0} MB.");
+                            return $"Not enough disk space. Required: {required:F0} MB, Available: {available:F0} MB. Free up space or change the install path.";
+                        }
+                    }
+                }
+                catch
+                {
+                    // If we can't check disk space, proceed with download anyway
+                }
+
                 // Create a temporary directory for the download
                 // this is done this way to avoid issues on windows
                 // as Directory.Move doesn't work across drives, probably
@@ -196,15 +249,18 @@ namespace upeko.Services
                         "What are you doing? Do not install the bot in the root folder. Change directory first." +
                         "If you delete the bot your system will be nuked.");
 
-                var tempDir = Path.Combine(botPath, "..", ".dl-" + Guid.NewGuid());
+                tempDir = Path.Combine(botPath, "..", ".dl-" + Guid.NewGuid());
                 Directory.CreateDirectory(tempDir);
 
                 // Download the file
                 var downloadPath = Path.Combine(tempDir, assetName);
-                OnDownloadProgress?.Invoke(0, $"Downloading {LatestRelease.TagName}...");
+                OnDownloadProgress?.Invoke(new DownloadProgressInfo(0, 0, 0, null, null,
+                    $"Downloading {LatestRelease.TagName}..."));
+
+                ct.ThrowIfCancellationRequested();
 
                 using (var response =
-                       await _httpClient.GetAsync(asset.DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                       await _httpClient.GetAsync(asset.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, ct))
                 {
                     response.EnsureSuccessStatusCode();
 
@@ -221,26 +277,60 @@ namespace upeko.Services
                         long totalBytesRead = 0;
                         int bytesRead;
 
-                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        var sw = Stopwatch.StartNew();
+                        double smoothedSpeed = 0;
+                        long lastReportBytes = 0;
+                        double lastReportTime = 0;
+                        const double emaAlpha = 0.3;
+                        const double updateIntervalSec = 0.5;
+                        const double warmupSec = 3.0;
+
+                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
                         {
-                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            await fileStream.WriteAsync(buffer, 0, bytesRead, ct);
                             totalBytesRead += bytesRead;
 
-                            if (totalBytes.HasValue)
+                            var elapsed = sw.Elapsed.TotalSeconds;
+                            if (elapsed - lastReportTime < updateIntervalSec)
+                                continue;
+
+                            var intervalBytes = totalBytesRead - lastReportBytes;
+                            var intervalSec = elapsed - lastReportTime;
+                            var instantSpeed = intervalBytes / intervalSec;
+
+                            smoothedSpeed = smoothedSpeed == 0
+                                ? instantSpeed
+                                : emaAlpha * instantSpeed + (1 - emaAlpha) * smoothedSpeed;
+
+                            lastReportBytes = totalBytesRead;
+                            lastReportTime = elapsed;
+
+                            var progress = totalBytes.HasValue
+                                ? (double)totalBytesRead / totalBytes.Value
+                                : 0;
+
+                            double? eta = null;
+                            if (elapsed >= warmupSec && smoothedSpeed > 0 && totalBytes.HasValue)
                             {
-                                var progress = (double)totalBytesRead / totalBytes.Value;
-                                OnDownloadProgress?.Invoke(progress,
-                                    $"Downloading {LatestRelease.TagName}... {Math.Round(progress * 100)}%");
+                                var remaining = totalBytes.Value - totalBytesRead;
+                                eta = remaining / smoothedSpeed;
                             }
+
+                            OnDownloadProgress?.Invoke(new DownloadProgressInfo(
+                                progress, smoothedSpeed, totalBytesRead, totalBytes, eta,
+                                $"Downloading {LatestRelease!.TagName}..."));
                         }
                     }
                 }
 
-                OnDownloadProgress?.Invoke(1, "Download complete. Extracting...");
+                OnDownloadProgress?.Invoke(new DownloadProgressInfo(1, 0, 0, null, null,
+                    "Download complete. Extracting..."));
 
                 // Extract the downloaded file
                 var extractPath = Path.Combine(tempDir, "extract");
                 Directory.CreateDirectory(extractPath);
+
+                ct.ThrowIfCancellationRequested();
 
                 if (extension == ".zip")
                 {
@@ -248,7 +338,6 @@ namespace upeko.Services
                 }
                 else
                 {
-                    // For tar.gz, we need to use a process since .NET doesn't have built-in tar.gz extraction
                     using var process = new Process();
                     process.StartInfo = new ProcessStartInfo
                     {
@@ -261,14 +350,13 @@ namespace upeko.Services
 
                     process.Start();
                     var error = await process.StandardError.ReadToEndAsync();
-                    await process.WaitForExitAsync();
+                    await process.WaitForExitAsync(ct);
 
                     if (process.ExitCode != 0)
                     {
                         return $"Error extracting tar.gz: {error}";
                     }
 
-                    // Make NadekoBot executable after downloading
                     var nadekoPath = Path.Combine(extractPath, "NadekoBot");
 
                     using var chmodProcess = new Process();
@@ -281,10 +369,11 @@ namespace upeko.Services
                     };
 
                     chmodProcess.Start();
-                    await chmodProcess.WaitForExitAsync();
+                    await chmodProcess.WaitForExitAsync(ct);
                 }
 
-                OnDownloadProgress?.Invoke(1, "Extraction complete. Installing...");
+                OnDownloadProgress?.Invoke(new DownloadProgressInfo(1, 0, 0, null, null,
+                    "Extraction complete. Installing..."));
 
 
                 var backupPath = Path.GetFullPath(Path.Combine(botPath, "..", $".old-{botName}"));
@@ -328,19 +417,49 @@ namespace upeko.Services
                 }
 
                 OnDownloadComplete?.Invoke(true, LatestVersion);
-                return null; // Success
+                return null;
+            }
+            catch (OperationCanceledException)
+            {
+                CleanupTempDir(tempDir);
+                OnDownloadCancelled?.Invoke();
+                return "Download cancelled.";
             }
             catch (Exception ex)
             {
+                CleanupTempDir(tempDir);
                 OnDownloadComplete?.Invoke(false, ex.Message);
                 return ex.ToString();
+            }
+            finally
+            {
+                _downloadCts?.Dispose();
+                _downloadCts = null;
             }
         }
 
 
-        /// <summary>
-        /// Recursively copies a directory.
-        /// </summary>
+        private static void CleanupTempDir(string? tempDir)
+        {
+            if (tempDir is null || !Directory.Exists(tempDir))
+                return;
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+
+        public static void CleanupOrphanedTempDirs(string botsParentDir)
+        {
+            if (!Directory.Exists(botsParentDir))
+                return;
+            try
+            {
+                foreach (var dir in Directory.GetDirectories(botsParentDir, ".dl-*"))
+                {
+                    try { Directory.Delete(dir, true); } catch { }
+                }
+            }
+            catch { }
+        }
+
         private void CopyDirectory(string sourceDir, string destinationDir)
         {
             // Create the destination directory if it doesn't exist

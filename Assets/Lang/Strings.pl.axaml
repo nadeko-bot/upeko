@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+    <!-- App / MainWindow -->
+    <x:String x:Key="App_Name">Upeko</x:String>
+    <x:String x:Key="MainWindow_Title">Upeko — Menedżer botów</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">Minimalizuj do zasobnika przy zamykaniu</x:String>
+    <x:String x:Key="MainWindow_ToggleThemeTip">Zmień motyw</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">Dołącz do Discorda Nadeko Bot</x:String>
+    <x:String x:Key="MainWindow_NewerVersion">Nowsza wersja</x:String>
+    <x:String x:Key="MainWindow_NewerVersionTip">Kliknij, aby pobrać najnowszą wersję Upeko</x:String>
+
+    <!-- Delete Modal -->
+    <x:String x:Key="Modal_DeleteTitle">Usuń instancję</x:String>
+    <x:String x:Key="Modal_DeletePrefix">Czy na pewno chcesz usunąć </x:String>
+    <x:String x:Key="Modal_DeleteSuffix">? Tej operacji nie można cofnąć.</x:String>
+    <x:String x:Key="Modal_Cancel">Anuluj</x:String>
+    <x:String x:Key="Modal_Delete">Usuń</x:String>
+
+    <!-- Exit Modal -->
+    <x:String x:Key="Modal_ExitTitle">Boty nadal działają</x:String>
+    <x:String x:Key="Modal_ExitSuffix"> bot(ów) nadal działa. Zamknięcie Upeko zatrzyma wszystkie uruchomione boty. Czy na pewno chcesz wyjść?</x:String>
+    <x:String x:Key="Modal_QuitAnyway">Wyjdź mimo to</x:String>
+
+    <!-- Tray -->
+    <x:String x:Key="Tray_Show">Pokaż Upeko</x:String>
+    <x:String x:Key="Tray_Exit">Wyjdź</x:String>
+    <x:String x:Key="Tray_Tooltip">Upeko</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko zostało przeniesione do zasobnika i będzie działać w tle</x:String>
+
+    <!-- Bot List View -->
+    <x:String x:Key="BotList_PageTitle">Instancje</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Zarządzaj wdrożeniami NadekoBot</x:String>
+    <x:String x:Key="BotList_Changelog">Dziennik zmian</x:String>
+    <x:String x:Key="BotList_AddInstance">Dodaj instancję</x:String>
+    <x:String x:Key="BotList_Start">Uruchom</x:String>
+    <x:String x:Key="BotList_Stop">Zatrzymaj</x:String>
+    <x:String x:Key="BotList_Download">Pobierz</x:String>
+    <x:String x:Key="BotList_Update">Aktualizuj</x:String>
+    <x:String x:Key="BotList_EmptyTitle">Nie znaleziono instancji</x:String>
+    <x:String x:Key="BotList_EmptySubtitle">Zacznij od utworzenia nowej instancji bota.</x:String>
+    <x:String x:Key="BotList_CreateInstance">Utwórz instancję</x:String>
+
+    <!-- Bot View -->
+    <x:String x:Key="BotView_BackToInstances">Powrót do instancji</x:String>
+    <x:String x:Key="BotView_ChangeAvatarTip">Kliknij, aby zmienić avatar</x:String>
+    <x:String x:Key="BotView_ClickToRenameTip">Kliknij, aby zmienić nazwę</x:String>
+    <x:String x:Key="BotView_SaveTip">Zapisz</x:String>
+    <x:String x:Key="BotView_CancelTip">Anuluj</x:String>
+    <x:String x:Key="BotView_Configuration">Konfiguracja</x:String>
+    <x:String x:Key="BotView_InstallPath">ŚCIEŻKA INSTALACJI</x:String>
+    <x:String x:Key="BotView_Browse">Przeglądaj</x:String>
+    <x:String x:Key="BotView_Actions">Akcje</x:String>
+    <x:String x:Key="BotView_StopInstance">Zatrzymaj instancję</x:String>
+    <x:String x:Key="BotView_Start">Uruchom</x:String>
+    <x:String x:Key="BotView_DownloadInstall">Pobierz i zainstaluj</x:String>
+    <x:String x:Key="BotView_CancelDownload">Anuluj pobieranie</x:String>
+    <x:String x:Key="BotView_Shortcuts">Skróty</x:String>
+    <x:String x:Key="BotView_DataFolder">Folder danych</x:String>
+    <x:String x:Key="BotView_OpenInFileManager">Otwórz w menedżerze plików</x:String>
+    <x:String x:Key="BotView_OpenConfiguration">Otwórz konfigurację</x:String>
+    <x:String x:Key="BotView_DangerZone">STREFA ZAGROŻENIA</x:String>
+    <x:String x:Key="BotView_DangerDescription">Usunięcie tej instancji spowoduje usunięcie wszystkich powiązanych danych i plików konfiguracyjnych.</x:String>
+    <x:String x:Key="BotView_DeleteInstance">Usuń instancję</x:String>
+    <x:String x:Key="BotView_SelectBotPath">Wybierz ścieżkę bota</x:String>
+    <x:String x:Key="BotView_SelectAvatarImage">Wybierz obraz avatara</x:String>
+    <x:String x:Key="BotView_ImageFiles">Pliki graficzne</x:String>
+
+    <!-- Status Text -->
+    <x:String x:Key="Status_Running">Działa</x:String>
+    <x:String x:Key="Status_Ready">Gotowy</x:String>
+    <x:String x:Key="Status_UpdateAvailable">Dostępna aktualizacja</x:String>
+    <x:String x:Key="Status_NotDownloaded">Nie pobrano</x:String>
+    <x:String x:Key="Status_Unknown">Nieznany</x:String>
+
+    <!-- Update Button -->
+    <x:String x:Key="BotView_Checking">Sprawdzanie...</x:String>
+    <x:String x:Key="BotView_UpdateButton">Aktualizuj</x:String>
+    <x:String x:Key="BotView_CheckUpdates">Sprawdź aktualizacje</x:String>
+
+    <!-- Download Progress -->
+    <x:String x:Key="Progress_Downloading">Pobieranie...</x:String>
+    <x:String x:Key="Progress_Initializing">Inicjalizacja...</x:String>
+    <x:String x:Key="Progress_PleaseWait">Proszę czekać, nie zamykaj aplikacji.</x:String>
+    <x:String x:Key="Progress_Stalled">Wstrzymano</x:String>
+    <x:String x:Key="Progress_Calculating">Obliczanie...</x:String>
+
+    <!-- Dependency Status -->
+    <x:String x:Key="Dep_Checking">sprawdzanie</x:String>
+    <x:String x:Key="Dep_Installed">zainstalowany</x:String>
+    <x:String x:Key="Dep_Missing">brak</x:String>
+
+    <!-- Toast Messages -->
+    <x:String x:Key="Toast_InstanceCreated">Instancja utworzona</x:String>
+    <x:String x:Key="Toast_InstanceDeleted">Instancja usunięta</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Odzyskano z kopii zapasowej</x:String>
+    <x:String x:Key="Toast_InstallingFfmpeg">Instalowanie ffmpeg...</x:String>
+    <x:String x:Key="Toast_InstallingYtdlp">Instalowanie yt-dlp...</x:String>
+    <x:String x:Key="Toast_ResumingBots">Wznawianie {0} bot(ów)...</x:String>
+</ResourceDictionary>
