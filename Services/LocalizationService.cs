@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 
 namespace upeko.Services;
 
@@ -23,7 +23,7 @@ public class LocalizationService : INotifyPropertyChanged
     };
 
     private string _currentLanguage = "en-US";
-    private IResourceDictionary? _currentDictionary;
+    private IResourceProvider? _currentDictionary;
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action? LanguageChanged;
@@ -66,22 +66,17 @@ public class LocalizationService : INotifyPropertyChanged
         if (_currentDictionary is not null)
             app.Resources.MergedDictionaries.Remove(_currentDictionary);
 
-        var uri = new Uri($"avares://upeko/Assets/Lang/Strings.{languageCode}.axaml");
-        try
+        var key = $"Lang_{languageCode}";
+        if (app.Resources.TryGetResource(key, null, out var resource)
+            && resource is IResourceProvider dict)
         {
-#pragma warning disable IL2026
-            var dict = (IResourceDictionary)AvaloniaXamlLoader.Load(uri);
-#pragma warning restore IL2026
             app.Resources.MergedDictionaries.Add(dict);
             _currentDictionary = dict;
         }
-        catch
+        else if (languageCode != "en-US")
         {
-            if (languageCode != "en-US")
-            {
-                SetLanguage("en-US");
-                return;
-            }
+            SetLanguage("en-US");
+            return;
         }
 
         CurrentLanguage = languageCode;

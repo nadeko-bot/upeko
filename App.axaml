@@ -10,6 +10,13 @@
 
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceInclude x:Key="Lang_en-US" Source="avares://upeko/Assets/Lang/Strings.en-US.axaml"/>
+            <ResourceInclude x:Key="Lang_fr" Source="avares://upeko/Assets/Lang/Strings.fr.axaml"/>
+            <ResourceInclude x:Key="Lang_de" Source="avares://upeko/Assets/Lang/Strings.de.axaml"/>
+            <ResourceInclude x:Key="Lang_es" Source="avares://upeko/Assets/Lang/Strings.es.axaml"/>
+            <ResourceInclude x:Key="Lang_pl" Source="avares://upeko/Assets/Lang/Strings.pl.axaml"/>
+            <ResourceInclude x:Key="Lang_ru" Source="avares://upeko/Assets/Lang/Strings.ru.axaml"/>
+            <ResourceInclude x:Key="Lang_zh-Hans" Source="avares://upeko/Assets/Lang/Strings.zh-Hans.axaml"/>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="AppBackground" Color="#ffffff"/>
