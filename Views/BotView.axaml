@@ -301,7 +301,8 @@
                         <Border Padding="8">
                             <StackPanel Spacing="0">
                                 <!-- Data Folder -->
-                                <Button Classes="shortcut-btn" Command="{Binding OpenFolderCommand}">
+                                <Button Classes="shortcut-btn" Command="{Binding OpenFolderCommand}"
+                                    IsEnabled="{Binding IsBotDownloaded}">
                                     <Grid ColumnDefinitions="Auto,*">
                                         <Viewbox Grid.Column="0" Width="20" Height="20" Margin="0,0,12,0">
                                             <Path Data="M3 7V17A2 2 0 0 0 5 19H19A2 2 0 0 0 21 17V9A2 2 0 0 0 19 7H13L11 5H5A2 2 0 0 0 3 7Z"
@@ -317,7 +318,8 @@
                                     </Grid>
                                 </Button>
                                 <!-- Creds -->
-                                <Button Classes="shortcut-btn" Command="{Binding OpenCredsCommand}">
+                                <Button Classes="shortcut-btn" Command="{Binding OpenCredsCommand}"
+                                    IsEnabled="{Binding IsBotDownloaded}">
                                     <Grid ColumnDefinitions="Auto,*">
                                         <Viewbox Grid.Column="0" Width="20" Height="20" Margin="0,0,12,0">
                                             <Path Data="M9 12H15M9 16H15M17 21H7A2 2 0 0 1 5 19V5A2 2 0 0 1 7 3H12.586A1 1 0 0 1 13.293 3.293L18.707 8.707A1 1 0 0 1 19 9.414V19A2 2 0 0 1 17 21Z"
