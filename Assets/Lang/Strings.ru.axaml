@@ -97,5 +97,6 @@
     <x:String x:Key="Toast_RecoveredFromBackup">Восстановлено из резервной копии</x:String>
     <x:String x:Key="Toast_InstallingFfmpeg">Установка ffmpeg...</x:String>
     <x:String x:Key="Toast_InstallingYtdlp">Установка yt-dlp...</x:String>
+    <x:String x:Key="Toast_InstallingJs">Установка deno...</x:String>
     <x:String x:Key="Toast_ResumingBots">Возобновление {0} бот(ов)...</x:String>
 </ResourceDictionary>

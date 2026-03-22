@@ -53,6 +53,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _ytdlpStatus = "checking";
 
     [ObservableProperty]
+    private string _jsStatus = "checking";
+
+    [ObservableProperty]
     private bool _isDeleteModalOpen;
 
     [ObservableProperty]
@@ -77,6 +80,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly BotListViewModel _botListViewModel;
     private readonly FfmpegDepViewModel _ffmpegViewModel;
     private readonly YtdlDepViewModel _ytdlpViewModel;
+    private readonly JsDepViewModel _jsDepViewModel;
     private DispatcherTimer? _toastTimer;
     private readonly string _currentVersion;
 
@@ -100,6 +104,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _ffmpegViewModel = new FfmpegDepViewModel();
         _ytdlpViewModel = new YtdlDepViewModel();
+        _jsDepViewModel = new JsDepViewModel();
 
         _botListViewModel = new BotListViewModel(this);
         _currentView = _botListViewModel;
@@ -123,6 +128,11 @@ public partial class MainWindowViewModel : ViewModelBase
             if (e.PropertyName == nameof(DepViewModel.StatusString))
                 YtdlpStatus = _ytdlpViewModel.StatusString;
         };
+        _jsDepViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(DepViewModel.StatusString))
+                JsStatus = _jsDepViewModel.StatusString;
+        };
 
         LocalizationService.Instance.LanguageChanged += OnLanguageChanged;
 
@@ -131,6 +141,7 @@ public partial class MainWindowViewModel : ViewModelBase
             await Task.Delay(1000);
             await _ffmpegViewModel.CheckAsync();
             await _ytdlpViewModel.CheckAsync();
+            await _jsDepViewModel.CheckAsync();
 
             await CheckForUpEkoUpdatesAsync();
         });
@@ -312,6 +323,11 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             ShowToast(Loc["Toast_InstallingYtdlp"], "info");
             _ = _ytdlpViewModel.InstallAsync();
+        }
+        else if (dep == "js" && _jsDepViewModel.IsNotInstalled)
+        {
+            ShowToast(Loc["Toast_InstallingJs"], "info");
+            _ = _jsDepViewModel.InstallAsync();
         }
     }
 

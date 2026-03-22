@@ -75,6 +75,18 @@
                             </StackPanel>
                         </Button>
 
+                        <!-- js runtime indicator -->
+                        <Button Classes="btn-ghost" Padding="6,4" MinHeight="0" MinWidth="0"
+                                Command="{Binding InstallDepCommand}" CommandParameter="js"
+                                Background="Transparent" BorderThickness="0" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8"
+                                         Fill="{Binding JsStatus, Converter={StaticResource DepDotColor}}"/>
+                                <TextBlock Text="js" FontSize="11"
+                                           Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                        </Button>
+
                         <!-- Minimize to Tray Toggle -->
                         <Button Classes="btn-ghost" Width="36" Height="36" Padding="0"
                                 Command="{Binding ToggleMinimizeToTrayCommand}"

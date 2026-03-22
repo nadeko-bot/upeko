@@ -97,5 +97,6 @@
     <x:String x:Key="Toast_RecoveredFromBackup">已从备份恢复</x:String>
     <x:String x:Key="Toast_InstallingFfmpeg">正在安装 ffmpeg...</x:String>
     <x:String x:Key="Toast_InstallingYtdlp">正在安装 yt-dlp...</x:String>
+    <x:String x:Key="Toast_InstallingJs">正在安装 deno...</x:String>
     <x:String x:Key="Toast_ResumingBots">正在恢复 {0} 个机器人...</x:String>
 </ResourceDictionary>

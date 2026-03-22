@@ -97,5 +97,6 @@
     <x:String x:Key="Toast_RecoveredFromBackup">Recovered from backup</x:String>
     <x:String x:Key="Toast_InstallingFfmpeg">Installing ffmpeg...</x:String>
     <x:String x:Key="Toast_InstallingYtdlp">Installing yt-dlp...</x:String>
+    <x:String x:Key="Toast_InstallingJs">Installing deno...</x:String>
     <x:String x:Key="Toast_ResumingBots">Resuming {0} bot(s)...</x:String>
 </ResourceDictionary>

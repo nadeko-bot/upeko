@@ -97,5 +97,6 @@
     <x:String x:Key="Toast_RecoveredFromBackup">Aus Sicherung wiederhergestellt</x:String>
     <x:String x:Key="Toast_InstallingFfmpeg">ffmpeg wird installiert...</x:String>
     <x:String x:Key="Toast_InstallingYtdlp">yt-dlp wird installiert...</x:String>
+    <x:String x:Key="Toast_InstallingJs">Deno wird installiert...</x:String>
     <x:String x:Key="Toast_ResumingBots">{0} Bot(s) werden fortgesetzt...</x:String>
 </ResourceDictionary>
