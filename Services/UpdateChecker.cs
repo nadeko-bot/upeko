@@ -401,9 +401,26 @@ namespace upeko.Services
                 var oldDataPath = Path.Combine(backupPath, "data");
                 var newDataPath = Path.Combine(botPath, "data");
 
+                // Preserve the fresh data/lib from the new release before overwriting with user data
+                var newLibPath = Path.Combine(newDataPath, "lib");
+                string? tempLibPath = null;
+                if (Directory.Exists(newLibPath))
+                {
+                    tempLibPath = Path.Combine(botPath, ".tmp-lib");
+                    Directory.Move(newLibPath, tempLibPath);
+                }
+
                 if (Directory.Exists(oldDataPath))
                 {
                     CopyDirectory(oldDataPath, newDataPath);
+                }
+
+                // Restore the fresh data/lib from the new release, overwriting old DLLs
+                if (tempLibPath != null && Directory.Exists(tempLibPath))
+                {
+                    if (Directory.Exists(newLibPath))
+                        Directory.Delete(newLibPath, true);
+                    Directory.Move(tempLibPath, newLibPath);
                 }
 
                 // Clean up the temporary directory
