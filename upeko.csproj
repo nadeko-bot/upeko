@@ -7,6 +7,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Version>1.0.3</Version>
+    <ApplicationIcon>Assets/upeko.ico</ApplicationIcon>
     
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>

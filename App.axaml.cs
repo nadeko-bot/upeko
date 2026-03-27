@@ -8,6 +8,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
 using upeko.Services;
 using upeko.ViewModels;
 using upeko.Views;
@@ -76,7 +77,7 @@ public partial class App : Application
 
         try
         {
-            _trayIcon.Icon = new WindowIcon("Assets/upeko.ico");
+            _trayIcon.Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://upeko/Assets/upeko.ico")));
         }
         catch
         {
