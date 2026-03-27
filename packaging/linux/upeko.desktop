@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Upeko
+Comment=Desktop bot manager for NadekoBot
+Icon=upeko
+Exec=upeko
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=nadeko;bot;discord;

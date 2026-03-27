@@ -53,12 +53,33 @@ jobs:
         cp publish-output/upeko upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}
         chmod +x upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}
 
+    - name: Create macOS .app bundle
+      if: startsWith(github.ref, 'refs/tags/') && contains(matrix.runtime, 'osx')
+      run: |
+        APP="Upeko.app"
+        mkdir -p "$APP/Contents/MacOS"
+        mkdir -p "$APP/Contents/Resources"
+        cp publish-output/upeko "$APP/Contents/MacOS/upeko"
+        chmod +x "$APP/Contents/MacOS/upeko"
+        cp packaging/osx/upeko.icns "$APP/Contents/Resources/upeko.icns"
+        sed "s/VERSION_PLACEHOLDER/${{ github.ref_name }}/g" packaging/osx/Info.plist > "$APP/Contents/Info.plist"
+        mkdir -p upeko-${{ matrix.runtime }}-app
+        cd upeko-${{ matrix.runtime }}-app
+        zip -r upeko-${{ matrix.runtime }}.app.zip "../$APP"
+
     - name: Upload Artifact
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: upeko-${{ matrix.runtime }}
         path: upeko-${{ matrix.runtime }}
+
+    - name: Upload macOS .app Artifact
+      if: startsWith(github.ref, 'refs/tags/') && contains(matrix.runtime, 'osx')
+      uses: actions/upload-artifact@v4
+      with:
+        name: upeko-${{ matrix.runtime }}-app
+        path: upeko-${{ matrix.runtime }}-app
 
   create-release:
     name: Create Release
@@ -91,3 +112,5 @@ jobs:
             artifacts/upeko-win-arm64/upeko-win-arm64.exe
             artifacts/upeko-osx-x64/upeko-osx-x64
             artifacts/upeko-osx-arm64/upeko-osx-arm64
+            artifacts/upeko-osx-x64-app/upeko-osx-x64.app.zip
+            artifacts/upeko-osx-arm64-app/upeko-osx-arm64.app.zip
