@@ -1,90 +1,83 @@
 # Upeko - NadekoBot Installer
 
-Cross-platform created to simplify the installation of NadekoBot(s).
-Built with .NET 8 and Avalonia UI.
-
+Upeko is a desktop app that installs, updates and runs [NadekoBot](https://nadeko.bot) for you.
+It works on Windows, macOS and Linux and is built with .NET 8 and Avalonia UI.
 
 ## Download
 
-Download the latest pre-built binaries for your operating system from the [RELEASES](https://github.com/nadeko-bot/upeko/releases/latest) page.
+Get the latest build for your system from the [releases page](https://github.com/nadeko-bot/upeko/releases/latest).
 
----
+| System | File |
+| --- | --- |
+| Windows | `upeko-win-x64.exe` (or `upeko-win-arm64.exe`) |
+| macOS | `upeko-osx-arm64.app.zip` for Apple Silicon, `upeko-osx-x64.app.zip` for Intel |
+| Linux | `upeko-linux-x64` (or `upeko-linux-arm64`); run `chmod +x` on it first |
 
 ## Features
 
-- **Multiple bots**: Install and manage multiple NadekoBot instances from one interface
-- **Updates**: Check for and download the latest NadekoBot versions
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Themes**: Support for light and dark themes
+- **Several bots**: install and manage any number of NadekoBot instances from one window.
+- **Updates**: see when a new NadekoBot version is out and update with one click. Your `data` folder (creds, database, configs) is kept.
+- **Music tools**: install ffmpeg, yt-dlp and a JavaScript runtime (deno) from the top bar.
+- **Runs in the background**: closing the window keeps Upeko in the system tray, and bots that were running start again the next time Upeko opens.
+- **Light and dark theme**, and 7 languages: English, Français, Deutsch, Español, Polski, Русский, 中文.
 
-## Usage Guide
+## First launch
 
-### First Launch
+1. Start Upeko.
+2. Click **Add Instance**. Upeko creates a bot in `Documents/upeko/<bot name>`. Open the bot and click **Browse** to pick another folder.
+3. Click **Download & Install**.
+4. Click **creds.yml** under *Shortcuts* and fill in your bot's credentials. The [creds guide](https://docs.nadeko.bot/creds-guide) explains each field.
+5. Click **Start**.
 
-1. Start Upeko application
-2. Click the **+** button to create a new bot 
-3. Click "Update" to download the latest version
-4. Once downloaded, click the **Note** icon above RUN to open the creds
-5. Fill in your bot credentials - [guide here](https://docs.nadeko.bot/creds-guide)
-6. Click "Start" to run your new bot
+### Music
 
-### Dependencies
+The dots at the top right show whether **ffmpeg**, **yt-dlp** and a **js** runtime (deno, bun or node) are installed: green means installed, orange means missing. Click a missing one to install it.
 
-At the top of the window, you will see `ffmpeg` and `yt-dlp` buttons. Click them to download the dependencies for your bot if you wish to use music features.
+- On Windows they go to `C:\ffmpeg`, `C:\yt-dlp` and `C:\deno`, and Upeko adds them to your user `PATH`.
+- On Linux they go to `~/.local/bin`.
+- On macOS, Upeko installs yt-dlp and deno. Install ffmpeg yourself with `brew install ffmpeg`.
 
-# Development
+## Where Upeko keeps its files
 
-If you want to build Upeko from source, follow these steps:
+| What | Where |
+| --- | --- |
+| Settings and bot list | `Documents/upeko/upeko.json`, with backups `upeko.json.bak.1` to `.bak.5` |
+| Logs | `Documents/upeko/logs/` |
+| Previous version of a bot after an update | `.old-<bot name>` next to the bot's folder |
 
-#### Prerequisites
+Removing an instance in Upeko does not delete the bot's folder.
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your system
+## Development
 
-### Build from Source
+You need the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (a newer SDK works too).
 
-#### Clone the repository
 ```bash
 git clone https://github.com/nadeko-bot/upeko.git
-```
-
-#### Build the application
-```bash
 cd upeko
-dotnet build
-```
-
-#### Run the application
-```bash
 dotnet run
 ```
 
+Release builds are trimmed single-file executables. Before a release, check that a trimmed build still works:
 
-### Requirements
+```bash
+dotnet publish -c Release -r linux-x64 --self-contained -o publish
+```
 
-- .NET 8 SDK
-- Visual Studio 2022, JetBrains Rider, or VS Code with C# extensions
+Pushing a tag (for example `1.2.0`) makes the GitHub workflow build all platforms and publish a release.
 
-### Project Structure
+### Project structure
 
-- `/Models`: Data models
-- `/ViewModels`: MVVM view models, most of the logic is here (contrary to MVVM pattern)
-- `/Views`: Avalonia UI views
-- `/Services`: Application services including UpdateChecker
+- `Views/`: Avalonia views (`.axaml`)
+- `ViewModels/`: view models; most of the app's logic lives here
+- `ViewModels/MusicPrereqs/`: ffmpeg, yt-dlp and deno checks and installers
+- `Services/`: NadekoBot downloads and updates (`UpdateChecker`), settings (`JsonBotRepository`), translations
+- `Assets/Lang/`: UI strings, one file per language. Add a new string to every file.
+- `packaging/`: macOS app bundle and Linux `.desktop` files
 
-## Troubleshooting
+## Help
 
-Join our [discord](https://discord.nadeko.bot) and ask for help in the `#help` channel.
+Ask in the `#help` channel of the [NadekoBot Discord](https://discord.nadeko.bot).
 
 ## License
 
-GPLv3 - See the [LICENSE](LICENSE.md) file for details.
-
-## Links
-
-- [NadekoBot](https://nadeko.bot/) - The Discord bot that this manager is built for
-
----
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+GPLv3. See [LICENSE.md](LICENSE.md).
