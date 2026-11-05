@@ -12,7 +12,6 @@
         <conv:StatusToDotColorConverter x:Key="StatusDotColor"/>
         <conv:StatusToPillBackgroundConverter x:Key="StatusPillBg"/>
         <conv:StatusToPillForegroundConverter x:Key="StatusPillFg"/>
-        <conv:NullToStringConverter x:Key="NullToStr"/>
     </UserControl.Resources>
 
     <StackPanel Spacing="0">
@@ -43,11 +42,15 @@
                         ClipToBounds="True">
                     <Panel>
                         <TextBlock Text="{Binding DisplayInitial}"
+                                   IsVisible="{Binding !HasAvatar}"
                                    FontSize="28" FontWeight="Bold"
                                    Foreground="{DynamicResource TextTertiary}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
-                        <Button Background="Transparent"
+                        <Image Source="{Binding AvatarImage}"
+                               IsVisible="{Binding HasAvatar}"
+                               Stretch="UniformToFill"/>
+                        <Button Classes="btn-icon"
                                 Width="80" Height="80"
                                 Padding="0"
                                 BorderThickness="0"
@@ -59,7 +62,7 @@
                 </Border>
 
                 <!-- Name + Meta -->
-                <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="4">
+                <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="4" Margin="0,0,16,0">
                     <!-- Version pill -->
                     <Border IsVisible="{Binding IsBotDownloaded}"
                             BorderBrush="{DynamicResource BorderColorStrong}"
@@ -77,6 +80,7 @@
                     <Grid>
                         <!-- Regular name display (click to edit) -->
                         <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource TextPrimary}"
                                    Margin="0,0,0,2"
                                    IsVisible="{Binding !IsEditingName}"
@@ -172,10 +176,12 @@
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBox Grid.Column="0" Classes="input" IsReadOnly="True"
                                                  Text="{Binding BotPath}"
+                                                 ToolTip.Tip="{Binding BotPath}"
                                                  FontFamily="JetBrains Mono,Consolas,monospace"
                                                  FontSize="11"/>
                                         <Button Grid.Column="1" Classes="btn-ghost" Content="{DynamicResource BotView_Browse}"
                                                 Command="{Binding BrowsePathCommand}"
+                                                IsEnabled="{Binding CanChangePath}"
                                                 Margin="8,0,0,0"/>
                                     </Grid>
                                 </StackPanel>

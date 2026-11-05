@@ -14,13 +14,12 @@
     <!-- Delete Modal -->
     <x:String x:Key="Modal_DeleteTitle">删除实例</x:String>
     <x:String x:Key="Modal_DeletePrefix">确定要删除 </x:String>
-    <x:String x:Key="Modal_DeleteSuffix"> 吗？此操作无法撤消。</x:String>
+    <x:String x:Key="Modal_DeleteSuffix"> 吗？此操作无法撤销。</x:String>
     <x:String x:Key="Modal_Cancel">取消</x:String>
     <x:String x:Key="Modal_Delete">删除</x:String>
 
     <!-- Exit Modal -->
     <x:String x:Key="Modal_ExitTitle">机器人仍在运行</x:String>
-    <x:String x:Key="Modal_ExitSuffix"> 个机器人仍在运行。关闭 Upeko 将停止所有正在运行的机器人。确定要退出吗？</x:String>
     <x:String x:Key="Modal_QuitAnyway">仍然退出</x:String>
 
     <!-- Tray -->
@@ -31,7 +30,7 @@
 
     <!-- Bot List View -->
     <x:String x:Key="BotList_PageTitle">实例</x:String>
-    <x:String x:Key="BotList_PageSubtitle">管理您的 NadekoBot 部署</x:String>
+    <x:String x:Key="BotList_PageSubtitle">管理您的 NadekoBot 实例</x:String>
     <x:String x:Key="BotList_Changelog">更新日志</x:String>
     <x:String x:Key="BotList_AddInstance">添加实例</x:String>
     <x:String x:Key="BotList_Start">启动</x:String>
@@ -56,12 +55,12 @@
     <x:String x:Key="BotView_Start">启动</x:String>
     <x:String x:Key="BotView_DownloadInstall">下载并安装</x:String>
     <x:String x:Key="BotView_CancelDownload">取消下载</x:String>
-    <x:String x:Key="BotView_Shortcuts">快捷方式</x:String>
+    <x:String x:Key="BotView_Shortcuts">快捷操作</x:String>
     <x:String x:Key="BotView_DataFolder">数据文件夹</x:String>
     <x:String x:Key="BotView_OpenInFileManager">在文件管理器中打开</x:String>
     <x:String x:Key="BotView_OpenConfiguration">打开配置</x:String>
     <x:String x:Key="BotView_DangerZone">危险区域</x:String>
-    <x:String x:Key="BotView_DangerDescription">删除此实例将移除所有相关数据和配置文件。</x:String>
+    <x:String x:Key="BotView_DangerDescription">从 Upeko 中移除此实例。机器人的文件仍保留在磁盘上，如不再需要，请自行删除其文件夹。</x:String>
     <x:String x:Key="BotView_DeleteInstance">删除实例</x:String>
     <x:String x:Key="BotView_SelectBotPath">选择机器人路径</x:String>
     <x:String x:Key="BotView_SelectAvatarImage">选择头像图片</x:String>
@@ -81,22 +80,45 @@
 
     <!-- Download Progress -->
     <x:String x:Key="Progress_Downloading">下载中...</x:String>
-    <x:String x:Key="Progress_Initializing">初始化中...</x:String>
     <x:String x:Key="Progress_PleaseWait">请等待，不要关闭应用程序。</x:String>
-    <x:String x:Key="Progress_Stalled">已暂停</x:String>
+    <x:String x:Key="Progress_Stalled">已停滞</x:String>
     <x:String x:Key="Progress_Calculating">计算中...</x:String>
 
     <!-- Dependency Status -->
-    <x:String x:Key="Dep_Checking">检查中</x:String>
-    <x:String x:Key="Dep_Installed">已安装</x:String>
-    <x:String x:Key="Dep_Missing">缺失</x:String>
 
     <!-- Toast Messages -->
     <x:String x:Key="Toast_InstanceCreated">实例已创建</x:String>
     <x:String x:Key="Toast_InstanceDeleted">实例已删除</x:String>
-    <x:String x:Key="Toast_RecoveredFromBackup">已从备份恢复</x:String>
-    <x:String x:Key="Toast_InstallingFfmpeg">正在安装 ffmpeg...</x:String>
-    <x:String x:Key="Toast_InstallingYtdlp">正在安装 yt-dlp...</x:String>
-    <x:String x:Key="Toast_InstallingJs">正在安装 deno...</x:String>
-    <x:String x:Key="Toast_ResumingBots">正在恢复 {0} 个机器人...</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">设置已损坏，已从备份中恢复</x:String>
+    <x:String x:Key="Toast_ResumingBots">正在启动上次运行的机器人：{0} 个</x:String>
+
+    <!-- Notices and errors -->
+    <x:String x:Key="Modal_ExitMessage">正在运行的机器人：{0} 个。退出 Upeko 会停止它们，下次打开 Upeko 时它们会重新启动。</x:String>
+    <x:String x:Key="Progress_DownloadingVersion">正在下载 NadekoBot {0}...</x:String>
+    <x:String x:Key="Progress_Extracting">正在解压...</x:String>
+    <x:String x:Key="Progress_Installing">正在安装...</x:String>
+    <x:String x:Key="BotView_DiskSpace">需要约 {0} · 可用 {1}</x:String>
+    <x:String x:Key="Dep_TipInstalled">{0} 已安装</x:String>
+    <x:String x:Key="Dep_TipMissing">缺少 {0}。点击安装（音乐功能需要）。</x:String>
+    <x:String x:Key="Dep_TipChecking">正在检查 {0}...</x:String>
+    <x:String x:Key="Toast_InstallingDep">正在安装 {0}...</x:String>
+    <x:String x:Key="Toast_DepInstalled">{0} 已安装</x:String>
+    <x:String x:Key="Toast_DepInstallFailed">无法安装 {0}。详情请查看日志。</x:String>
+    <x:String x:Key="Toast_FfmpegMacBrew">请使用 Homebrew 安装 ffmpeg：brew install ffmpeg</x:String>
+    <x:String x:Key="Toast_StartFailed">无法启动 {0}：{1}</x:String>
+    <x:String x:Key="Toast_BotExited">{0} 意外停止</x:String>
+    <x:String x:Key="Toast_CredsMissing">未找到 creds_example.yml。请先下载机器人。</x:String>
+    <x:String x:Key="Toast_OpenFailed">无法打开：{0}</x:String>
+    <x:String x:Key="Toast_UpdateCheckFailed">无法检查更新：{0}</x:String>
+    <x:String x:Key="Toast_UpToDate">NadekoBot 已是最新版本</x:String>
+    <x:String x:Key="Toast_StopBeforeUpdate">请先停止机器人再更新</x:String>
+    <x:String x:Key="Toast_BotInstalled">{0} 已就绪（v{1}）</x:String>
+    <x:String x:Key="Toast_DownloadCancelled">已取消下载</x:String>
+    <x:String x:Key="Toast_DownloadFailed">下载失败：{0}</x:String>
+    <x:String x:Key="Error_DownloadInProgress">另一个下载正在进行，请等待其完成。</x:String>
+    <x:String x:Key="Error_NoAssets">最新的 NadekoBot 版本尚无可下载文件，请稍后再试。</x:String>
+    <x:String x:Key="Error_NoAssetForPlatform">最新的 NadekoBot 版本没有适用于此系统的构建（{0}）。</x:String>
+    <x:String x:Key="Error_RootFolder">请为机器人选择一个文件夹，而不是磁盘根目录。</x:String>
+    <x:String x:Key="Error_NotEnoughSpace">磁盘空间不足：需要 {0}，可用 {1}。请释放空间或选择其他文件夹。</x:String>
+    <x:String x:Key="Error_Extract">无法解压下载的文件：{0}</x:String>
 </ResourceDictionary>

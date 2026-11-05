@@ -24,7 +24,7 @@
                     <SolidColorBrush x:Key="TertiaryBackground" Color="#f5f5f5"/>
                     <SolidColorBrush x:Key="TextPrimary" Color="#000000"/>
                     <SolidColorBrush x:Key="TextSecondary" Color="#666666"/>
-                    <SolidColorBrush x:Key="TextTertiary" Color="#999999"/>
+                    <SolidColorBrush x:Key="TextTertiary" Color="#8a8a8a"/>
                     <SolidColorBrush x:Key="BorderColor" Color="#eaeaea"/>
                     <SolidColorBrush x:Key="BorderColorStrong" Color="#d6d6d6"/>
                     <SolidColorBrush x:Key="AccentColor" Color="#0070f3"/>
@@ -46,7 +46,7 @@
                     <SolidColorBrush x:Key="TertiaryBackground" Color="#1a1a1a"/>
                     <SolidColorBrush x:Key="TextPrimary" Color="#ffffff"/>
                     <SolidColorBrush x:Key="TextSecondary" Color="#888888"/>
-                    <SolidColorBrush x:Key="TextTertiary" Color="#555555"/>
+                    <SolidColorBrush x:Key="TextTertiary" Color="#6e6e6e"/>
                     <SolidColorBrush x:Key="BorderColor" Color="#222222"/>
                     <SolidColorBrush x:Key="BorderColorStrong" Color="#333333"/>
                     <SolidColorBrush x:Key="AccentColor" Color="#3291ff"/>
@@ -55,7 +55,7 @@
                     <SolidColorBrush x:Key="ErrorColor" Color="#e5484d"/>
                     <SolidColorBrush x:Key="HoverBackground" Color="#0dffffff"/>
                     <SolidColorBrush x:Key="CardShadowColor" Color="#66000000"/>
-                    <SolidColorBrush x:Key="ModalBackdrop" Color="#66000000"/>
+                    <SolidColorBrush x:Key="ModalBackdrop" Color="#99000000"/>
                     <SolidColorBrush x:Key="BtnSecondaryBg" Color="#ffffff"/>
                     <SolidColorBrush x:Key="BtnSecondaryFg" Color="#000000"/>
                     <SolidColorBrush x:Key="AccentBgSubtle" Color="#193291ff"/>
@@ -233,6 +233,42 @@
         </Style>
         <Style Selector="Button.btn-icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+        </Style>
+
+        <!-- Disabled flat buttons fade instead of getting Fluent's grey fill -->
+        <Style Selector="Button.btn-ghost:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.shortcut-btn:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.btn-ghost-sm:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button.btn-ghost:disabled, Button.shortcut-btn:disabled, Button.btn-ghost-sm:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
+
+        <!-- Toast (a button so a click dismisses it) -->
+        <Style Selector="Button.toast">
+            <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColorStrong}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.toast:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColorStrong}"/>
+        </Style>
+        <Style Selector="Button.toast:pressed">
+            <Setter Property="RenderTransform" Value="none"/>
+        </Style>
+
+        <!-- "Newer version" pill in the footer -->
+        <Style Selector="Button.update-pill">
+            <Setter Property="Background" Value="#2f9e44"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.update-pill:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#2b8a3e"/>
+            <Setter Property="Foreground" Value="White"/>
         </Style>
 
         <!-- Small danger button -->

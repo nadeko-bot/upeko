@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Reflection;
@@ -18,10 +17,17 @@ namespace upeko.ViewModels;
 
 public record LanguageOption(string Code, string DisplayName);
 
+public enum ToastKind
+{
+    Info,
+    Success,
+    Error,
+}
+
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
-    private const string UpEkoReleaseUrl = "https://github.com/nadeko-bot/upeko/releases";
+    private const string UpEkoReleaseUrl = "https://github.com/nadeko-bot/upeko/releases/latest";
+    private const string DiscordUrl = "https://discord.gg/nadekobot";
 
     private static readonly System.Net.Http.HttpClient _httpClient = new()
     {
@@ -44,27 +50,20 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isToastVisible;
 
     [ObservableProperty]
-    private string _toastType = "info";
-
-    [ObservableProperty]
-    private string _ffmpegStatus = "checking";
-
-    [ObservableProperty]
-    private string _ytdlpStatus = "checking";
-
-    [ObservableProperty]
-    private string _jsStatus = "checking";
+    private ToastKind _toastKind = ToastKind.Info;
 
     [ObservableProperty]
     private bool _isDeleteModalOpen;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DeleteModalMessage))]
     private string _deleteModalBotName = string.Empty;
 
     [ObservableProperty]
     private bool _isExitModalOpen;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExitModalMessage))]
     private int _runningBotCount;
 
     [ObservableProperty]
@@ -77,23 +76,23 @@ public partial class MainWindowViewModel : ViewModelBase
         .Select(kv => new LanguageOption(kv.Key, kv.Value))
         .ToList();
 
-    private readonly BotListViewModel _botListViewModel;
-    private readonly FfmpegDepViewModel _ffmpegViewModel;
-    private readonly YtdlDepViewModel _ytdlpViewModel;
-    private readonly JsDepViewModel _jsDepViewModel;
-    private DispatcherTimer? _toastTimer;
-    private readonly string _currentVersion;
+    public FfmpegDepViewModel Ffmpeg { get; }
+    public YtdlDepViewModel Ytdlp { get; }
+    public JsDepViewModel Js { get; }
 
-    public string CurrentVersion => _currentVersion;
+    private readonly BotListViewModel _botListViewModel;
+    private DispatcherTimer? _toastTimer;
+
+    public string CurrentVersion { get; }
 
     public string DeleteModalMessage =>
         $"{Loc["Modal_DeletePrefix"]}{DeleteModalBotName}{Loc["Modal_DeleteSuffix"]}";
 
     public string ExitModalMessage =>
-        $"{RunningBotCount}{Loc["Modal_ExitSuffix"]}";
+        string.Format(Loc["Modal_ExitMessage"], RunningBotCount);
 
     /// <summary>
-    /// Raised when the ViewModel wants the window to close.
+    /// Raised when the ViewModel wants the app to quit.
     /// MainWindow subscribes to this in OnDataContextChanged.
     /// </summary>
     public Action? CloseRequested { get; set; }
@@ -102,49 +101,41 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        _ffmpegViewModel = new FfmpegDepViewModel();
-        _ytdlpViewModel = new YtdlDepViewModel();
-        _jsDepViewModel = new JsDepViewModel();
+        Ffmpeg = new FfmpegDepViewModel();
+        Ytdlp = new YtdlDepViewModel();
+        Js = new JsDepViewModel();
 
         _botListViewModel = new BotListViewModel(this);
         _currentView = _botListViewModel;
-        _minimizeToTray = _botListViewModel.GetConfig().MinimizeToTray;
-        _selectedLanguageOption = LanguageOptions.FirstOrDefault(l => l.Code == _botListViewModel.GetConfig().Language)
-            ?? LanguageOptions.First();
 
-        _currentVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0.0";
+        var config = _botListViewModel.GetConfig();
+        _minimizeToTray = config.MinimizeToTray;
+        _selectedLanguageOption = LanguageOptions.FirstOrDefault(l => l.Code == config.Language)
+                                  ?? LanguageOptions.First();
 
-        _isDarkTheme = _botListViewModel.GetConfig().IsDarkTheme;
+        // Show "1.2.3", not the assembly's "1.2.3.0".
+        CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "1.0.0";
+
+        _isDarkTheme = config.IsDarkTheme;
         if (Application.Current != null)
             Application.Current.RequestedThemeVariant = _isDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
-
-        _ffmpegViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(DepViewModel.StatusString))
-                FfmpegStatus = _ffmpegViewModel.StatusString;
-        };
-        _ytdlpViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(DepViewModel.StatusString))
-                YtdlpStatus = _ytdlpViewModel.StatusString;
-        };
-        _jsDepViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(DepViewModel.StatusString))
-                JsStatus = _jsDepViewModel.StatusString;
-        };
 
         LocalizationService.Instance.LanguageChanged += OnLanguageChanged;
 
         Dispatcher.UIThread.InvokeAsync(async () =>
         {
             await Task.Delay(1000);
-            await _ffmpegViewModel.CheckAsync();
-            await _ytdlpViewModel.CheckAsync();
-            await _jsDepViewModel.CheckAsync();
-
-            await CheckForUpEkoUpdatesAsync();
+            await Task.WhenAll(
+                CheckDepsAsync(),
+                CheckForUpEkoUpdatesAsync());
         });
+    }
+
+    private async Task CheckDepsAsync()
+    {
+        await Ffmpeg.CheckAsync();
+        await Ytdlp.CheckAsync();
+        await Js.CheckAsync();
     }
 
     private void OnLanguageChanged()
@@ -177,16 +168,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _botListViewModel.SaveConfig();
     }
 
-    partial void OnDeleteModalBotNameChanged(string value)
-    {
-        OnPropertyChanged(nameof(DeleteModalMessage));
-    }
-
-    partial void OnRunningBotCountChanged(int value)
-    {
-        OnPropertyChanged(nameof(ExitModalMessage));
-    }
-
     [RelayCommand]
     private void ToggleMinimizeToTray()
     {
@@ -202,33 +183,22 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void OpenChangelog()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = ChangelogUrl,
-            UseShellExecute = true
-        });
-    }
+    private void OpenDiscord() => OpenUrl(DiscordUrl);
 
     [RelayCommand]
-    private void OpenDiscord()
-    {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://discord.gg/nadekobot",
-            UseShellExecute = true
-        });
-    }
+    private void OpenUpEkoRelease() => OpenUrl(UpEkoReleaseUrl);
 
-    [RelayCommand]
-    private void OpenUpEkoRelease()
+    private void OpenUrl(string url)
     {
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = UpEkoReleaseUrl,
-            UseShellExecute = true
-        });
+            PlatformSpecific.Open(url);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open {Url}", url);
+            ShowToast(string.Format(Loc["Toast_OpenFailed"], ex.Message), ToastKind.Error);
+        }
     }
 
     public void NavigateToList()
@@ -241,20 +211,31 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentView = botViewModel;
     }
 
-    public void ShowToast(string message, string type = "info")
+    public void ShowToast(string message, ToastKind kind = ToastKind.Info)
     {
         ToastMessage = message;
-        ToastType = type;
+        ToastKind = kind;
         IsToastVisible = true;
 
         _toastTimer?.Stop();
-        _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _toastTimer = new DispatcherTimer
+        {
+            // Errors stay longer, they usually need to be read.
+            Interval = TimeSpan.FromSeconds(kind == ToastKind.Error ? 8 : 3)
+        };
         _toastTimer.Tick += (_, _) =>
         {
             IsToastVisible = false;
-            _toastTimer.Stop();
+            _toastTimer?.Stop();
         };
         _toastTimer.Start();
+    }
+
+    [RelayCommand]
+    private void DismissToast()
+    {
+        _toastTimer?.Stop();
+        IsToastVisible = false;
     }
 
     public void RequestDelete(string botName)
@@ -277,19 +258,16 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _botListViewModel.RemoveBot(detail);
             NavigateToList();
-            ShowToast(Loc["Toast_InstanceDeleted"], "success");
+            ShowToast(Loc["Toast_InstanceDeleted"], ToastKind.Success);
         }
     }
 
+    /// <summary>
+    /// Returns true when upeko can quit right away; otherwise shows the exit confirmation.
+    /// </summary>
     public bool RequestExit()
     {
-        var running = 0;
-        foreach (var bot in _botListViewModel.Bots)
-        {
-            if (bot.IsRunning)
-                running++;
-        }
-
+        var running = _botListViewModel.Bots.Count(b => b.IsRunning);
         if (running == 0)
             return true;
 
@@ -308,46 +286,51 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ConfirmExit()
     {
         IsExitModalOpen = false;
+        StopBotsForExit();
         CloseRequested?.Invoke();
     }
 
+    public void StopBotsForExit() => _botListViewModel.StopAllForExit();
+
     [RelayCommand]
-    private void InstallDep(string dep)
+    private async Task InstallDep(string dep)
     {
-        if (dep == "ffmpeg" && _ffmpegViewModel.IsNotInstalled)
+        DepViewModel? vm = dep switch
         {
-            ShowToast(Loc["Toast_InstallingFfmpeg"], "info");
-            _ = _ffmpegViewModel.InstallAsync();
-        }
-        else if (dep == "ytdlp" && _ytdlpViewModel.IsNotInstalled)
-        {
-            ShowToast(Loc["Toast_InstallingYtdlp"], "info");
-            _ = _ytdlpViewModel.InstallAsync();
-        }
-        else if (dep == "js" && _jsDepViewModel.IsNotInstalled)
-        {
-            ShowToast(Loc["Toast_InstallingJs"], "info");
-            _ = _jsDepViewModel.InstallAsync();
-        }
+            "ffmpeg" => Ffmpeg,
+            "ytdlp" => Ytdlp,
+            "js" => Js,
+            _ => null
+        };
+
+        if (vm is null || !vm.IsNotInstalled)
+            return;
+
+        ShowToast(string.Format(Loc["Toast_InstallingDep"], vm.DisplayName));
+        var success = await vm.InstallAsync();
+        if (success)
+            ShowToast(string.Format(Loc["Toast_DepInstalled"], vm.DisplayName), ToastKind.Success);
+        else
+            ShowToast(vm.LastError ?? string.Format(Loc["Toast_DepInstallFailed"], vm.DisplayName), ToastKind.Error);
     }
 
     private async Task CheckForUpEkoUpdatesAsync()
     {
         try
         {
-            var response = await _httpClient.GetAsync("https://api.github.com/repos/nadeko-bot/upeko/releases/latest");
+            using var response = await _httpClient.GetAsync("https://api.github.com/repos/nadeko-bot/upeko/releases/latest");
             response.EnsureSuccessStatusCode();
 
             var newRelease = await response.Content.ReadFromJsonAsync(SourceJsonSerializer.Default.ReleaseModel);
 
             if (newRelease != null)
             {
-                var latestVersion = newRelease.TagName?.TrimStart('v') ?? "1.0.0.0";
-                IsUpEkoUpdateAvailable = CompareVersions(_currentVersion, latestVersion) < 0;
+                var latestVersion = newRelease.TagName?.TrimStart('v') ?? "1.0.0";
+                IsUpEkoUpdateAvailable = VersionUtil.Compare(CurrentVersion, latestVersion) < 0;
                 if (IsUpEkoUpdateAvailable)
-                    Log.Information("Upeko update available: {Latest} (current: {Current})", latestVersion, _currentVersion);
+                    Log.Information("Upeko update available: {Latest} (current: {Current})", latestVersion, CurrentVersion);
                 else
-                    Log.Information("Upeko is up to date: {Current}", _currentVersion);
+                    Log.Information("Upeko is up to date: {Current}", CurrentVersion);
             }
         }
         catch (Exception ex)
@@ -355,15 +338,5 @@ public partial class MainWindowViewModel : ViewModelBase
             Log.Error(ex, "Error checking for Upeko updates");
             IsUpEkoUpdateAvailable = false;
         }
-    }
-
-    private int CompareVersions(string version1, string version2)
-    {
-        if (Version.TryParse(version1, out var v1) && Version.TryParse(version2, out var v2))
-        {
-            return v1.CompareTo(v2);
-        }
-
-        return string.Compare(version1, version2, StringComparison.Ordinal);
     }
 }

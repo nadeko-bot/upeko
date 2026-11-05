@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Serilog;
 using upeko.Services;
 using upeko.ViewModels;
@@ -10,6 +11,7 @@ namespace upeko.Views;
 public partial class MainWindow : Window
 {
     private bool _forceClose;
+    private bool _isClosed;
 
     public MainWindow()
     {
@@ -18,6 +20,9 @@ public partial class MainWindow : Window
 
     public void ForceClose()
     {
+        if (_isClosed)
+            return;
+
         _forceClose = true;
         Close();
     }
@@ -30,10 +35,32 @@ public partial class MainWindow : Window
         {
             vm.CloseRequested = () =>
             {
-                _forceClose = true;
-                Close();
+                if (Application.Current is App app)
+                    app.Quit();
+                else
+                    ForceClose();
             };
         }
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        // Escape closes whichever dialog is open.
+        if (e.Key == Key.Escape && DataContext is MainWindowViewModel vm)
+        {
+            if (vm.IsDeleteModalOpen)
+            {
+                vm.CancelDeleteCommand.Execute(null);
+                e.Handled = true;
+            }
+            else if (vm.IsExitModalOpen)
+            {
+                vm.CancelExitCommand.Execute(null);
+                e.Handled = true;
+            }
+        }
+
+        base.OnKeyDown(e);
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)
@@ -66,5 +93,15 @@ public partial class MainWindow : Window
         }
 
         base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _isClosed = true;
+        base.OnClosed(e);
+
+        // With minimize-to-tray off, closing the window means quitting.
+        if (Application.Current is App app)
+            app.Quit();
     }
 }

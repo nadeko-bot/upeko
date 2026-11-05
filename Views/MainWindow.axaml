@@ -16,7 +16,7 @@
 
     <Window.Resources>
         <conv:DepStatusToDotColorConverter x:Key="DepDotColor"/>
-        <conv:InverseBoolConverter x:Key="InverseBool"/>
+        <conv:ToastKindToColorConverter x:Key="ToastKindColor"/>
     </Window.Resources>
 
     <Design.DataContext>
@@ -34,54 +34,46 @@
                     Height="56">
                 <Grid ColumnDefinitions="*,Auto" Margin="24,0">
                     <!-- Left: Logo + Version -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="16">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Image Source="/Assets/upeko.ico" Width="20" Height="20"/>
-                            <TextBlock Text="{DynamicResource App_Name}" FontWeight="SemiBold" FontSize="16"
-                                       Foreground="{DynamicResource TextPrimary}"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1,0,0,0"
-                                Padding="16,0,0,0" Height="24">
-                            <TextBlock Text="{Binding CurrentVersion, StringFormat='v{0}'}" FontSize="11"
-                                       Foreground="{DynamicResource TextTertiary}"
-                                       VerticalAlignment="Center"/>
-                        </Border>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
+                        <Image Source="/Assets/upeko.png" Width="20" Height="20"/>
+                        <TextBlock Text="{DynamicResource App_Name}" FontWeight="SemiBold" FontSize="16"
+                                   Foreground="{DynamicResource TextPrimary}"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Right: Deps + Theme Toggle -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Spacing="16">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
                         <!-- ffmpeg indicator -->
-                        <Button Classes="btn-ghost" Padding="6,4" MinHeight="0" MinWidth="0"
+                        <Button Classes="btn-ghost" Padding="8,4" Height="28" MinHeight="0" MinWidth="0"
                                 Command="{Binding InstallDepCommand}" CommandParameter="ffmpeg"
-                                Background="Transparent" BorderThickness="0" Cursor="Hand">
+                                ToolTip.Tip="{Binding Ffmpeg.Tooltip}">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <Ellipse Width="8" Height="8"
-                                         Fill="{Binding FfmpegStatus, Converter={StaticResource DepDotColor}}"/>
+                                         Fill="{Binding Ffmpeg.StatusString, Converter={StaticResource DepDotColor}}"/>
                                 <TextBlock Text="ffmpeg" FontSize="11"
                                            Foreground="{DynamicResource TextSecondary}"/>
                             </StackPanel>
                         </Button>
 
                         <!-- yt-dlp indicator -->
-                        <Button Classes="btn-ghost" Padding="6,4" MinHeight="0" MinWidth="0"
+                        <Button Classes="btn-ghost" Padding="8,4" Height="28" MinHeight="0" MinWidth="0"
                                 Command="{Binding InstallDepCommand}" CommandParameter="ytdlp"
-                                Background="Transparent" BorderThickness="0" Cursor="Hand">
+                                ToolTip.Tip="{Binding Ytdlp.Tooltip}">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <Ellipse Width="8" Height="8"
-                                         Fill="{Binding YtdlpStatus, Converter={StaticResource DepDotColor}}"/>
+                                         Fill="{Binding Ytdlp.StatusString, Converter={StaticResource DepDotColor}}"/>
                                 <TextBlock Text="yt-dlp" FontSize="11"
                                            Foreground="{DynamicResource TextSecondary}"/>
                             </StackPanel>
                         </Button>
 
                         <!-- js runtime indicator -->
-                        <Button Classes="btn-ghost" Padding="6,4" MinHeight="0" MinWidth="0"
+                        <Button Classes="btn-ghost" Padding="8,4" Height="28" MinHeight="0" MinWidth="0"
                                 Command="{Binding InstallDepCommand}" CommandParameter="js"
-                                Background="Transparent" BorderThickness="0" Cursor="Hand">
+                                ToolTip.Tip="{Binding Js.Tooltip}">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <Ellipse Width="8" Height="8"
-                                         Fill="{Binding JsStatus, Converter={StaticResource DepDotColor}}"/>
+                                         Fill="{Binding Js.StatusString, Converter={StaticResource DepDotColor}}"/>
                                 <TextBlock Text="js" FontSize="11"
                                            Foreground="{DynamicResource TextSecondary}"/>
                             </StackPanel>
@@ -176,21 +168,20 @@
                     <!-- Right: Version or Update pill -->
                     <TextBlock Grid.Column="2"
                                IsVisible="{Binding !IsUpEkoUpdateAvailable}"
-                               Text="{Binding CurrentVersion, StringFormat='v{0}'}"
+                               Text="{Binding CurrentVersion, StringFormat='upeko v{0}'}"
                                VerticalAlignment="Center"
-                               Opacity="0.5"
                                FontSize="11"
                                Foreground="{DynamicResource TextTertiary}"/>
 
                     <Button Grid.Column="2"
                             IsVisible="{Binding IsUpEkoUpdateAvailable}"
                             Command="{Binding OpenUpEkoReleaseCommand}"
-                            Background="#4CBB17"
-                            Foreground="White"
+                            Classes="update-pill"
                             Padding="10,2"
                             CornerRadius="12"
                             BorderThickness="0"
                             VerticalAlignment="Center"
+                            Cursor="Hand"
                             ToolTip.Tip="{DynamicResource MainWindow_NewerVersionTip}">
                         <TextBlock Text="{DynamicResource MainWindow_NewerVersion}"
                                    VerticalAlignment="Center"
@@ -203,40 +194,34 @@
             <!-- Content Area -->
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <ContentControl Content="{Binding CurrentView}"
-                                Margin="24,40,24,40"
+                                Margin="32,32,32,40"
                                 MaxWidth="960"
-                                HorizontalAlignment="Center"
+                                HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"/>
             </ScrollViewer>
         </DockPanel>
 
-        <!-- Toast Notification -->
-        <Border IsVisible="{Binding IsToastVisible}"
-                Background="{DynamicResource AppBackground}"
-                BorderBrush="{DynamicResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="16"
+        <!-- Toast Notification (click to dismiss) -->
+        <Button Classes="toast"
+                IsVisible="{Binding IsToastVisible}"
+                Command="{Binding DismissToastCommand}"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
-                Margin="0,0,24,24"
-                MaxWidth="300"
-                BoxShadow="0 2 8 0 #20000000">
-            <StackPanel Orientation="Horizontal" Spacing="12">
-                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
-                    <Ellipse.Fill>
-                        <SolidColorBrush Color="#0070f3"/>
-                    </Ellipse.Fill>
-                </Ellipse>
-                <TextBlock Text="{Binding ToastMessage}" FontSize="13" FontWeight="Medium"
+                Margin="0,0,24,52"
+                MaxWidth="380">
+            <Grid ColumnDefinitions="Auto,*">
+                <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Top" Margin="0,5,12,0"
+                         Fill="{Binding ToastKind, Converter={StaticResource ToastKindColor}}"/>
+                <TextBlock Grid.Column="1" Text="{Binding ToastMessage}" FontSize="13" FontWeight="Medium"
                            Foreground="{DynamicResource TextPrimary}"
+                           TextWrapping="Wrap"
                            VerticalAlignment="Center"/>
-            </StackPanel>
-        </Border>
+            </Grid>
+        </Button>
 
         <!-- Delete Modal Overlay -->
         <Border IsVisible="{Binding IsDeleteModalOpen}"
-                Background="#66000000"
+                Background="{DynamicResource ModalBackdrop}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
             <Border Background="{DynamicResource AppBackground}"
@@ -268,7 +253,7 @@
 
         <!-- Exit Confirmation Modal Overlay -->
         <Border IsVisible="{Binding IsExitModalOpen}"
-                Background="#66000000"
+                Background="{DynamicResource ModalBackdrop}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
             <Border Background="{DynamicResource AppBackground}"

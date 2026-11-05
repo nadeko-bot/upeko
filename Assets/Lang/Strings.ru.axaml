@@ -7,7 +7,7 @@
     <x:String x:Key="MainWindow_Title">Upeko — Менеджер ботов</x:String>
     <x:String x:Key="MainWindow_MinimizeToTrayTip">Сворачивать в трей при закрытии</x:String>
     <x:String x:Key="MainWindow_ToggleThemeTip">Сменить тему</x:String>
-    <x:String x:Key="MainWindow_DiscordTip">Присоединиться к Discord Nadeko Bot</x:String>
+    <x:String x:Key="MainWindow_DiscordTip">Присоединиться к серверу Nadeko Bot в Discord</x:String>
     <x:String x:Key="MainWindow_NewerVersion">Новая версия</x:String>
     <x:String x:Key="MainWindow_NewerVersionTip">Нажмите, чтобы скачать последнюю версию Upeko</x:String>
 
@@ -20,7 +20,6 @@
 
     <!-- Exit Modal -->
     <x:String x:Key="Modal_ExitTitle">Боты всё ещё работают</x:String>
-    <x:String x:Key="Modal_ExitSuffix"> бот(ов) всё ещё работают. Закрытие Upeko остановит все запущенные боты. Вы уверены, что хотите выйти?</x:String>
     <x:String x:Key="Modal_QuitAnyway">Выйти в любом случае</x:String>
 
     <!-- Tray -->
@@ -31,7 +30,7 @@
 
     <!-- Bot List View -->
     <x:String x:Key="BotList_PageTitle">Экземпляры</x:String>
-    <x:String x:Key="BotList_PageSubtitle">Управляйте вашими развёртываниями NadekoBot</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Управляйте экземплярами NadekoBot</x:String>
     <x:String x:Key="BotList_Changelog">Журнал изменений</x:String>
     <x:String x:Key="BotList_AddInstance">Добавить экземпляр</x:String>
     <x:String x:Key="BotList_Start">Запустить</x:String>
@@ -55,13 +54,13 @@
     <x:String x:Key="BotView_StopInstance">Остановить экземпляр</x:String>
     <x:String x:Key="BotView_Start">Запустить</x:String>
     <x:String x:Key="BotView_DownloadInstall">Скачать и установить</x:String>
-    <x:String x:Key="BotView_CancelDownload">Отменить загрузку</x:String>
+    <x:String x:Key="BotView_CancelDownload">Отменить скачивание</x:String>
     <x:String x:Key="BotView_Shortcuts">Ярлыки</x:String>
     <x:String x:Key="BotView_DataFolder">Папка данных</x:String>
     <x:String x:Key="BotView_OpenInFileManager">Открыть в файловом менеджере</x:String>
     <x:String x:Key="BotView_OpenConfiguration">Открыть конфигурацию</x:String>
     <x:String x:Key="BotView_DangerZone">ОПАСНАЯ ЗОНА</x:String>
-    <x:String x:Key="BotView_DangerDescription">Удаление этого экземпляра приведёт к удалению всех связанных данных и файлов конфигурации.</x:String>
+    <x:String x:Key="BotView_DangerDescription">Удаляет этот экземпляр из Upeko. Файлы бота остаются на диске: удалите его папку сами, если она больше не нужна.</x:String>
     <x:String x:Key="BotView_DeleteInstance">Удалить экземпляр</x:String>
     <x:String x:Key="BotView_SelectBotPath">Выберите путь бота</x:String>
     <x:String x:Key="BotView_SelectAvatarImage">Выберите изображение аватара</x:String>
@@ -71,7 +70,7 @@
     <x:String x:Key="Status_Running">Работает</x:String>
     <x:String x:Key="Status_Ready">Готов</x:String>
     <x:String x:Key="Status_UpdateAvailable">Доступно обновление</x:String>
-    <x:String x:Key="Status_NotDownloaded">Не загружен</x:String>
+    <x:String x:Key="Status_NotDownloaded">Не скачан</x:String>
     <x:String x:Key="Status_Unknown">Неизвестно</x:String>
 
     <!-- Update Button -->
@@ -80,23 +79,46 @@
     <x:String x:Key="BotView_CheckUpdates">Проверить обновления</x:String>
 
     <!-- Download Progress -->
-    <x:String x:Key="Progress_Downloading">Загрузка...</x:String>
-    <x:String x:Key="Progress_Initializing">Инициализация...</x:String>
+    <x:String x:Key="Progress_Downloading">Скачивание...</x:String>
     <x:String x:Key="Progress_PleaseWait">Подождите, не закрывайте приложение.</x:String>
-    <x:String x:Key="Progress_Stalled">Приостановлено</x:String>
+    <x:String x:Key="Progress_Stalled">Нет прогресса</x:String>
     <x:String x:Key="Progress_Calculating">Вычисление...</x:String>
 
     <!-- Dependency Status -->
-    <x:String x:Key="Dep_Checking">проверка</x:String>
-    <x:String x:Key="Dep_Installed">установлен</x:String>
-    <x:String x:Key="Dep_Missing">отсутствует</x:String>
 
     <!-- Toast Messages -->
     <x:String x:Key="Toast_InstanceCreated">Экземпляр создан</x:String>
     <x:String x:Key="Toast_InstanceDeleted">Экземпляр удалён</x:String>
-    <x:String x:Key="Toast_RecoveredFromBackup">Восстановлено из резервной копии</x:String>
-    <x:String x:Key="Toast_InstallingFfmpeg">Установка ffmpeg...</x:String>
-    <x:String x:Key="Toast_InstallingYtdlp">Установка yt-dlp...</x:String>
-    <x:String x:Key="Toast_InstallingJs">Установка deno...</x:String>
-    <x:String x:Key="Toast_ResumingBots">Возобновление {0} бот(ов)...</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Настройки были повреждены и восстановлены из резервной копии</x:String>
+    <x:String x:Key="Toast_ResumingBots">Запуск ботов прошлой сессии: {0}</x:String>
+
+    <!-- Notices and errors -->
+    <x:String x:Key="Modal_ExitMessage">Запущено ботов: {0}. Если закрыть Upeko, они остановятся. Они снова запустятся при следующем открытии Upeko.</x:String>
+    <x:String x:Key="Progress_DownloadingVersion">Скачивание NadekoBot {0}...</x:String>
+    <x:String x:Key="Progress_Extracting">Распаковка...</x:String>
+    <x:String x:Key="Progress_Installing">Установка...</x:String>
+    <x:String x:Key="BotView_DiskSpace">нужно ~{0} · свободно {1}</x:String>
+    <x:String x:Key="Dep_TipInstalled">{0} установлен</x:String>
+    <x:String x:Key="Dep_TipMissing">{0} не найден. Нажмите, чтобы установить (нужен для музыки).</x:String>
+    <x:String x:Key="Dep_TipChecking">Проверка {0}...</x:String>
+    <x:String x:Key="Toast_InstallingDep">Установка {0}...</x:String>
+    <x:String x:Key="Toast_DepInstalled">{0} установлен</x:String>
+    <x:String x:Key="Toast_DepInstallFailed">Не удалось установить {0}. Подробности в журнале.</x:String>
+    <x:String x:Key="Toast_FfmpegMacBrew">Установите ffmpeg через Homebrew: brew install ffmpeg</x:String>
+    <x:String x:Key="Toast_StartFailed">Не удалось запустить {0}: {1}</x:String>
+    <x:String x:Key="Toast_BotExited">{0} неожиданно остановился</x:String>
+    <x:String x:Key="Toast_CredsMissing">Файл creds_example.yml не найден. Сначала скачайте бота.</x:String>
+    <x:String x:Key="Toast_OpenFailed">Не удалось открыть: {0}</x:String>
+    <x:String x:Key="Toast_UpdateCheckFailed">Не удалось проверить обновления: {0}</x:String>
+    <x:String x:Key="Toast_UpToDate">У вас последняя версия NadekoBot</x:String>
+    <x:String x:Key="Toast_StopBeforeUpdate">Остановите бота перед обновлением</x:String>
+    <x:String x:Key="Toast_BotInstalled">{0} готов (v{1})</x:String>
+    <x:String x:Key="Toast_DownloadCancelled">Скачивание отменено</x:String>
+    <x:String x:Key="Toast_DownloadFailed">Не удалось скачать: {0}</x:String>
+    <x:String x:Key="Error_DownloadInProgress">Уже идёт другое скачивание. Дождитесь его завершения.</x:String>
+    <x:String x:Key="Error_NoAssets">У последней версии NadekoBot пока нет файлов для скачивания. Попробуйте позже.</x:String>
+    <x:String x:Key="Error_NoAssetForPlatform">Для этой системы нет сборки последней версии NadekoBot ({0}).</x:String>
+    <x:String x:Key="Error_RootFolder">Выберите для бота папку, а не корень диска.</x:String>
+    <x:String x:Key="Error_NotEnoughSpace">Недостаточно места на диске: нужно {0}, свободно {1}. Освободите место или выберите другую папку.</x:String>
+    <x:String x:Key="Error_Extract">Не удалось распаковать скачанный файл: {0}</x:String>
 </ResourceDictionary>

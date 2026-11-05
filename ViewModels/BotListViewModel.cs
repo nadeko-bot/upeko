@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,6 +15,8 @@ namespace upeko.ViewModels;
 
 public partial class BotListViewModel : ViewModelBase
 {
+    private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
+
     private readonly MainWindowViewModel _main;
     private readonly IBotRepository _botRepository;
 
@@ -29,7 +31,7 @@ public partial class BotListViewModel : ViewModelBase
         _botRepository = new JsonBotRepository();
 
         if (_botRepository.RecoveredFromBackup)
-            _main.ShowToast(Loc["Toast_RecoveredFromBackup"], "info");
+            _main.ShowToast(Loc["Toast_RecoveredFromBackup"], ToastKind.Info);
 
         Bots = new ObservableCollection<BotViewModel>();
         LoadBots();
@@ -45,29 +47,21 @@ public partial class BotListViewModel : ViewModelBase
     private void LoadBots()
     {
         Bots.Clear();
-        var botModels = _botRepository.GetBots();
-        foreach (var botModel in botModels)
-        {
+        foreach (var botModel in _botRepository.GetBots())
             Bots.Add(new BotViewModel(this, botModel));
-        }
     }
 
     private async Task ResumeSessionAsync()
     {
+        // Give the bots a moment to read their versions, so IsReady is known.
         await Task.Delay(1000);
 
-        var botsToResume = new List<BotViewModel>();
-        foreach (var bot in Bots)
-        {
-            if (bot.Bot.WasRunning && bot.IsReady)
-                botsToResume.Add(bot);
-        }
-
+        var botsToResume = Bots.Where(b => b.Bot.WasRunning && b.IsReady).ToList();
         if (botsToResume.Count == 0)
             return;
 
         Log.Information("Resuming {Count} bot(s) from previous session", botsToResume.Count);
-        _main.ShowToast(string.Format(Loc["Toast_ResumingBots"], botsToResume.Count));
+        ShowToast(string.Format(Loc["Toast_ResumingBots"], botsToResume.Count));
 
         foreach (var bot in botsToResume)
         {
@@ -93,8 +87,7 @@ public partial class BotListViewModel : ViewModelBase
     private void AddBot()
     {
         var guid = Guid.NewGuid();
-        var first5 = guid.ToString()[..5];
-        var botName = $"bot-{first5}";
+        var botName = $"bot-{guid.ToString()[..5]}";
 
         var defaultPath = Path.GetFullPath(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Personal),
@@ -111,17 +104,13 @@ public partial class BotListViewModel : ViewModelBase
         _botRepository.AddBot(botModel);
         Bots.Add(new BotViewModel(this, botModel));
         Log.Information("Created bot instance {BotName} at {BotPath}", botModel.Name, defaultPath);
-        _main.ShowToast(Loc["Toast_InstanceCreated"], "success");
+        ShowToast(Loc["Toast_InstanceCreated"], ToastKind.Success);
     }
 
     [RelayCommand]
     private void ShowChangelog()
     {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md",
-            UseShellExecute = true
-        });
+        PlatformSpecific.Open(ChangelogUrl);
     }
 
     public void UpdateBot(BotModel bot)
@@ -132,8 +121,18 @@ public partial class BotListViewModel : ViewModelBase
     public void RemoveBot(BotViewModel botViewModel)
     {
         Log.Information("Deleted bot instance {BotName}", botViewModel.Bot.Name);
+        botViewModel.PrepareForRemoval();
         _botRepository.RemoveBot(botViewModel.Bot);
         Bots.Remove(botViewModel);
+    }
+
+    /// <summary>
+    /// Stops all running bots because upeko is quitting.
+    /// </summary>
+    public void StopAllForExit()
+    {
+        foreach (var bot in Bots)
+            bot.StopForExit();
     }
 
     public void RemoveNavigation()
@@ -145,6 +144,9 @@ public partial class BotListViewModel : ViewModelBase
     {
         _main.RequestDelete(botName);
     }
+
+    public void ShowToast(string message, ToastKind kind = ToastKind.Info)
+        => _main.ShowToast(message, kind);
 
     public ConfigModel GetConfig() => _botRepository.GetConfig();
 

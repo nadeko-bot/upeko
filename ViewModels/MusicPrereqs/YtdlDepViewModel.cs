@@ -1,130 +1,57 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace upeko.ViewModels
 {
     /// <summary>
-    /// Viewmodel for YoutubeDL bot dependency
+    /// yt-dlp, which the bot uses to play music from YouTube and other sites.
     /// </summary>
     public class YtdlDepViewModel : DepViewModel
     {
-        #region Constructors
+        private const string BaseUrl = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/";
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
         public YtdlDepViewModel() : base("yt-dlp")
         {
         }
 
-        #endregion
-
-        #region Methods
-
+        // "-U" also keeps an existing yt-dlp up to date, which matters because sites change often.
         protected override async Task<DepState> InternalCheckAsync()
-        {
-            try
-            {
-                await Process.Start(new ProcessStartInfo()
-                {
-                    FileName = "yt-dlp",
-                    Arguments = "-U",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                })!.WaitForExitAsync();
-
-                return DepState.Installed;
-            }
-            catch
-            {
-                // it's just not installed if running it fails
-                return DepState.NotInstalled;
-            }
-        }
+            => await CanRunAsync("yt-dlp", TimeSpan.FromSeconds(60), "-U")
+                ? DepState.Installed
+                : DepState.NotInstalled;
 
         protected override async Task<bool> InternalInstallAsync()
         {
-            var baseUrl = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/";
-
-            var winDlLink = baseUrl + "yt-dlp.exe";
-            var linuxDlLink = baseUrl + "yt-dlp";
-
-            try
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Delete the old yt-dlp directory, if it exists
-                    var ytdlPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory)!, "yt-dlp");
+                var ytdlPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory)!, "yt-dlp");
+                if (Directory.Exists(ytdlPath))
+                    Directory.Delete(ytdlPath, true);
+                Directory.CreateDirectory(ytdlPath);
 
-                    if (Directory.Exists(ytdlPath))
-                        Directory.Delete(ytdlPath, true);
-
-                    // Recreate the directory for the new yt-dlp file
-                    Directory.CreateDirectory(ytdlPath);
-
-                    using var http = new HttpClient();
-                    await using var stream = await http.GetStreamAsync(winDlLink);
-                    await using var fs = new FileStream(Path.Combine(ytdlPath, "yt-dlp.exe"), FileMode.Create);
-
-                    try
-                    {
-                        await stream.CopyToAsync(fs);
-                        Environment.SetEnvironmentVariable("path",
-                            Environment.GetEnvironmentVariable("path") + ";" + ytdlPath,
-                            EnvironmentVariableTarget.User);
-                    }
-                    catch
-                    {
-                    }
-
-                    return true;
-                }
-                else
-                {
-                    using var http = new HttpClient();
-                    await using var stream = await http.GetStreamAsync(linuxDlLink);
-
-                    // Ensure the directory exists
-                    var targetDir = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "sbin"));
-                    Directory.CreateDirectory(targetDir);
-
-                    var ytdlpPath = Path.Combine(targetDir, "yt-dlp");
-                    await using (var fs = new FileStream(ytdlpPath, FileMode.Create))
-                    {
-                        await stream.CopyToAsync(fs);
-                    }
-
-                    var process = new Process
-                    {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "chmod",
-                            Arguments = $"+x \"{ytdlpPath}\"",
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            RedirectStandardError = true
-                        }
-                    };
-
-                    process.Start();
-                    await process.WaitForExitAsync();
-
-                    return true;
-                }
-            }
-            catch (Exception)
-            {
-                // MessageBox.Show(ex.ToString(), "YoutubeDLP installation failed.");
-                // todo: Add an error message box
+                await DownloadToFileAsync(BaseUrl + "yt-dlp.exe", Path.Combine(ytdlPath, "yt-dlp.exe"));
+                PlatformSpecific.AddToUserPath(ytdlPath);
+                return true;
             }
 
-            return false;
+            // The standalone builds do not need Python, unlike the plain "yt-dlp" zipapp.
+            var asset = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                ? "yt-dlp_macos"
+                : RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+                    ? "yt-dlp_linux_aarch64"
+                    : "yt-dlp_linux";
+
+            var targetDir = PlatformSpecific.UnixToolsDirectory;
+            Directory.CreateDirectory(targetDir);
+
+            var ytdlpPath = Path.Combine(targetDir, "yt-dlp");
+            var tempPath = ytdlpPath + ".download";
+            await DownloadToFileAsync(BaseUrl + asset, tempPath);
+            File.Move(tempPath, ytdlpPath, overwrite: true);
+            PlatformSpecific.MakeExecutable(ytdlpPath);
+            return true;
         }
-
-        #endregion
     }
 }

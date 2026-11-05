@@ -5,7 +5,7 @@
     <!-- App / MainWindow -->
     <x:String x:Key="App_Name">Upeko</x:String>
     <x:String x:Key="MainWindow_Title">Upeko — Bot-Verwaltung</x:String>
-    <x:String x:Key="MainWindow_MinimizeToTrayTip">Beim Schließen in die Taskleiste minimieren</x:String>
+    <x:String x:Key="MainWindow_MinimizeToTrayTip">Beim Schließen in den Infobereich minimieren</x:String>
     <x:String x:Key="MainWindow_ToggleThemeTip">Design wechseln</x:String>
     <x:String x:Key="MainWindow_DiscordTip">Dem Nadeko Bot Discord beitreten</x:String>
     <x:String x:Key="MainWindow_NewerVersion">Neuere Version</x:String>
@@ -20,18 +20,17 @@
 
     <!-- Exit Modal -->
     <x:String x:Key="Modal_ExitTitle">Bots laufen noch</x:String>
-    <x:String x:Key="Modal_ExitSuffix"> Bot(s) laufen noch. Das Schließen von Upeko stoppt alle laufenden Bots. Möchten Sie wirklich beenden?</x:String>
     <x:String x:Key="Modal_QuitAnyway">Trotzdem beenden</x:String>
 
     <!-- Tray -->
     <x:String x:Key="Tray_Show">Upeko anzeigen</x:String>
     <x:String x:Key="Tray_Exit">Beenden</x:String>
     <x:String x:Key="Tray_Tooltip">Upeko</x:String>
-    <x:String x:Key="Tray_MinimizedNotification">Upeko wurde in die Taskleiste verschoben und läuft im Hintergrund weiter</x:String>
+    <x:String x:Key="Tray_MinimizedNotification">Upeko wurde in den Infobereich minimiert und läuft im Hintergrund weiter</x:String>
 
     <!-- Bot List View -->
     <x:String x:Key="BotList_PageTitle">Instanzen</x:String>
-    <x:String x:Key="BotList_PageSubtitle">Verwalten Sie Ihre NadekoBot-Bereitstellungen</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Verwalten Sie Ihre NadekoBot-Instanzen</x:String>
     <x:String x:Key="BotList_Changelog">Änderungsprotokoll</x:String>
     <x:String x:Key="BotList_AddInstance">Instanz hinzufügen</x:String>
     <x:String x:Key="BotList_Start">Starten</x:String>
@@ -43,7 +42,7 @@
     <x:String x:Key="BotList_CreateInstance">Instanz erstellen</x:String>
 
     <!-- Bot View -->
-    <x:String x:Key="BotView_BackToInstances">Zurück zu Instanzen</x:String>
+    <x:String x:Key="BotView_BackToInstances">Zurück zu den Instanzen</x:String>
     <x:String x:Key="BotView_ChangeAvatarTip">Klicken, um Avatar zu ändern</x:String>
     <x:String x:Key="BotView_ClickToRenameTip">Klicken, um umzubenennen</x:String>
     <x:String x:Key="BotView_SaveTip">Speichern</x:String>
@@ -55,13 +54,13 @@
     <x:String x:Key="BotView_StopInstance">Instanz stoppen</x:String>
     <x:String x:Key="BotView_Start">Starten</x:String>
     <x:String x:Key="BotView_DownloadInstall">Herunterladen und installieren</x:String>
-    <x:String x:Key="BotView_CancelDownload">Download abbrechen</x:String>
+    <x:String x:Key="BotView_CancelDownload">Herunterladen abbrechen</x:String>
     <x:String x:Key="BotView_Shortcuts">Verknüpfungen</x:String>
     <x:String x:Key="BotView_DataFolder">Datenordner</x:String>
     <x:String x:Key="BotView_OpenInFileManager">Im Dateimanager öffnen</x:String>
     <x:String x:Key="BotView_OpenConfiguration">Konfiguration öffnen</x:String>
     <x:String x:Key="BotView_DangerZone">GEFAHRENZONE</x:String>
-    <x:String x:Key="BotView_DangerDescription">Das Löschen dieser Instanz entfernt alle zugehörigen Daten und Konfigurationsdateien.</x:String>
+    <x:String x:Key="BotView_DangerDescription">Entfernt diese Instanz aus Upeko. Die Dateien des Bots bleiben erhalten. Löschen Sie den Ordner selbst, wenn Sie ihn nicht mehr brauchen.</x:String>
     <x:String x:Key="BotView_DeleteInstance">Instanz löschen</x:String>
     <x:String x:Key="BotView_SelectBotPath">Bot-Pfad auswählen</x:String>
     <x:String x:Key="BotView_SelectAvatarImage">Avatar-Bild auswählen</x:String>
@@ -75,28 +74,51 @@
     <x:String x:Key="Status_Unknown">Unbekannt</x:String>
 
     <!-- Update Button -->
-    <x:String x:Key="BotView_Checking">Überprüfung...</x:String>
+    <x:String x:Key="BotView_Checking">Wird geprüft...</x:String>
     <x:String x:Key="BotView_UpdateButton">Aktualisieren</x:String>
     <x:String x:Key="BotView_CheckUpdates">Nach Updates suchen</x:String>
 
     <!-- Download Progress -->
     <x:String x:Key="Progress_Downloading">Herunterladen...</x:String>
-    <x:String x:Key="Progress_Initializing">Initialisierung...</x:String>
     <x:String x:Key="Progress_PleaseWait">Bitte warten, schließen Sie die Anwendung nicht.</x:String>
-    <x:String x:Key="Progress_Stalled">Angehalten</x:String>
+    <x:String x:Key="Progress_Stalled">Kein Fortschritt</x:String>
     <x:String x:Key="Progress_Calculating">Berechnung...</x:String>
 
     <!-- Dependency Status -->
-    <x:String x:Key="Dep_Checking">Überprüfung</x:String>
-    <x:String x:Key="Dep_Installed">installiert</x:String>
-    <x:String x:Key="Dep_Missing">fehlt</x:String>
 
     <!-- Toast Messages -->
     <x:String x:Key="Toast_InstanceCreated">Instanz erstellt</x:String>
     <x:String x:Key="Toast_InstanceDeleted">Instanz gelöscht</x:String>
-    <x:String x:Key="Toast_RecoveredFromBackup">Aus Sicherung wiederhergestellt</x:String>
-    <x:String x:Key="Toast_InstallingFfmpeg">ffmpeg wird installiert...</x:String>
-    <x:String x:Key="Toast_InstallingYtdlp">yt-dlp wird installiert...</x:String>
-    <x:String x:Key="Toast_InstallingJs">Deno wird installiert...</x:String>
-    <x:String x:Key="Toast_ResumingBots">{0} Bot(s) werden fortgesetzt...</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Die Einstellungen waren beschädigt und wurden aus einer Sicherung wiederhergestellt</x:String>
+    <x:String x:Key="Toast_ResumingBots">Bots der letzten Sitzung werden gestartet: {0}</x:String>
+
+    <!-- Notices and errors -->
+    <x:String x:Key="Modal_ExitMessage">Laufende Bots: {0}. Wenn Sie Upeko beenden, werden sie gestoppt. Beim nächsten Start von Upeko starten sie wieder.</x:String>
+    <x:String x:Key="Progress_DownloadingVersion">NadekoBot {0} wird heruntergeladen...</x:String>
+    <x:String x:Key="Progress_Extracting">Wird entpackt...</x:String>
+    <x:String x:Key="Progress_Installing">Wird installiert...</x:String>
+    <x:String x:Key="BotView_DiskSpace">~{0} benötigt · {1} frei</x:String>
+    <x:String x:Key="Dep_TipInstalled">{0} ist installiert</x:String>
+    <x:String x:Key="Dep_TipMissing">{0} fehlt. Klicken Sie, um es zu installieren (wird für Musik benötigt).</x:String>
+    <x:String x:Key="Dep_TipChecking">{0} wird geprüft...</x:String>
+    <x:String x:Key="Toast_InstallingDep">{0} wird installiert...</x:String>
+    <x:String x:Key="Toast_DepInstalled">{0} wurde installiert</x:String>
+    <x:String x:Key="Toast_DepInstallFailed">{0} konnte nicht installiert werden. Details stehen im Log.</x:String>
+    <x:String x:Key="Toast_FfmpegMacBrew">Installieren Sie ffmpeg mit Homebrew: brew install ffmpeg</x:String>
+    <x:String x:Key="Toast_StartFailed">{0} konnte nicht gestartet werden: {1}</x:String>
+    <x:String x:Key="Toast_BotExited">{0} wurde unerwartet beendet</x:String>
+    <x:String x:Key="Toast_CredsMissing">creds_example.yml wurde nicht gefunden. Laden Sie zuerst den Bot herunter.</x:String>
+    <x:String x:Key="Toast_OpenFailed">Konnte nicht geöffnet werden: {0}</x:String>
+    <x:String x:Key="Toast_UpdateCheckFailed">Die Suche nach Updates ist fehlgeschlagen: {0}</x:String>
+    <x:String x:Key="Toast_UpToDate">NadekoBot ist auf dem neuesten Stand</x:String>
+    <x:String x:Key="Toast_StopBeforeUpdate">Stoppen Sie den Bot vor dem Update</x:String>
+    <x:String x:Key="Toast_BotInstalled">{0} ist bereit (v{1})</x:String>
+    <x:String x:Key="Toast_DownloadCancelled">Herunterladen abgebrochen</x:String>
+    <x:String x:Key="Toast_DownloadFailed">Herunterladen fehlgeschlagen: {0}</x:String>
+    <x:String x:Key="Error_DownloadInProgress">Es läuft bereits ein anderer Download. Warten Sie, bis er abgeschlossen ist.</x:String>
+    <x:String x:Key="Error_NoAssets">Die neueste NadekoBot-Version hat noch keine Downloads. Versuchen Sie es später erneut.</x:String>
+    <x:String x:Key="Error_NoAssetForPlatform">Die neueste NadekoBot-Version hat keinen Build für dieses System ({0}).</x:String>
+    <x:String x:Key="Error_RootFolder">Wählen Sie einen Ordner für den Bot, nicht das Stammverzeichnis eines Laufwerks.</x:String>
+    <x:String x:Key="Error_NotEnoughSpace">Nicht genug Speicherplatz: {0} benötigt, {1} frei. Geben Sie Speicher frei oder wählen Sie einen anderen Ordner.</x:String>
+    <x:String x:Key="Error_Extract">Der Download konnte nicht entpackt werden: {0}</x:String>
 </ResourceDictionary>

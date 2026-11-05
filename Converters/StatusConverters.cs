@@ -2,27 +2,31 @@ using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using upeko.Services;
+using upeko.ViewModels;
 
 namespace upeko.Converters;
+
+internal static class Palette
+{
+    public static readonly Color Running = Color.Parse("#12b886");
+    public static readonly Color Ready = Color.Parse("#0070f3");
+    public static readonly Color Warning = Color.Parse("#f5a623");
+    public static readonly Color Error = Color.Parse("#e5484d");
+    public static readonly Color Neutral = Color.Parse("#999999");
+
+    public static Color ForState(object? value) => value switch
+    {
+        MainActivityState.Running => Running,
+        MainActivityState.Runnable => Ready,
+        MainActivityState.Updatable => Warning,
+        _ => Neutral
+    };
+}
 
 public class StatusToDotColorConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        if (value is MainActivityState status)
-        {
-            return status switch
-            {
-                MainActivityState.Running => new SolidColorBrush(Color.Parse("#12b886")),
-                MainActivityState.Runnable => new SolidColorBrush(Color.Parse("#0070f3")),
-                MainActivityState.Updatable => new SolidColorBrush(Color.Parse("#f5a623")),
-                MainActivityState.Downloadable => new SolidColorBrush(Color.Parse("#999999")),
-                _ => new SolidColorBrush(Color.Parse("#999999"))
-            };
-        }
-        return new SolidColorBrush(Color.Parse("#999999"));
-    }
+        => new SolidColorBrush(Palette.ForState(value));
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
@@ -31,20 +35,7 @@ public class StatusToDotColorConverter : IValueConverter
 public class StatusToPillBackgroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        if (value is MainActivityState status)
-        {
-            return status switch
-            {
-                MainActivityState.Running => new SolidColorBrush(Color.Parse("#12b886"), 0.15),
-                MainActivityState.Runnable => new SolidColorBrush(Color.Parse("#0070f3"), 0.1),
-                MainActivityState.Updatable => new SolidColorBrush(Color.Parse("#f5a623"), 0.1),
-                MainActivityState.Downloadable => new SolidColorBrush(Color.Parse("#999999"), 0.1),
-                _ => new SolidColorBrush(Color.Parse("#999999"), 0.1)
-            };
-        }
-        return new SolidColorBrush(Color.Parse("#999999"), 0.1);
-    }
+        => new SolidColorBrush(Palette.ForState(value), value is MainActivityState.Running ? 0.15 : 0.1);
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
@@ -53,54 +44,7 @@ public class StatusToPillBackgroundConverter : IValueConverter
 public class StatusToPillForegroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        if (value is MainActivityState status)
-        {
-            return status switch
-            {
-                MainActivityState.Running => new SolidColorBrush(Color.Parse("#12b886")),
-                MainActivityState.Runnable => new SolidColorBrush(Color.Parse("#0070f3")),
-                MainActivityState.Updatable => new SolidColorBrush(Color.Parse("#f5a623")),
-                MainActivityState.Downloadable => new SolidColorBrush(Color.Parse("#999999")),
-                _ => new SolidColorBrush(Color.Parse("#999999"))
-            };
-        }
-        return new SolidColorBrush(Color.Parse("#999999"));
-    }
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotSupportedException();
-}
-
-public class StatusToTextConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        var loc = LocalizationService.Instance;
-        if (value is MainActivityState status)
-        {
-            return status switch
-            {
-                MainActivityState.Running => loc["Status_Running"],
-                MainActivityState.Runnable => loc["Status_Ready"],
-                MainActivityState.Updatable => loc["Status_UpdateAvailable"],
-                MainActivityState.Downloadable => loc["Status_NotDownloaded"],
-                _ => loc["Status_Unknown"]
-            };
-        }
-        return loc["Status_Unknown"];
-    }
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotSupportedException();
-}
-
-public class BoolToOpacityConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value is true ? 1.0 : 0.0;
-    }
+        => new SolidColorBrush(Palette.ForState(value));
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
@@ -109,40 +53,28 @@ public class BoolToOpacityConverter : IValueConverter
 public class DepStatusToDotColorConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        if (value is string status)
+        => new SolidColorBrush(value switch
         {
-            return status switch
-            {
-                "installed" => new SolidColorBrush(Color.Parse("#50e3c2")),
-                "missing" => new SolidColorBrush(Color.Parse("#f5a623")),
-                "checking" => new SolidColorBrush(Color.Parse("#0070f3")),
-                _ => new SolidColorBrush(Color.Parse("#999999"))
-            };
-        }
-        return new SolidColorBrush(Color.Parse("#999999"));
-    }
+            "installed" => Palette.Running,
+            "missing" => Palette.Warning,
+            "checking" => Palette.Ready,
+            _ => Palette.Neutral
+        });
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
 
-public class NullToStringConverter : IValueConverter
+public class ToastKindToColorConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value?.ToString() ?? (parameter?.ToString() ?? "\u2014");
-    }
+        => new SolidColorBrush(value switch
+        {
+            ToastKind.Success => Palette.Running,
+            ToastKind.Error => Palette.Error,
+            _ => Palette.Ready
+        });
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
-}
-
-public class InverseBoolConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => value is bool b && !b;
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => value is bool b && !b;
 }

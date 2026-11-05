@@ -1,12 +1,11 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using upeko.Services;
@@ -21,7 +20,10 @@ public partial class App : Application
     public static MainWindowViewModel? ViewModel { get; private set; }
 
     private TrayIcon? _trayIcon;
+    private NativeMenuItem? _showItem;
+    private NativeMenuItem? _exitItem;
     private DateTime _lastNotification = DateTime.MinValue;
+    private bool _quitting;
 
     public override void Initialize()
     {
@@ -47,6 +49,8 @@ public partial class App : Application
                 DataContext = ViewModel,
             };
             desktop.MainWindow = MainWindow;
+
+            // The window hides to the tray instead of closing, so only Quit() ends the app.
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             SetupTrayIcon();
@@ -57,23 +61,25 @@ public partial class App : Application
 
     private void SetupTrayIcon()
     {
-        var showItem = new NativeMenuItem("Show Upeko");
-        showItem.Click += (_, _) => ShowMainWindow();
+        _showItem = new NativeMenuItem();
+        _showItem.Click += (_, _) => ShowMainWindow();
 
-        var exitItem = new NativeMenuItem("Exit");
-        exitItem.Click += (_, _) => ExitApplication();
+        _exitItem = new NativeMenuItem();
+        _exitItem.Click += (_, _) => ExitApplication();
 
         var menu = new NativeMenu();
-        menu.Items.Add(showItem);
+        menu.Items.Add(_showItem);
         menu.Items.Add(new NativeMenuItemSeparator());
-        menu.Items.Add(exitItem);
+        menu.Items.Add(_exitItem);
 
         _trayIcon = new TrayIcon
         {
-            ToolTipText = "Upeko",
             Menu = menu,
             IsVisible = true
         };
+
+        UpdateTrayText();
+        LocalizationService.Instance.LanguageChanged += UpdateTrayText;
 
         try
         {
@@ -87,6 +93,14 @@ public partial class App : Application
         _trayIcon.Clicked += (_, _) => ShowMainWindow();
     }
 
+    private void UpdateTrayText()
+    {
+        var loc = LocalizationService.Instance;
+        if (_showItem is not null) _showItem.Header = loc["Tray_Show"];
+        if (_exitItem is not null) _exitItem.Header = loc["Tray_Exit"];
+        if (_trayIcon is not null) _trayIcon.ToolTipText = loc["Tray_Tooltip"];
+    }
+
     private void ShowMainWindow()
     {
         MainWindow.Show();
@@ -94,8 +108,29 @@ public partial class App : Application
         MainWindow.Activate();
     }
 
+    /// <summary>
+    /// Exit from the tray menu. Asks first when bots are running.
+    /// </summary>
     public void ExitApplication()
     {
+        if (ViewModel is not null && !ViewModel.RequestExit())
+        {
+            ShowMainWindow();
+            return;
+        }
+
+        Quit();
+    }
+
+    /// <summary>
+    /// Ends the app without asking.
+    /// </summary>
+    public void Quit()
+    {
+        if (_quitting)
+            return;
+        _quitting = true;
+
         _trayIcon?.Dispose();
         _trayIcon = null;
 
@@ -115,28 +150,42 @@ public partial class App : Application
 
         try
         {
+            ProcessStartInfo psi;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Process.Start(new ProcessStartInfo("notify-send", $"\"{title}\" \"{message}\"")
-                    { UseShellExecute = false, CreateNoWindow = true });
+                psi = new ProcessStartInfo("notify-send");
+                psi.ArgumentList.Add(title);
+                psi.ArgumentList.Add(message);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start(new ProcessStartInfo("osascript",
-                    $"-e 'display notification \"{message}\" with title \"{title}\"'")
-                    { UseShellExecute = false, CreateNoWindow = true });
+                static string AppleScriptString(string s) => "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+                psi = new ProcessStartInfo("osascript");
+                psi.ArgumentList.Add("-e");
+                psi.ArgumentList.Add($"display notification {AppleScriptString(message)} with title {AppleScriptString(title)}");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                static string PsString(string s) => "'" + s.Replace("'", "''") + "'";
                 var script = "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; " +
                              "$xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); " +
                              "$text = $xml.GetElementsByTagName('text'); " +
-                             $"$text[0].AppendChild($xml.CreateTextNode('{title}')) | Out-Null; " +
-                             $"$text[1].AppendChild($xml.CreateTextNode('{message}')) | Out-Null; " +
+                             $"$text[0].AppendChild($xml.CreateTextNode({PsString(title)})) | Out-Null; " +
+                             $"$text[1].AppendChild($xml.CreateTextNode({PsString(message)})) | Out-Null; " +
                              "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Upeko').Show([Windows.UI.Notifications.ToastNotification]::new($xml))";
-                Process.Start(new ProcessStartInfo("powershell", $"-NoProfile -Command \"{script}\"")
-                    { UseShellExecute = false, CreateNoWindow = true });
+                psi = new ProcessStartInfo("powershell");
+                psi.ArgumentList.Add("-NoProfile");
+                psi.ArgumentList.Add("-Command");
+                psi.ArgumentList.Add(script);
             }
+            else
+            {
+                return;
+            }
+
+            psi.UseShellExecute = false;
+            psi.CreateNoWindow = true;
+            Process.Start(psi)?.Dispose();
         }
         catch
         {

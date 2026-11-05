@@ -1,53 +1,48 @@
-using System.Runtime.InteropServices;
+using System.IO;
 
 namespace upeko;
 
 public static class DiskSpace
 {
+    /// <summary>
+    /// Free space available to the current user on the drive that holds <paramref name="path"/>.
+    /// The path does not need to exist yet; its closest existing parent folder is used.
+    /// </summary>
     public static long? GetAvailableBytes(string path)
     {
         try
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var dir = Path.GetFullPath(path);
+            while (!Directory.Exists(dir))
             {
-                if (GetDiskFreeSpaceEx(path, out var freeBytesAvailable, out _, out _))
-                    return (long)freeBytesAvailable;
-                return null;
+                var parent = Path.GetDirectoryName(dir);
+                if (parent is null)
+                    return null;
+                dir = parent;
             }
-            else
-            {
-                var buf = new Statvfs();
-                if (statvfs(path, ref buf) == 0)
-                    return (long)(buf.f_bavail * buf.f_frsize);
-                return null;
-            }
+
+            // On Linux and macOS DriveInfo queries the file system that contains this folder,
+            // which is what we need when /home or the bots folder is a separate mount.
+            return new DriveInfo(dir).AvailableFreeSpace;
         }
-        catch { return null; }
+        catch
+        {
+            return null;
+        }
     }
 
-    [DllImport("libc", SetLastError = true)]
-    private static extern int statvfs(string path, ref Statvfs buf);
+    /// <summary>
+    /// Bytes a NadekoBot download needs: the archive, its extracted copy, the old install kept as backup,
+    /// plus some headroom.
+    /// </summary>
+    public static long RequiredForInstall(long archiveSize)
+        => (archiveSize > 0 ? archiveSize : 100_000_000L) * 4 + 100_000_000L;
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct Statvfs
-    {
-        public ulong f_bsize;
-        public ulong f_frsize;
-        public ulong f_blocks;
-        public ulong f_bfree;
-        public ulong f_bavail;
-        public ulong f_files;
-        public ulong f_ffree;
-        public ulong f_favail;
-        public ulong f_fsid;
-        public ulong f_flag;
-        public ulong f_namemax;
-    }
-
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    private static extern bool GetDiskFreeSpaceEx(
-        string lpDirectoryName,
-        out ulong lpFreeBytesAvailableToCaller,
-        out ulong lpTotalNumberOfBytes,
-        out ulong lpTotalNumberOfFreeBytes);
+    public static string Format(long bytes)
+        => bytes switch
+        {
+            >= 1_073_741_824 => $"{bytes / 1_073_741_824.0:F1} GB",
+            >= 1_048_576 => $"{bytes / 1_048_576.0:F0} MB",
+            _ => $"{bytes / 1024.0:F0} KB"
+        };
 }

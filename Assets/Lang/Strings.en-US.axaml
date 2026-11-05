@@ -20,7 +20,6 @@
 
     <!-- Exit Modal -->
     <x:String x:Key="Modal_ExitTitle">Bots Are Still Running</x:String>
-    <x:String x:Key="Modal_ExitSuffix"> bot(s) are still running. Closing Upeko will stop all running bots. Are you sure you want to quit?</x:String>
     <x:String x:Key="Modal_QuitAnyway">Quit Anyway</x:String>
 
     <!-- Tray -->
@@ -31,7 +30,7 @@
 
     <!-- Bot List View -->
     <x:String x:Key="BotList_PageTitle">Instances</x:String>
-    <x:String x:Key="BotList_PageSubtitle">Manage your NadekoBot deployments</x:String>
+    <x:String x:Key="BotList_PageSubtitle">Manage your NadekoBot instances</x:String>
     <x:String x:Key="BotList_Changelog">Changelog</x:String>
     <x:String x:Key="BotList_AddInstance">Add Instance</x:String>
     <x:String x:Key="BotList_Start">Start</x:String>
@@ -61,7 +60,7 @@
     <x:String x:Key="BotView_OpenInFileManager">Open in file manager</x:String>
     <x:String x:Key="BotView_OpenConfiguration">Open configuration</x:String>
     <x:String x:Key="BotView_DangerZone">DANGER ZONE</x:String>
-    <x:String x:Key="BotView_DangerDescription">Deleting this instance will remove all associated data and configuration files.</x:String>
+    <x:String x:Key="BotView_DangerDescription">Removes this instance from Upeko. The bot's files stay on disk, so delete its folder yourself if you no longer need it.</x:String>
     <x:String x:Key="BotView_DeleteInstance">Delete Instance</x:String>
     <x:String x:Key="BotView_SelectBotPath">Select Bot Path</x:String>
     <x:String x:Key="BotView_SelectAvatarImage">Select Avatar Image</x:String>
@@ -81,22 +80,45 @@
 
     <!-- Download Progress -->
     <x:String x:Key="Progress_Downloading">Downloading...</x:String>
-    <x:String x:Key="Progress_Initializing">Initializing...</x:String>
     <x:String x:Key="Progress_PleaseWait">Please wait, do not close the application.</x:String>
     <x:String x:Key="Progress_Stalled">Stalled</x:String>
     <x:String x:Key="Progress_Calculating">Calculating...</x:String>
 
     <!-- Dependency Status -->
-    <x:String x:Key="Dep_Checking">checking</x:String>
-    <x:String x:Key="Dep_Installed">installed</x:String>
-    <x:String x:Key="Dep_Missing">missing</x:String>
 
     <!-- Toast Messages -->
     <x:String x:Key="Toast_InstanceCreated">Instance created</x:String>
     <x:String x:Key="Toast_InstanceDeleted">Instance deleted</x:String>
-    <x:String x:Key="Toast_RecoveredFromBackup">Recovered from backup</x:String>
-    <x:String x:Key="Toast_InstallingFfmpeg">Installing ffmpeg...</x:String>
-    <x:String x:Key="Toast_InstallingYtdlp">Installing yt-dlp...</x:String>
-    <x:String x:Key="Toast_InstallingJs">Installing deno...</x:String>
-    <x:String x:Key="Toast_ResumingBots">Resuming {0} bot(s)...</x:String>
+    <x:String x:Key="Toast_RecoveredFromBackup">Settings were damaged and have been restored from a backup</x:String>
+    <x:String x:Key="Toast_ResumingBots">Starting bots from your last session: {0}</x:String>
+
+    <!-- Notices and errors -->
+    <x:String x:Key="Modal_ExitMessage">Running bots: {0}. Quitting Upeko stops them. They start again the next time you open Upeko.</x:String>
+    <x:String x:Key="Progress_DownloadingVersion">Downloading NadekoBot {0}...</x:String>
+    <x:String x:Key="Progress_Extracting">Extracting...</x:String>
+    <x:String x:Key="Progress_Installing">Installing...</x:String>
+    <x:String x:Key="BotView_DiskSpace">~{0} needed · {1} free</x:String>
+    <x:String x:Key="Dep_TipInstalled">{0} is installed</x:String>
+    <x:String x:Key="Dep_TipMissing">{0} is missing. Click to install it (needed for music).</x:String>
+    <x:String x:Key="Dep_TipChecking">Checking {0}...</x:String>
+    <x:String x:Key="Toast_InstallingDep">Installing {0}...</x:String>
+    <x:String x:Key="Toast_DepInstalled">{0} installed</x:String>
+    <x:String x:Key="Toast_DepInstallFailed">Could not install {0}. See the log for details.</x:String>
+    <x:String x:Key="Toast_FfmpegMacBrew">Install ffmpeg with Homebrew: brew install ffmpeg</x:String>
+    <x:String x:Key="Toast_StartFailed">Could not start {0}: {1}</x:String>
+    <x:String x:Key="Toast_BotExited">{0} stopped unexpectedly</x:String>
+    <x:String x:Key="Toast_CredsMissing">creds_example.yml was not found. Download the bot first.</x:String>
+    <x:String x:Key="Toast_OpenFailed">Could not open it: {0}</x:String>
+    <x:String x:Key="Toast_UpdateCheckFailed">Could not check for updates: {0}</x:String>
+    <x:String x:Key="Toast_UpToDate">NadekoBot is up to date</x:String>
+    <x:String x:Key="Toast_StopBeforeUpdate">Stop the bot before you update it</x:String>
+    <x:String x:Key="Toast_BotInstalled">{0} is ready (v{1})</x:String>
+    <x:String x:Key="Toast_DownloadCancelled">Download cancelled</x:String>
+    <x:String x:Key="Toast_DownloadFailed">Download failed: {0}</x:String>
+    <x:String x:Key="Error_DownloadInProgress">Another download is running. Wait for it to finish.</x:String>
+    <x:String x:Key="Error_NoAssets">The latest NadekoBot release has no downloads yet. Try again later.</x:String>
+    <x:String x:Key="Error_NoAssetForPlatform">The latest NadekoBot release has no build for this system ({0}).</x:String>
+    <x:String x:Key="Error_RootFolder">Choose a folder for the bot, not the root of a drive.</x:String>
+    <x:String x:Key="Error_NotEnoughSpace">Not enough disk space: {0} needed, {1} free. Free up space or choose another folder.</x:String>
+    <x:String x:Key="Error_Extract">Could not extract the download: {0}</x:String>
 </ResourceDictionary>
