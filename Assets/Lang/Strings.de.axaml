@@ -121,4 +121,15 @@
     <x:String x:Key="Error_RootFolder">Wählen Sie einen Ordner für den Bot, nicht das Stammverzeichnis eines Laufwerks.</x:String>
     <x:String x:Key="Error_NotEnoughSpace">Nicht genug Speicherplatz: {0} benötigt, {1} frei. Geben Sie Speicher frei oder wählen Sie einen anderen Ordner.</x:String>
     <x:String x:Key="Error_Extract">Der Download konnte nicht entpackt werden: {0}</x:String>
+
+    <!-- Patreon and NadeKloud -->
+    <x:String x:Key="MainWindow_PatreonTip">Nadeko auf Patreon unterstützen</x:String>
+    <x:String x:Key="MainWindow_CloudTip">NadeKloud: verwaltetes NadekoBot-Hosting</x:String>
+    <x:String x:Key="Cloud_StripText">Lieber nicht selbst betreiben? Wir hosten Ihren Bot rund um die Uhr und können Ihren data-Ordner übernehmen.</x:String>
+    <x:String x:Key="Cloud_MoveBot">Bot umziehen</x:String>
+    <x:String x:Key="Cloud_HideTip">30 Tage ausblenden</x:String>
+    <x:String x:Key="Cloud_Or">oder</x:String>
+    <x:String x:Key="Cloud_CardTitle">Wir hosten ihn für Sie</x:String>
+    <x:String x:Key="Cloud_CardText">NadeKloud betreibt Ihren eigenen NadekoBot rund um die Uhr. Kein eigener Server, Updates und nächtliche Sicherungen übernehmen wir. Kostenlos testen, ohne Karte.</x:String>
+    <x:String x:Key="Cloud_TryFree">Kostenlos testen</x:String>
 </ResourceDictionary>

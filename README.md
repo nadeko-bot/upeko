@@ -21,6 +21,10 @@ Get the latest build for your system from the [releases page](https://github.com
 - **Runs in the background**: closing the window keeps Upeko in the system tray, and bots that were running start again the next time Upeko opens.
 - **Light and dark theme**, and 7 languages: English, Français, Deutsch, Español, Polski, Русский, 中文.
 
+## Don't want to host it yourself?
+
+[NadeKloud](https://cloud.nadeko.bot/?ref=upeko&utm_source=upeko&utm_medium=readme) is managed NadekoBot hosting from Nadeko's developer: your own bot online 24/7, with updates and nightly backups handled for you. It has a free trial, and you can import the `data` folder of a bot you already run.
+
 ## First launch
 
 1. Start Upeko.
@@ -77,6 +81,8 @@ Pushing a tag (for example `1.2.0`) makes the GitHub workflow build all platform
 ## Help
 
 Ask in the `#help` channel of the [NadekoBot Discord](https://discord.nadeko.bot).
+
+Nadeko is free and open source. If you'd like to help, you can [support it on Patreon](https://patreon.com/join/nadekobot).
 
 ## License
 

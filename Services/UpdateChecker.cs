@@ -148,6 +148,14 @@ namespace upeko.Services
 
             try
             {
+                botPath = Path.GetFullPath(botPath);
+                var parentDir = Path.GetDirectoryName(botPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+
+                // The old install is moved next to the bot folder and deleted later,
+                // so a bot in a drive root would take the whole drive with it.
+                if (string.IsNullOrEmpty(parentDir))
+                    return DownloadResult.Failed(Loc["Error_RootFolder"]);
+
                 if (LatestRelease == null)
                 {
                     var error = await CheckForUpdatesAsync();
@@ -165,14 +173,6 @@ namespace upeko.Services
 
                 if (asset == null || string.IsNullOrEmpty(asset.DownloadUrl))
                     return DownloadResult.Failed(string.Format(Loc["Error_NoAssetForPlatform"], assetName));
-
-                botPath = Path.GetFullPath(botPath);
-                var parentDir = Path.GetDirectoryName(botPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-
-                // The old install is moved next to the bot folder and deleted later,
-                // so a bot in a drive root would take the whole drive with it.
-                if (string.IsNullOrEmpty(parentDir))
-                    return DownloadResult.Failed(Loc["Error_RootFolder"]);
 
                 var requiredBytes = DiskSpace.RequiredForInstall(asset.Size);
                 var availableBytes = DiskSpace.GetAvailableBytes(botPath);

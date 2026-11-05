@@ -121,4 +121,15 @@
     <x:String x:Key="Error_RootFolder">Wybierz folder dla bota, a nie katalog główny dysku.</x:String>
     <x:String x:Key="Error_NotEnoughSpace">Za mało miejsca na dysku: potrzeba {0}, wolne {1}. Zwolnij miejsce lub wybierz inny folder.</x:String>
     <x:String x:Key="Error_Extract">Nie udało się rozpakować pobranego pliku: {0}</x:String>
+
+    <!-- Patreon and NadeKloud -->
+    <x:String x:Key="MainWindow_PatreonTip">Wesprzyj Nadeko na Patreonie</x:String>
+    <x:String x:Key="MainWindow_CloudTip">NadeKloud: zarządzany hosting NadekoBot</x:String>
+    <x:String x:Key="Cloud_StripText">Nie chcesz utrzymywać go sam? Hostujemy twojego bota 24/7 i możemy zaimportować twój folder data.</x:String>
+    <x:String x:Key="Cloud_MoveBot">Przenieś bota</x:String>
+    <x:String x:Key="Cloud_HideTip">Ukryj na 30 dni</x:String>
+    <x:String x:Key="Cloud_Or">lub</x:String>
+    <x:String x:Key="Cloud_CardTitle">Pozwól nam go hostować</x:String>
+    <x:String x:Key="Cloud_CardText">NadeKloud uruchamia twojego własnego NadekoBota 24/7. Bez własnego serwera, a aktualizacjami i nocnymi kopiami zapasowymi zajmujemy się my. Darmowy okres próbny, bez karty.</x:String>
+    <x:String x:Key="Cloud_TryFree">Wypróbuj za darmo</x:String>
 </ResourceDictionary>

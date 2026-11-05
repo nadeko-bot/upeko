@@ -121,4 +121,15 @@
     <x:String x:Key="Error_RootFolder">Choose a folder for the bot, not the root of a drive.</x:String>
     <x:String x:Key="Error_NotEnoughSpace">Not enough disk space: {0} needed, {1} free. Free up space or choose another folder.</x:String>
     <x:String x:Key="Error_Extract">Could not extract the download: {0}</x:String>
+
+    <!-- Patreon and NadeKloud -->
+    <x:String x:Key="MainWindow_PatreonTip">Support Nadeko on Patreon</x:String>
+    <x:String x:Key="MainWindow_CloudTip">NadeKloud: managed NadekoBot hosting</x:String>
+    <x:String x:Key="Cloud_StripText">Rather not run it yourself? We host your bot 24/7 and can import your data folder.</x:String>
+    <x:String x:Key="Cloud_MoveBot">Move my bot</x:String>
+    <x:String x:Key="Cloud_HideTip">Hide for 30 days</x:String>
+    <x:String x:Key="Cloud_Or">or</x:String>
+    <x:String x:Key="Cloud_CardTitle">Let us host it</x:String>
+    <x:String x:Key="Cloud_CardText">NadeKloud runs your own NadekoBot 24/7. No server to keep running, and updates and nightly backups are handled for you. Free trial, no card needed.</x:String>
+    <x:String x:Key="Cloud_TryFree">Try it free</x:String>
 </ResourceDictionary>

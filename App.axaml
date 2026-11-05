@@ -261,6 +261,30 @@
             <Setter Property="RenderTransform" Value="none"/>
         </Style>
 
+        <!-- NadeKloud card and strip on the bot list -->
+        <Style Selector="Border.cloud-strip">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+
+        <!-- Footer links -->
+        <Style Selector="Button.footer-icon">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+        </Style>
+        <Style Selector="Button.footer-link">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
         <!-- "Newer version" pill in the footer -->
         <Style Selector="Button.update-pill">
             <Setter Property="Background" Value="#2f9e44"/>

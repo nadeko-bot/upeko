@@ -28,6 +28,8 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private const string UpEkoReleaseUrl = "https://github.com/nadeko-bot/upeko/releases/latest";
     private const string DiscordUrl = "https://discord.gg/nadekobot";
+    private const string PatreonUrl = "https://patreon.com/join/nadekobot";
+    private const string CloudUrl = "https://cloud.nadeko.bot";
 
     private static readonly System.Net.Http.HttpClient _httpClient = new()
     {
@@ -187,6 +189,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void OpenUpEkoRelease() => OpenUrl(UpEkoReleaseUrl);
+
+    [RelayCommand]
+    private void OpenPatreon() => OpenUrl(PatreonUrl);
+
+    /// <param name="content">Where in upeko the link was clicked; NadeKloud records it with the signup.</param>
+    [RelayCommand]
+    private void OpenCloud(string? content) => OpenUrl(CloudLink(content ?? "app"));
+
+    public static string CloudLink(string content)
+        => $"{CloudUrl}/?ref=upeko&utm_source=upeko&utm_medium=app&utm_content={Uri.EscapeDataString(content)}";
 
     private void OpenUrl(string url)
     {
