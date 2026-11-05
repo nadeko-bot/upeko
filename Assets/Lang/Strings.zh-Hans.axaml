@@ -144,4 +144,6 @@
     <x:String x:Key="Changelog_LoadFailed">无法加载更新日志：{0}</x:String>
     <x:String x:Key="Changelog_OnGitHub">在 GitHub 上查看完整日志</x:String>
     <x:String x:Key="Changelog_Close">关闭</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyTitle">下载后可用</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyText">下载机器人后，即可在此打开其 data 文件夹和 creds.yml。</x:String>
 </ResourceDictionary>

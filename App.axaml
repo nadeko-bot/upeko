@@ -262,10 +262,10 @@
         </Style>
 
         <!-- Disabled flat buttons fade instead of getting Fluent's grey fill -->
-        <Style Selector="Button.btn-ghost:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.shortcut-btn:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.btn-ghost-sm:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Style Selector="Button.btn-ghost:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.btn-ghost-sm:disabled /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent"/>
         </Style>
-        <Style Selector="Button.btn-ghost:disabled, Button.shortcut-btn:disabled, Button.btn-ghost-sm:disabled">
+        <Style Selector="Button.btn-ghost:disabled, Button.btn-ghost-sm:disabled">
             <Setter Property="Opacity" Value="0.45"/>
         </Style>
 

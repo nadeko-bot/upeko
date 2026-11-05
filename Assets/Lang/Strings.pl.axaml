@@ -144,4 +144,6 @@
     <x:String x:Key="Changelog_LoadFailed">Nie udało się wczytać listy zmian: {0}</x:String>
     <x:String x:Key="Changelog_OnGitHub">Pełna lista zmian na GitHubie</x:String>
     <x:String x:Key="Changelog_Close">Zamknij</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyTitle">Dostępne po pobraniu</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyText">Pobierz bota, aby otwierać tutaj jego folder data i creds.yml.</x:String>
 </ResourceDictionary>

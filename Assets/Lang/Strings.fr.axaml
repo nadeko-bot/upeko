@@ -144,4 +144,6 @@
     <x:String x:Key="Changelog_LoadFailed">Impossible de charger les modifications : {0}</x:String>
     <x:String x:Key="Changelog_OnGitHub">Journal complet sur GitHub</x:String>
     <x:String x:Key="Changelog_Close">Fermer</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyTitle">Disponible après le téléchargement</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyText">Téléchargez le bot pour ouvrir ici son dossier data et creds.yml.</x:String>
 </ResourceDictionary>

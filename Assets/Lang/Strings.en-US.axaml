@@ -144,4 +144,6 @@
     <x:String x:Key="Changelog_LoadFailed">Could not load the changelog: {0}</x:String>
     <x:String x:Key="Changelog_OnGitHub">Full changelog on GitHub</x:String>
     <x:String x:Key="Changelog_Close">Close</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyTitle">Available after the download</x:String>
+    <x:String x:Key="BotView_ShortcutsEmptyText">Download the bot to open its data folder and creds.yml here.</x:String>
 </ResourceDictionary>
