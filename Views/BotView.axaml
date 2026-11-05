@@ -246,6 +246,15 @@
                                     </Button>
                                 </Grid>
 
+                                <!-- Update available: what changed -->
+                                <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding CanUpdate}" Margin="0,-4,0,0">
+                                    <Button Grid.Column="2" Classes="btn-ghost-sm" HorizontalAlignment="Center"
+                                            Command="{Binding WhatsNewCommand}">
+                                        <TextBlock Text="{DynamicResource Changelog_WhatsNew}" FontSize="12"
+                                                   TextDecorations="Underline"/>
+                                    </Button>
+                                </Grid>
+
                                 <!-- Missing: Download -->
                                 <Button Classes="btn-primary" IsVisible="{Binding IsMissing}"
                                         Content="{DynamicResource BotView_DownloadInstall}"

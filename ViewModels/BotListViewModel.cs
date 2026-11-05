@@ -15,8 +15,6 @@ namespace upeko.ViewModels;
 
 public partial class BotListViewModel : ViewModelBase
 {
-    private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
-
     private readonly MainWindowViewModel _main;
     private readonly IBotRepository _botRepository;
 
@@ -110,10 +108,9 @@ public partial class BotListViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ShowChangelog()
-    {
-        PlatformSpecific.Open(ChangelogUrl);
-    }
+    private Task ShowChangelog() => _main.OpenChangelogAsync(null);
+
+    public Task ShowChangelogFor(BotViewModel bot) => _main.OpenChangelogAsync(bot);
 
     public void UpdateBot(BotModel bot)
     {

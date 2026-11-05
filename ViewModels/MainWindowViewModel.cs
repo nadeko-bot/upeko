@@ -78,6 +78,8 @@ public partial class MainWindowViewModel : ViewModelBase
         .Select(kv => new LanguageOption(kv.Key, kv.Value))
         .ToList();
 
+    public ChangelogViewModel Changelog { get; }
+
     public FfmpegDepViewModel Ffmpeg { get; }
     public YtdlDepViewModel Ytdlp { get; }
     public JsDepViewModel Js { get; }
@@ -106,6 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Ffmpeg = new FfmpegDepViewModel();
         Ytdlp = new YtdlDepViewModel();
         Js = new JsDepViewModel();
+        Changelog = new ChangelogViewModel(this);
 
         _botListViewModel = new BotListViewModel(this);
         _currentView = _botListViewModel;
@@ -200,6 +203,21 @@ public partial class MainWindowViewModel : ViewModelBase
     public static string CloudLink(string content)
         => $"{CloudUrl}/?ref=upeko&utm_source=upeko&utm_medium=app&utm_content={Uri.EscapeDataString(content)}";
 
+    /// <summary>
+    /// Shows the NadekoBot changes newer than the bot's version; without a bot, newer than the oldest installed one.
+    /// </summary>
+    public Task OpenChangelogAsync(BotViewModel? bot)
+    {
+        var since = bot?.Version ?? _botListViewModel.Bots
+            .Select(b => b.Version)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .OrderBy(v => v!, Comparer<string>.Create(VersionUtil.Compare))
+            .FirstOrDefault();
+
+        return Changelog.OpenAsync(since, bot);
+    }
+
+    [RelayCommand]
     private void OpenUrl(string url)
     {
         try

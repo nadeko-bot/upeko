@@ -48,7 +48,12 @@ public partial class MainWindow : Window
         // Escape closes whichever dialog is open.
         if (e.Key == Key.Escape && DataContext is MainWindowViewModel vm)
         {
-            if (vm.IsDeleteModalOpen)
+            if (vm.Changelog.IsOpen)
+            {
+                vm.Changelog.CloseCommand.Execute(null);
+                e.Handled = true;
+            }
+            else if (vm.IsDeleteModalOpen)
             {
                 vm.CancelDeleteCommand.Execute(null);
                 e.Handled = true;

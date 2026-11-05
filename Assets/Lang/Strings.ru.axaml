@@ -134,4 +134,14 @@
     <x:String x:Key="Footer_Support">Поддержка</x:String>
     <x:String x:Key="Footer_Donate">Донат</x:String>
     <x:String x:Key="Footer_Hosting">Хостинг бота</x:String>
+
+    <!-- Changelog -->
+    <x:String x:Key="Changelog_WhatsNew">Что нового</x:String>
+    <x:String x:Key="Changelog_Title">Список изменений NadekoBot</x:String>
+    <x:String x:Key="Changelog_Since">Изменения после v{0}</x:String>
+    <x:String x:Key="Changelog_Latest">Последняя версия</x:String>
+    <x:String x:Key="Changelog_Loading">Загрузка списка изменений...</x:String>
+    <x:String x:Key="Changelog_LoadFailed">Не удалось загрузить список изменений: {0}</x:String>
+    <x:String x:Key="Changelog_OnGitHub">Все изменения на GitHub</x:String>
+    <x:String x:Key="Changelog_Close">Закрыть</x:String>
 </ResourceDictionary>

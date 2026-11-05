@@ -199,6 +199,20 @@
                                                                VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </Button>
+                                            <Button Classes="btn-ghost" IsVisible="{Binding CanUpdate}"
+                                                    Command="{Binding WhatsNewCommand}"
+                                                    Padding="12,4" MinHeight="0" Height="28">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Viewbox Width="11" Height="11">
+                                                        <Path Data="M5 4H15L19 8V20H5Z M9 12H15 M9 16H13"
+                                                              Stroke="{DynamicResource TextSecondary}" StrokeThickness="2"
+                                                              StrokeLineCap="Round" StrokeJoin="Round"/>
+                                                    </Viewbox>
+                                                    <TextBlock Text="{DynamicResource Changelog_WhatsNew}" FontSize="12" FontWeight="Medium"
+                                                               Foreground="{DynamicResource TextSecondary}"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
                                         </StackPanel>
 
                                         <!-- Download progress (shown during download) -->

@@ -301,6 +301,9 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     private Task DownloadBot() => DownloadAndInstallBotAsync();
 
     [RelayCommand]
+    private Task WhatsNew() => Parent.ShowChangelogFor(this);
+
+    [RelayCommand]
     private void CancelDownload()
     {
         Log.Information("Cancelling download for {BotName}", Bot.Name);

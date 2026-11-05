@@ -134,4 +134,14 @@
     <x:String x:Key="Footer_Support">支持</x:String>
     <x:String x:Key="Footer_Donate">捐助</x:String>
     <x:String x:Key="Footer_Hosting">机器人托管</x:String>
+
+    <!-- Changelog -->
+    <x:String x:Key="Changelog_WhatsNew">更新内容</x:String>
+    <x:String x:Key="Changelog_Title">NadekoBot 更新日志</x:String>
+    <x:String x:Key="Changelog_Since">自 v{0} 以来的更改</x:String>
+    <x:String x:Key="Changelog_Latest">最新版本</x:String>
+    <x:String x:Key="Changelog_Loading">正在加载更新日志...</x:String>
+    <x:String x:Key="Changelog_LoadFailed">无法加载更新日志：{0}</x:String>
+    <x:String x:Key="Changelog_OnGitHub">在 GitHub 上查看完整日志</x:String>
+    <x:String x:Key="Changelog_Close">关闭</x:String>
 </ResourceDictionary>

@@ -134,4 +134,14 @@
     <x:String x:Key="Footer_Support">Support</x:String>
     <x:String x:Key="Footer_Donate">Donate</x:String>
     <x:String x:Key="Footer_Hosting">Bot hosting</x:String>
+
+    <!-- Changelog -->
+    <x:String x:Key="Changelog_WhatsNew">What's new</x:String>
+    <x:String x:Key="Changelog_Title">NadekoBot changelog</x:String>
+    <x:String x:Key="Changelog_Since">Changes since v{0}</x:String>
+    <x:String x:Key="Changelog_Latest">Latest version</x:String>
+    <x:String x:Key="Changelog_Loading">Loading the changelog...</x:String>
+    <x:String x:Key="Changelog_LoadFailed">Could not load the changelog: {0}</x:String>
+    <x:String x:Key="Changelog_OnGitHub">Full changelog on GitHub</x:String>
+    <x:String x:Key="Changelog_Close">Close</x:String>
 </ResourceDictionary>

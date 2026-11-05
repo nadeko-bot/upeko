@@ -2,6 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:upeko.ViewModels"
         xmlns:conv="using:upeko.Converters"
+        xmlns:svc="using:upeko.Services"
+        xmlns:views="using:upeko.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="700"
@@ -18,6 +20,29 @@
         <conv:DepStatusToDotColorConverter x:Key="DepDotColor"/>
         <conv:ToastKindToColorConverter x:Key="ToastKindColor"/>
     </Window.Resources>
+
+    <Window.DataTemplates>
+        <!-- One changelog bullet; nested bullets use the same template. -->
+        <DataTemplate DataType="svc:ChangelogItem">
+            <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="14,*">
+                    <TextBlock Grid.Column="0" Text="•" FontSize="13"
+                               Foreground="{DynamicResource TextTertiary}"/>
+                    <views:InlineCodeText Grid.Column="1" Markdown="{Binding Text}" FontSize="13"
+                                          TextWrapping="Wrap" LineHeight="20"
+                                          Foreground="{DynamicResource TextSecondary}"/>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Children}" Margin="14,0,0,0"
+                              IsVisible="{Binding HasChildren}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+    </Window.DataTemplates>
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -303,5 +328,127 @@
                 </StackPanel>
             </Border>
         </Border>
+
+        <!-- NadekoBot changelog -->
+        <Panel DataContext="{Binding Changelog}">
+          <Panel x:DataType="vm:ChangelogViewModel" IsVisible="{Binding IsOpen}">
+            <Button Classes="backdrop" Command="{Binding CloseCommand}"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Border Background="{DynamicResource AppBackground}"
+                    BorderBrush="{DynamicResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    MaxWidth="640"
+                    Margin="32,40"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    BoxShadow="0 4 16 0 #40000000">
+                <DockPanel>
+                    <!-- Header -->
+                    <Border DockPanel.Dock="Top" Padding="24,20,16,16"
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding Subtitle}" FontSize="12"
+                                           IsVisible="{Binding Subtitle, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                           Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="btn-icon" Width="32" Height="32" Padding="0"
+                                    VerticalAlignment="Top"
+                                    Command="{Binding CloseCommand}"
+                                    ToolTip.Tip="{DynamicResource Changelog_Close}">
+                                <Viewbox Width="14" Height="14">
+                                    <Path Data="M18 6L6 18M6 6L18 18"
+                                          Stroke="{DynamicResource TextTertiary}" StrokeThickness="2"
+                                          StrokeLineCap="Round"/>
+                                </Viewbox>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Footer -->
+                    <Border DockPanel.Dock="Bottom" Padding="16,12,24,16"
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Button Grid.Column="0" Classes="btn-ghost" Padding="8,0"
+                                    Command="{Binding OpenOnGitHubCommand}">
+                                <TextBlock Text="{DynamicResource Changelog_OnGitHub}" FontSize="13"/>
+                            </Button>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                                <Button Classes="btn-ghost"
+                                        Content="{DynamicResource Changelog_Close}"
+                                        Command="{Binding CloseCommand}"/>
+                                <Button Classes="btn-primary"
+                                        IsVisible="{Binding CanUpdate}"
+                                        Content="{DynamicResource BotView_UpdateButton}"
+                                        Command="{Binding UpdateCommand}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Body -->
+                    <Panel>
+                        <TextBlock IsVisible="{Binding IsLoading}" Margin="24,32"
+                                   Text="{DynamicResource Changelog_Loading}" FontSize="13"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource TextSecondary}"/>
+                        <SelectableTextBlock IsVisible="{Binding HasError}" Margin="24,32"
+                                             Text="{Binding Error}" FontSize="13" TextWrapping="Wrap"
+                                             Foreground="{DynamicResource ErrorColor}"/>
+                        <ScrollViewer IsVisible="{Binding ShowVersions}" MaxHeight="520"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding Versions}" Margin="24,20,24,24">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="28"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="svc:ChangelogVersion">
+                                        <StackPanel Spacing="14">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <TextBlock Text="{Binding Version, StringFormat='v{0}'}"
+                                                           FontSize="16" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextPrimary}"/>
+                                                <TextBlock Text="{Binding Date}" FontSize="12"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource TextTertiary}"/>
+                                            </StackPanel>
+                                            <ItemsControl ItemsSource="{Binding Groups}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Spacing="14"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="svc:ChangelogGroup">
+                                                        <StackPanel Spacing="6">
+                                                            <TextBlock Text="{Binding Title}" FontSize="11"
+                                                                       FontWeight="SemiBold" LetterSpacing="0.5"
+                                                                       Foreground="{DynamicResource TextTertiary}"
+                                                                       IsVisible="{Binding Title, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <StackPanel Spacing="4"/>
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Panel>
+                </DockPanel>
+            </Border>
+          </Panel>
+        </Panel>
     </Panel>
 </Window>
