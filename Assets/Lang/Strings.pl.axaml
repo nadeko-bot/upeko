@@ -131,4 +131,7 @@
     <x:String x:Key="Cloud_TryFree">Wypróbuj za darmo</x:String>
     <x:String x:Key="Cloud_AdTag">Reklama</x:String>
     <x:String x:Key="Cloud_AdTip">NadeKloud prowadzi twórca Nadeko</x:String>
+    <x:String x:Key="Footer_Support">Pomoc</x:String>
+    <x:String x:Key="Footer_Donate">Wesprzyj</x:String>
+    <x:String x:Key="Footer_Hosting">Hosting bota</x:String>
 </ResourceDictionary>

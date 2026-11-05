@@ -131,4 +131,7 @@
     <x:String x:Key="Cloud_TryFree">免费试用</x:String>
     <x:String x:Key="Cloud_AdTag">广告</x:String>
     <x:String x:Key="Cloud_AdTip">NadeKloud 由 Nadeko 的开发者运营</x:String>
+    <x:String x:Key="Footer_Support">支持</x:String>
+    <x:String x:Key="Footer_Donate">捐助</x:String>
+    <x:String x:Key="Footer_Hosting">机器人托管</x:String>
 </ResourceDictionary>

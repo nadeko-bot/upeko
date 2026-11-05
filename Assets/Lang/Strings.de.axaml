@@ -131,4 +131,7 @@
     <x:String x:Key="Cloud_TryFree">Kostenlos testen</x:String>
     <x:String x:Key="Cloud_AdTag">Anzeige</x:String>
     <x:String x:Key="Cloud_AdTip">NadeKloud wird vom Entwickler von Nadeko betrieben</x:String>
+    <x:String x:Key="Footer_Support">Support</x:String>
+    <x:String x:Key="Footer_Donate">Spenden</x:String>
+    <x:String x:Key="Footer_Hosting">Bot-Hosting</x:String>
 </ResourceDictionary>

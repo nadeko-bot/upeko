@@ -295,13 +295,6 @@
         </Style>
 
         <!-- Footer links -->
-        <Style Selector="Button.footer-icon">
-            <Setter Property="Width" Value="28"/>
-            <Setter Property="Height" Value="28"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="MinWidth" Value="0"/>
-            <Setter Property="MinHeight" Value="0"/>
-        </Style>
         <Style Selector="Button.footer-link">
             <Setter Property="Height" Value="28"/>
             <Setter Property="Padding" Value="6,0"/>

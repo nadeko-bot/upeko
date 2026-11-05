@@ -131,4 +131,7 @@
     <x:String x:Key="Cloud_TryFree">Try it free</x:String>
     <x:String x:Key="Cloud_AdTag">Ad</x:String>
     <x:String x:Key="Cloud_AdTip">NadeKloud is run by Nadeko's developer</x:String>
+    <x:String x:Key="Footer_Support">Support</x:String>
+    <x:String x:Key="Footer_Donate">Donate</x:String>
+    <x:String x:Key="Footer_Hosting">Bot hosting</x:String>
 </ResourceDictionary>
