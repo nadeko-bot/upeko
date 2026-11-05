@@ -125,11 +125,10 @@
     <!-- Patreon and NadeKloud -->
     <x:String x:Key="MainWindow_PatreonTip">在 Patreon 上支持 Nadeko</x:String>
     <x:String x:Key="MainWindow_CloudTip">NadeKloud：NadekoBot 托管服务</x:String>
-    <x:String x:Key="Cloud_StripText">不想自己运行？我们全天候托管您的机器人，并可导入您的 data 文件夹。</x:String>
-    <x:String x:Key="Cloud_MoveBot">迁移我的机器人</x:String>
-    <x:String x:Key="Cloud_HideTip">隐藏 30 天</x:String>
     <x:String x:Key="Cloud_Or">或</x:String>
     <x:String x:Key="Cloud_CardTitle">交给我们托管</x:String>
     <x:String x:Key="Cloud_CardText">NadeKloud 全天候运行您自己的 NadekoBot。无需维护服务器，更新和每晚备份都由我们处理。免费试用，无需银行卡。</x:String>
     <x:String x:Key="Cloud_TryFree">免费试用</x:String>
+    <x:String x:Key="Cloud_AdTag">广告</x:String>
+    <x:String x:Key="Cloud_AdTip">NadeKloud 由 Nadeko 的开发者运营</x:String>
 </ResourceDictionary>

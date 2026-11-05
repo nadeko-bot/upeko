@@ -125,11 +125,10 @@
     <!-- Patreon and NadeKloud -->
     <x:String x:Key="MainWindow_PatreonTip">Soutenir Nadeko sur Patreon</x:String>
     <x:String x:Key="MainWindow_CloudTip">NadeKloud : hébergement NadekoBot géré</x:String>
-    <x:String x:Key="Cloud_StripText">Vous préférez ne pas l'héberger vous-même ? Nous hébergeons votre bot 24 h/24 et pouvons importer votre dossier data.</x:String>
-    <x:String x:Key="Cloud_MoveBot">Migrer mon bot</x:String>
-    <x:String x:Key="Cloud_HideTip">Masquer pendant 30 jours</x:String>
     <x:String x:Key="Cloud_Or">ou</x:String>
     <x:String x:Key="Cloud_CardTitle">Laissez-nous l'héberger</x:String>
     <x:String x:Key="Cloud_CardText">NadeKloud fait tourner votre propre NadekoBot 24 h/24. Aucun serveur à gérer : les mises à jour et les sauvegardes nocturnes sont prises en charge. Essai gratuit, sans carte.</x:String>
     <x:String x:Key="Cloud_TryFree">Essayer gratuitement</x:String>
+    <x:String x:Key="Cloud_AdTag">Pub</x:String>
+    <x:String x:Key="Cloud_AdTip">NadeKloud est géré par le développeur de Nadeko</x:String>
 </ResourceDictionary>

@@ -17,6 +17,30 @@
             <ResourceInclude x:Key="Lang_pl" Source="avares://upeko/Assets/Lang/Strings.pl.axaml"/>
             <ResourceInclude x:Key="Lang_ru" Source="avares://upeko/Assets/Lang/Strings.ru.axaml"/>
             <ResourceInclude x:Key="Lang_zh-Hans" Source="avares://upeko/Assets/Lang/Strings.zh-Hans.axaml"/>
+            <!-- NadeKloud logo, drawn from ndkloud's favicon.svg (seal with a sakura flower) -->
+            <DrawingImage x:Key="NadeKloudLogo">
+                <DrawingGroup>
+                    <GeometryDrawing Geometry="M0,0 H32 V24.96 L24.96,32 H0 Z">
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="5.07,-2.93" EndPoint="26.93,34.93">
+                                <GradientStop Offset="0" Color="#e0457e"/>
+                                <GradientStop Offset="1" Color="#a8124c"/>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#8CFFFFFF"
+                                     Geometry="M16.000,15.480 L13.400,8.720 L14.310,7.160 L15.220,8.200 L16.000,6.640 L16.780,8.200 L17.690,7.160 L18.600,8.720 Z M16.495,15.839 L22.120,11.278 L23.885,11.661 L23.177,12.848 L24.902,13.108 L23.659,14.331 L24.930,14.876 L23.727,16.223 Z M16.306,16.421 L22.383,20.361 L22.563,22.158 L21.216,21.852 L21.502,23.572 L19.954,22.769 L19.829,24.145 L18.176,23.418 Z M15.694,16.421 L13.824,23.418 L12.171,24.145 L12.046,22.769 L10.498,23.572 L10.784,21.852 L9.437,22.158 L9.617,20.361 Z M15.505,15.839 L8.273,16.223 L7.070,14.876 L8.341,14.331 L7.098,13.108 L8.823,12.848 L8.115,11.661 L9.880,11.278 Z">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="White" Thickness="2.08" LineCap="Round" LineJoin="Round"/>
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="White">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="16,16" RadiusX="1.82" RadiusY="1.82"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="AppBackground" Color="#ffffff"/>

@@ -18,10 +18,5 @@ namespace upeko.Models
         public string Language { get; set; } = "en-US";
 
         public bool IsDarkTheme { get; set; } = false;
-
-        /// <summary>
-        /// The NadeKloud strip under the bot list stays hidden until this time (UTC).
-        /// </summary>
-        public DateTime? CloudPromoHiddenUntil { get; set; }
     }
 }

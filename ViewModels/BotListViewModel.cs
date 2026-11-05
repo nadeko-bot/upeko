@@ -22,20 +22,8 @@ public partial class BotListViewModel : ViewModelBase
 
     public ObservableCollection<BotViewModel> Bots { get; }
 
-    private static readonly TimeSpan CloudPromoHideTime = TimeSpan.FromDays(30);
-
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowCloudStrip))]
     private bool _isEmpty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowCloudStrip))]
-    private bool _isCloudStripHidden;
-
-    /// <summary>
-    /// The one-line NadeKloud strip under a non-empty list. The empty list shows a bigger card instead.
-    /// </summary>
-    public bool ShowCloudStrip => !IsEmpty && !IsCloudStripHidden;
 
     public MainWindowViewModel Main => _main;
 
@@ -46,9 +34,6 @@ public partial class BotListViewModel : ViewModelBase
 
         if (_botRepository.RecoveredFromBackup)
             _main.ShowToast(Loc["Toast_RecoveredFromBackup"], ToastKind.Info);
-
-        var hiddenUntil = _botRepository.GetConfig().CloudPromoHiddenUntil;
-        _isCloudStripHidden = hiddenUntil is not null && hiddenUntil > DateTime.UtcNow;
 
         Bots = new ObservableCollection<BotViewModel>();
         LoadBots();
@@ -122,14 +107,6 @@ public partial class BotListViewModel : ViewModelBase
         Bots.Add(new BotViewModel(this, botModel));
         Log.Information("Created bot instance {BotName} at {BotPath}", botModel.Name, defaultPath);
         ShowToast(Loc["Toast_InstanceCreated"], ToastKind.Success);
-    }
-
-    [RelayCommand]
-    private void HideCloudStrip()
-    {
-        IsCloudStripHidden = true;
-        _botRepository.GetConfig().CloudPromoHiddenUntil = DateTime.UtcNow + CloudPromoHideTime;
-        _botRepository.SaveConfig();
     }
 
     [RelayCommand]
