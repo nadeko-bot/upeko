@@ -242,6 +242,11 @@ public partial class MainWindowViewModel : ViewModelBase
         return Changelog.OpenAsync(since, bot);
     }
 
+    /// <summary>
+    /// Records that the user read the notes up to <paramref name="release"/>, which hides its release strip.
+    /// </summary>
+    public void MarkBotReleaseSeen(string release) => _botListViewModel.ReleaseNews.MarkSeen(release);
+
     [RelayCommand]
     private void OpenUrl(string url)
     {

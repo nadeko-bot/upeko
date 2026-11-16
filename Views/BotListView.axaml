@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:upeko.ViewModels"
              xmlns:conv="using:upeko.Converters"
+             xmlns:svc="using:upeko.Services"
+             xmlns:views="using:upeko.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
@@ -47,6 +49,95 @@
                 </Button>
             </StackPanel>
         </Grid>
+
+        <!-- New NadekoBot release whose notes the user has not read -->
+        <Panel DataContext="{Binding ReleaseNews}">
+            <Border x:DataType="vm:ReleaseNewsViewModel" Classes="release-strip"
+                    IsVisible="{Binding IsVisible}" Margin="0,0,0,24">
+                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+                    <Border Grid.Column="0" Width="32" Height="32" CornerRadius="6"
+                            Background="{DynamicResource AppBackground}"
+                            BorderBrush="{DynamicResource AccentBorderSubtle}" BorderThickness="1"
+                            VerticalAlignment="Top" Margin="0,0,12,0">
+                        <Panel>
+                            <Viewbox Width="16" Height="16" IsVisible="{Binding IsAvailable}">
+                                <Path Data="M17.65 6.35C16.2 4.9 14.21 4 12 4A8 8 0 0 0 4 12A8 8 0 0 0 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18A6 6 0 0 1 6 12A6 6 0 0 1 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z"
+                                      Fill="{DynamicResource AccentColor}"/>
+                            </Viewbox>
+                            <Viewbox Width="14" Height="14" IsVisible="{Binding IsUpdated}">
+                                <Path Data="M5 12.5L10 17.5L19 7"
+                                      Stroke="{DynamicResource AccentColor}" StrokeThickness="2.5"
+                                      StrokeLineCap="Round" StrokeJoin="Round"/>
+                            </Viewbox>
+                        </Panel>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextPrimary}"/>
+                        <!-- A line wraps between parts, so a separator never ends a line. -->
+                        <ItemsControl ItemsSource="{Binding DetailParts}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" FontSize="12" Margin="0,0,12,0"
+                                               Foreground="{DynamicResource TextSecondary}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- The negative margin lines the close glyph up with the strip edge like the icon tile on the left. -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
+                                VerticalAlignment="Top" Margin="12,0,-8,0">
+                        <Button Classes="btn-outline" Command="{Binding WhatsNewCommand}"
+                                Content="{DynamicResource Changelog_WhatsNew}"/>
+                        <Button Classes="btn-icon" Width="32" Height="32" Padding="0"
+                                Command="{Binding DismissCommand}"
+                                ToolTip.Tip="{DynamicResource ReleaseNews_Hide}"
+                                AutomationProperties.Name="{DynamicResource ReleaseNews_Hide}">
+                            <Viewbox Width="12" Height="12">
+                                <Path Data="M18 6L6 18M6 6L18 18"
+                                      Stroke="{DynamicResource TextSecondary}" StrokeThickness="2"
+                                      StrokeLineCap="Round"/>
+                            </Viewbox>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- The first changes; the dialog has all of them -->
+                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,12,0,0" Spacing="4"
+                                IsVisible="{Binding HasTopChanges}">
+                    <ItemsControl ItemsSource="{Binding TopChanges}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="svc:ChangelogItem">
+                                <Grid ColumnDefinitions="14,*">
+                                    <Ellipse Grid.Column="0" Width="4" Height="4" Margin="1,8,0,0"
+                                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                                             Fill="{DynamicResource TextSecondary}"/>
+                                    <!-- The grey code background looks muddy on the accent tint. -->
+                                    <views:InlineCodeText Grid.Column="1" Markdown="{Binding Text}"
+                                                          CodeBackgroundKey="CodeBackgroundOnAccent"
+                                                          FontSize="13" LineHeight="20" TextWrapping="Wrap"
+                                                          Foreground="{DynamicResource TextPrimary}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding MoreText}" IsVisible="{Binding HasMore}" Margin="14,0,0,0"
+                               FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Panel>
 
         <!-- Bot List -->
         <Border IsVisible="{Binding !IsEmpty}"

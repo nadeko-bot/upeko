@@ -373,8 +373,8 @@
                             BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
                         <Grid ColumnDefinitions="Auto,*,Auto">
                             <Button Grid.Column="0" Classes="btn-ghost" Padding="8,0"
-                                    Command="{Binding OpenOnGitHubCommand}">
-                                <TextBlock Text="{DynamicResource Changelog_OnGitHub}" FontSize="13"/>
+                                    Command="{Binding OpenOnWebsiteCommand}">
+                                <TextBlock Text="{DynamicResource Changelog_OnWebsite}" FontSize="13"/>
                             </Button>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
                                 <Button Classes="btn-ghost"

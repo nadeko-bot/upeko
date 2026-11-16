@@ -141,7 +141,7 @@
     <x:String x:Key="Changelog_Latest">Dernière version</x:String>
     <x:String x:Key="Changelog_Loading">Chargement des modifications...</x:String>
     <x:String x:Key="Changelog_LoadFailed">Impossible de charger les modifications : {0}</x:String>
-    <x:String x:Key="Changelog_OnGitHub">Journal complet sur GitHub</x:String>
+    <x:String x:Key="Changelog_OnWebsite">Toutes les modifications sur nadeko.bot</x:String>
     <x:String x:Key="Changelog_Close">Fermer</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyTitle">Disponible après le téléchargement</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyText">Téléchargez le bot pour ouvrir ici son dossier data et creds.yml.</x:String>
@@ -163,4 +163,13 @@
     <x:String x:Key="BotView_LogEmpty">Démarrez le bot pour voir sa sortie ici.</x:String>
     <x:String x:Key="Toast_LogCopied">Journal copié</x:String>
     <x:String x:Key="Toast_BotExitedWithError">{0} s'est arrêté : {1}</x:String>
+    <!-- Release strip above the bot list -->
+    <x:String x:Key="ReleaseNews_Available">NadekoBot {0} est disponible</x:String>
+    <x:String x:Key="ReleaseNews_Updated">Mis à jour vers NadekoBot {0}</x:String>
+    <x:String x:Key="ReleaseNews_Added">Ajouts : {0}</x:String>
+    <x:String x:Key="ReleaseNews_Changed">Modifications : {0}</x:String>
+    <x:String x:Key="ReleaseNews_Fixed">Corrections : {0}</x:String>
+    <x:String x:Key="ReleaseNews_Removed">Suppressions : {0}</x:String>
+    <x:String x:Key="ReleaseNews_More">et {0} autres</x:String>
+    <x:String x:Key="ReleaseNews_Hide">Masquer jusqu'à la prochaine version</x:String>
 </ResourceDictionary>

@@ -25,6 +25,8 @@ public partial class BotListViewModel : ViewModelBase
 
     public MainWindowViewModel Main => _main;
 
+    public ReleaseNewsViewModel ReleaseNews { get; }
+
     public BotListViewModel(MainWindowViewModel main)
     {
         _main = main;
@@ -38,6 +40,7 @@ public partial class BotListViewModel : ViewModelBase
 
         UpdateEmpty();
         Bots.CollectionChanged += (_, _) => UpdateEmpty();
+        ReleaseNews = new ReleaseNewsViewModel(this);
 
         LocalizationService.Instance.LanguageChanged += () => OnPropertyChanged(nameof(Loc));
 

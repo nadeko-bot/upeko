@@ -18,6 +18,7 @@ Get the latest build for your system from the [releases page](https://github.com
 - **Several bots**: install and manage any number of NadekoBot instances from one window.
 - **Bot token**: paste the token on the bot page. Upeko does not start a bot that has no token.
 - **Updates**: Upeko checks for a new NadekoBot version at startup and every 6 hours, and sends a notification. Update with one click, also while the bot runs: the bot stays online during the download and starts again on the new version. Your `data` folder (creds, database, configs) is kept.
+- **What's new**: a strip above the bot list shows the first changes of a new NadekoBot version. Its **What's new** button opens the full changelog since your version.
 - **Log**: the bot page shows the last 500 lines of the bot's output, with a Copy button. When a bot stops by itself, Upeko shows its last error.
 - **Music tools**: install ffmpeg, yt-dlp and a JavaScript runtime (deno) from the top bar.
 - **Runs in the background**: closing the window keeps Upeko in the system tray, and bots that were running start again the next time Upeko opens. If you start Upeko again, the window of the running Upeko opens.
@@ -50,6 +51,7 @@ The dots at the top right show whether **ffmpeg**, **yt-dlp** and a **js** runti
 | --- | --- |
 | Settings and bot list | `Documents/upeko/upeko.json`, with backups `upeko.json.bak.1` to `.bak.5` |
 | Logs | `Documents/upeko/logs/` |
+| Changelog of the latest NadekoBot release | `Documents/upeko/cache/` |
 | Lock file that stops a second Upeko | `Documents/upeko/upeko.lock` |
 | Previous version of a bot after an update | `.old-<bot name>` next to the bot's folder |
 

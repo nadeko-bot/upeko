@@ -141,7 +141,7 @@
     <x:String x:Key="Changelog_Latest">最新版本</x:String>
     <x:String x:Key="Changelog_Loading">正在加载更新日志...</x:String>
     <x:String x:Key="Changelog_LoadFailed">无法加载更新日志：{0}</x:String>
-    <x:String x:Key="Changelog_OnGitHub">在 GitHub 上查看完整日志</x:String>
+    <x:String x:Key="Changelog_OnWebsite">在 nadeko.bot 上查看完整更新日志</x:String>
     <x:String x:Key="Changelog_Close">关闭</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyTitle">下载后可用</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyText">下载机器人后，即可在此打开其 data 文件夹和 creds.yml。</x:String>
@@ -163,4 +163,13 @@
     <x:String x:Key="BotView_LogEmpty">启动机器人后，可在此查看其输出。</x:String>
     <x:String x:Key="Toast_LogCopied">日志已复制</x:String>
     <x:String x:Key="Toast_BotExitedWithError">{0} 已停止：{1}</x:String>
+    <!-- Release strip above the bot list -->
+    <x:String x:Key="ReleaseNews_Available">NadekoBot {0} 已发布</x:String>
+    <x:String x:Key="ReleaseNews_Updated">已更新到 NadekoBot {0}</x:String>
+    <x:String x:Key="ReleaseNews_Added">新增 {0} 项</x:String>
+    <x:String x:Key="ReleaseNews_Changed">更改 {0} 项</x:String>
+    <x:String x:Key="ReleaseNews_Fixed">修复 {0} 项</x:String>
+    <x:String x:Key="ReleaseNews_Removed">移除 {0} 项</x:String>
+    <x:String x:Key="ReleaseNews_More">另有 {0} 项</x:String>
+    <x:String x:Key="ReleaseNews_Hide">隐藏至下一个版本</x:String>
 </ResourceDictionary>

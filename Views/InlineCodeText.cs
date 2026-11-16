@@ -13,6 +13,9 @@ public class InlineCodeText : SelectableTextBlock
     public static readonly StyledProperty<string?> MarkdownProperty =
         AvaloniaProperty.Register<InlineCodeText, string?>(nameof(Markdown));
 
+    public static readonly StyledProperty<string> CodeBackgroundKeyProperty =
+        AvaloniaProperty.Register<InlineCodeText, string>(nameof(CodeBackgroundKey), "CodeBackground");
+
     private static readonly FontFamily CodeFont = new("JetBrains Mono,Cascadia Mono,Consolas,Menlo,monospace");
 
     public string? Markdown
@@ -21,12 +24,21 @@ public class InlineCodeText : SelectableTextBlock
         set => SetValue(MarkdownProperty, value);
     }
 
+    /// <summary>
+    /// The resource key of the brush behind code spans.
+    /// </summary>
+    public string CodeBackgroundKey
+    {
+        get => GetValue(CodeBackgroundKeyProperty);
+        set => SetValue(CodeBackgroundKeyProperty, value);
+    }
+
     protected override System.Type StyleKeyOverride => typeof(SelectableTextBlock);
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == MarkdownProperty)
+        if (change.Property == MarkdownProperty || change.Property == CodeBackgroundKeyProperty)
             Rebuild();
     }
 
@@ -46,7 +58,7 @@ public class InlineCodeText : SelectableTextBlock
             {
                 run.FontFamily = CodeFont;
                 run.FontSize = FontSize * 0.92;
-                run[!Run.BackgroundProperty] = this.GetResourceObservable("CodeBackground").ToBinding();
+                run[!Run.BackgroundProperty] = this.GetResourceObservable(CodeBackgroundKey).ToBinding();
                 run[!Run.ForegroundProperty] = this.GetResourceObservable("TextPrimary").ToBinding();
             }
             else if (i % 2 == 1)

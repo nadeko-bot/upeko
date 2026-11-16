@@ -75,6 +75,10 @@ public partial class ChangelogViewModel : ViewModelBase
             var shown = ChangelogService.GetSince(all, sinceVersion);
             Versions = shown;
 
+            // The dialog always shows the newest notes, so the release strip has nothing left to announce.
+            if (UpdateChecker.Instance.LatestRelease?.TagName is { } latest)
+                _main.MarkBotReleaseSeen(latest);
+
             var installed = sinceVersion?.Trim().TrimStart('v');
             var showsRange = installed is not null
                              && shown.Count > 0
@@ -105,9 +109,9 @@ public partial class ChangelogViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void OpenOnGitHub()
+    private void OpenOnWebsite()
     {
-        _main.OpenUrlCommand.Execute(ChangelogService.ChangelogPageUrl);
+        _main.OpenUrlCommand.Execute(ChangelogService.WebsiteUrlFor(Versions.Count > 0 ? Versions[0].Version : null));
     }
 
     [RelayCommand]

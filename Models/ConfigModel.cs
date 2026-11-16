@@ -18,5 +18,15 @@ namespace upeko.Models
         public string Language { get; set; } = "en-US";
 
         public bool IsDarkTheme { get; set; } = false;
+
+        /// <summary>
+        /// The newest NadekoBot release whose notes the user opened, or whose release strip the user closed.
+        /// </summary>
+        public string? SeenBotRelease { get; set; }
+
+        /// <summary>
+        /// The newest NadekoBot release that Upeko found, so the release strip can show at startup before the check ends.
+        /// </summary>
+        public string? LatestBotRelease { get; set; }
     }
 }
