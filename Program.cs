@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Avalonia;
 using Serilog;
+using upeko.Services;
 
 namespace upeko;
 
@@ -10,6 +11,11 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // Before the logger: a second Upeko must not open the log file of the first one.
+        using var instance = SingleInstance.Claim(App.ShowFromAnotherInstance);
+        if (instance is null)
+            return;
+
         var logPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "upeko", "logs", "upeko-.log");
@@ -28,6 +34,9 @@ sealed class Program
         try
         {
             Log.Information("Upeko starting");
+            if (instance.Problem is not null)
+                Log.Warning("Running without the single instance check. {Problem}", instance.Problem);
+
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
         catch (Exception ex)

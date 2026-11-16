@@ -8,6 +8,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using upeko.Services;
 using upeko.ViewModels;
 using upeko.Views;
@@ -101,11 +102,26 @@ public partial class App : Application
         if (_trayIcon is not null) _trayIcon.ToolTipText = loc["Tray_Tooltip"];
     }
 
-    private void ShowMainWindow()
+    public void ShowMainWindow()
     {
+        // Null until the framework is initialized.
+        if (MainWindow is null)
+            return;
+
         MainWindow.Show();
-        MainWindow.WindowState = WindowState.Normal;
+        if (MainWindow.WindowState == WindowState.Minimized)
+            MainWindow.WindowState = WindowState.Normal;
         MainWindow.Activate();
+    }
+
+    /// <summary>
+    /// Called on a background thread when the user starts Upeko again while this one runs.
+    /// </summary>
+    public static void ShowFromAnotherInstance()
+    {
+        // Before Avalonia is set up, Dispatcher.UIThread would bind to this background thread. The window shows at startup anyway.
+        if (Current is App app)
+            Dispatcher.UIThread.Post(app.ShowMainWindow);
     }
 
     /// <summary>
