@@ -146,4 +146,13 @@
     <x:String x:Key="Changelog_Close">关闭</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyTitle">下载后可用</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyText">下载机器人后，即可在此打开其 data 文件夹和 creds.yml。</x:String>
+    <!-- Bot token -->
+    <x:String x:Key="BotView_Token">机器人令牌</x:String>
+    <x:String x:Key="BotView_TokenPlaceholder">粘贴您的机器人令牌</x:String>
+    <x:String x:Key="BotView_TokenGuide">如何获取令牌</x:String>
+    <x:String x:Key="BotView_TokenInvalid">这不是机器人令牌。请从您的 Discord 应用的 Bot 页面复制令牌。</x:String>
+    <x:String x:Key="BotView_TokenNeeded">请添加机器人令牌以启动机器人。</x:String>
+    <x:String x:Key="Toast_TokenSaved">令牌已保存</x:String>
+    <x:String x:Key="Toast_TokenSavedRestart">令牌已保存。重启机器人后生效。</x:String>
+    <x:String x:Key="Toast_TokenSaveFailed">无法保存令牌：{0}</x:String>
 </ResourceDictionary>

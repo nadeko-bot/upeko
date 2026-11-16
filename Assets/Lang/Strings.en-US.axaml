@@ -146,4 +146,13 @@
     <x:String x:Key="Changelog_Close">Close</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyTitle">Available after the download</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyText">Download the bot to open its data folder and creds.yml here.</x:String>
+    <!-- Bot token -->
+    <x:String x:Key="BotView_Token">BOT TOKEN</x:String>
+    <x:String x:Key="BotView_TokenPlaceholder">Paste the token of your bot</x:String>
+    <x:String x:Key="BotView_TokenGuide">How to get a token</x:String>
+    <x:String x:Key="BotView_TokenInvalid">This is not a bot token. Copy the token from the Bot page of your Discord application.</x:String>
+    <x:String x:Key="BotView_TokenNeeded">Add the bot token to start the bot.</x:String>
+    <x:String x:Key="Toast_TokenSaved">Token saved</x:String>
+    <x:String x:Key="Toast_TokenSavedRestart">Token saved. Restart the bot to use it.</x:String>
+    <x:String x:Key="Toast_TokenSaveFailed">Could not save the token: {0}</x:String>
 </ResourceDictionary>

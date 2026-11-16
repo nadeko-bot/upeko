@@ -18,6 +18,8 @@ namespace upeko.ViewModels;
 
 public partial class BotViewModel : ViewModelBase, IDisposable
 {
+    private const string CredsGuideUrl = "https://docs.nadeko.bot/creds-guide/";
+
     private readonly BotModel _bot = null!;
     private bool _isDownloading;
     private Process? _process;
@@ -30,7 +32,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsReady), nameof(IsMissing), nameof(ShowStartStop),
         nameof(CanUpdate), nameof(CanChangePath), nameof(StatusText), nameof(UpdateButtonText),
-        nameof(IsUpdateAvailable), nameof(IsBotDownloaded))]
+        nameof(IsUpdateAvailable), nameof(IsBotDownloaded), nameof(ShowTokenNeeded))]
     private MainActivityState _state;
 
     [ObservableProperty]
@@ -75,6 +77,23 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     [NotifyPropertyChangedFor(nameof(HasAvatar))]
     private Bitmap? _avatarImage;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveToken))]
+    private string _tokenInput = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasTokenError))]
+    private string? _tokenError;
+
+    /// <summary>
+    /// True when NadekoBot would stop at once because creds.yml has no token.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowTokenNeeded))]
+    private bool _needsToken;
+
+    private string _savedToken = string.Empty;
+
     public string BotPath
     {
         get => Bot.PathUri ?? string.Empty;
@@ -99,6 +118,9 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     public bool CanChangePath => !IsRunning && !IsProgressVisible;
     public bool IsUpdateAvailable => IsBotDownloaded && UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
     public bool IsBotDownloaded => !string.IsNullOrWhiteSpace(Bot?.Version);
+    public bool CanSaveToken => !string.IsNullOrWhiteSpace(TokenInput) && TokenInput.Trim() != _savedToken;
+    public bool HasTokenError => TokenError is not null;
+    public bool ShowTokenNeeded => NeedsToken && IsReady;
     public string UpdateButtonText => IsCheckingForUpdates ? Loc["BotView_Checking"] : IsUpdateAvailable ? Loc["BotView_UpdateButton"] : Loc["BotView_CheckUpdates"];
 
     public string StatusText => State switch
@@ -128,6 +150,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         _bot = model;
         Parent = parent;
         UpdateCurrentActivity();
+        RefreshToken();
         _ = LoadAvatarAsync();
         VersionLoaded = ReloadVersionFromPathAsync();
         _ = InitAsync();
@@ -184,6 +207,14 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         if (!File.Exists(ExecutablePath))
         {
             _ = ReloadVersionFromPathAsync();
+            return;
+        }
+
+        if (!CredsFile.CanStart(BotPath))
+        {
+            RefreshToken();
+            Parent.ShowToast(Loc["BotView_TokenNeeded"], ToastKind.Error);
+            Parent.ShowDetail(this);
             return;
         }
 
@@ -378,6 +409,75 @@ public partial class BotViewModel : ViewModelBase, IDisposable
             Parent.ShowToast(string.Format(Loc["Toast_OpenFailed"], ex.Message), ToastKind.Error);
         }
     }
+
+    /// <summary>
+    /// Reads the token again, because the user can also change it in creds.yml.
+    /// </summary>
+    public void RefreshToken()
+    {
+        _savedToken = string.Empty;
+        if (!IsBotDownloaded || string.IsNullOrWhiteSpace(BotPath))
+        {
+            TokenInput = string.Empty;
+            NeedsToken = false;
+            OnPropertyChanged(nameof(CanSaveToken));
+            return;
+        }
+
+        try
+        {
+            _savedToken = CredsFile.ReadToken(BotPath).Token;
+            NeedsToken = !CredsFile.CanStart(BotPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not read creds.yml of {BotName}", Bot.Name);
+            NeedsToken = false;
+        }
+
+        TokenInput = _savedToken;
+        TokenError = null;
+        OnPropertyChanged(nameof(CanSaveToken));
+    }
+
+    partial void OnTokenInputChanged(string value) => TokenError = null;
+
+    [RelayCommand]
+    private void SaveToken()
+    {
+        var token = TokenInput.Trim();
+        if (token.Length == 0 || token == _savedToken)
+            return;
+
+        if (!CredsFile.LooksLikeToken(token))
+        {
+            TokenError = Loc["BotView_TokenInvalid"];
+            return;
+        }
+
+        try
+        {
+            CredsFile.WriteToken(BotPath, token);
+        }
+        catch (FileNotFoundException)
+        {
+            Parent.ShowToast(Loc["Toast_CredsMissing"], ToastKind.Error);
+            return;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to save the token of {BotName}", Bot.Name);
+            Parent.ShowToast(string.Format(Loc["Toast_TokenSaveFailed"], ex.Message), ToastKind.Error);
+            return;
+        }
+
+        Log.Information("Saved a new token for {BotName}", Bot.Name);
+        RefreshToken();
+        Parent.ShowToast(IsRunning ? Loc["Toast_TokenSavedRestart"] : Loc["Toast_TokenSaved"], ToastKind.Success);
+    }
+
+    [RelayCommand]
+    private void OpenTokenGuide() => Parent.Main.OpenUrlCommand.Execute(CredsGuideUrl);
 
     [RelayCommand]
     private async Task BrowsePath()
@@ -578,6 +678,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
         OnPropertyChanged(nameof(Version));
         UpdateCurrentActivity();
+        RefreshToken();
     }
 
     private void UpdateCurrentActivity()

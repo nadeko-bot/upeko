@@ -185,6 +185,43 @@
                                                 Margin="8,0,0,0"/>
                                     </Grid>
                                 </StackPanel>
+
+                                <!-- Bot token (creds.yml exists only after the download) -->
+                                <StackPanel Spacing="6" IsVisible="{Binding IsBotDownloaded}">
+                                    <TextBlock Text="{DynamicResource BotView_Token}" FontSize="11" FontWeight="Medium"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               LetterSpacing="1"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0" Classes="input revealPasswordButton"
+                                                 Classes.invalid="{Binding HasTokenError}"
+                                                 PasswordChar="•"
+                                                 Text="{Binding TokenInput}"
+                                                 Watermark="{DynamicResource BotView_TokenPlaceholder}"
+                                                 FontFamily="JetBrains Mono,Consolas,monospace"
+                                                 FontSize="11">
+                                            <TextBox.KeyBindings>
+                                                <KeyBinding Gesture="Enter" Command="{Binding SaveTokenCommand}"/>
+                                            </TextBox.KeyBindings>
+                                        </TextBox>
+                                        <Button Grid.Column="1" Classes="btn-ghost" Content="{DynamicResource BotView_SaveTip}"
+                                                Command="{Binding SaveTokenCommand}"
+                                                IsEnabled="{Binding CanSaveToken}"
+                                                Margin="8,0,0,0"/>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasTokenError}">
+                                        <Viewbox Grid.Column="0" Width="12" Height="12" Margin="0,2,6,0" VerticalAlignment="Top">
+                                            <Path Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-2h2v2h-2zm0-4V7h2v6h-2z"
+                                                  Fill="{DynamicResource ErrorColor}"/>
+                                        </Viewbox>
+                                        <TextBlock Grid.Column="1" Text="{Binding TokenError}" FontSize="12" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource TextSecondary}"/>
+                                    </Grid>
+                                    <Button Classes="btn-ghost-sm" HorizontalAlignment="Left" Padding="0" Margin="0,-2,0,0"
+                                            Command="{Binding OpenTokenGuideCommand}">
+                                        <TextBlock Text="{DynamicResource BotView_TokenGuide}" FontSize="12"
+                                                   TextDecorations="Underline"/>
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -229,6 +266,7 @@
                                     <Button Grid.Column="0" Classes="btn-primary"
                                             Content="{DynamicResource BotView_Start}"
                                             Command="{Binding StartBotCommand}"
+                                            IsEnabled="{Binding !NeedsToken}"
                                             HorizontalAlignment="Stretch"/>
                                     <Button Grid.Column="2" Classes="btn-ghost"
                                             Command="{Binding UpdateBotCommand}"
@@ -244,6 +282,16 @@
                                                        VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
+                                </Grid>
+
+                                <!-- Why Start is disabled -->
+                                <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding ShowTokenNeeded}">
+                                    <Viewbox Grid.Column="0" Width="12" Height="12" Margin="0,2,6,0" VerticalAlignment="Top">
+                                        <Path Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-2h2v2h-2zm0-4V7h2v6h-2z"
+                                              Fill="{DynamicResource ErrorColor}"/>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="1" Text="{DynamicResource BotView_TokenNeeded}" FontSize="12"
+                                               TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"/>
                                 </Grid>
 
                                 <!-- Update available: what changed -->

@@ -90,6 +90,8 @@ public partial class BotListViewModel : ViewModelBase
         _main.NavigateToDetail(bot);
     }
 
+    public void ShowDetail(BotViewModel bot) => _main.NavigateToDetail(bot);
+
     [RelayCommand]
     private void AddBot()
     {

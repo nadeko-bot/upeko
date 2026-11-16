@@ -146,4 +146,13 @@
     <x:String x:Key="Changelog_Close">Закрыть</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyTitle">Доступно после скачивания</x:String>
     <x:String x:Key="BotView_ShortcutsEmptyText">Скачайте бота, чтобы открывать здесь его папку data и creds.yml.</x:String>
+    <!-- Bot token -->
+    <x:String x:Key="BotView_Token">ТОКЕН БОТА</x:String>
+    <x:String x:Key="BotView_TokenPlaceholder">Вставьте токен вашего бота</x:String>
+    <x:String x:Key="BotView_TokenGuide">Как получить токен</x:String>
+    <x:String x:Key="BotView_TokenInvalid">Это не токен бота. Скопируйте токен на странице Bot вашего приложения Discord.</x:String>
+    <x:String x:Key="BotView_TokenNeeded">Добавьте токен бота, чтобы запустить его.</x:String>
+    <x:String x:Key="Toast_TokenSaved">Токен сохранён</x:String>
+    <x:String x:Key="Toast_TokenSavedRestart">Токен сохранён. Перезапустите бота, чтобы применить его.</x:String>
+    <x:String x:Key="Toast_TokenSaveFailed">Не удалось сохранить токен: {0}</x:String>
 </ResourceDictionary>

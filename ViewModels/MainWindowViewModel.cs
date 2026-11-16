@@ -234,6 +234,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void NavigateToDetail(BotViewModel botViewModel)
     {
+        botViewModel.RefreshToken();
         CurrentView = botViewModel;
     }
 
