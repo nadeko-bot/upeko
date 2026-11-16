@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -25,6 +26,8 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     private Process? _process;
     private int _avatarLoad;
     private bool _disposed;
+    private readonly DispatcherTimer _logTimer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private int _shownLogVersion;
 
     public BotModel Bot => _bot;
     public BotListViewModel Parent { get; } = null!;
@@ -78,6 +81,10 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     private Bitmap? _avatarImage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasLog))]
+    private string _logText = string.Empty;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSaveToken))]
     private string _tokenInput = string.Empty;
 
@@ -121,6 +128,12 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     public bool CanSaveToken => !string.IsNullOrWhiteSpace(TokenInput) && TokenInput.Trim() != _savedToken;
     public bool HasTokenError => TokenError is not null;
     public bool ShowTokenNeeded => NeedsToken && IsReady;
+    public bool HasLog => LogText.Length > 0;
+
+    /// <summary>
+    /// What the bot wrote to stdout and stderr since its last start.
+    /// </summary>
+    public BotOutput Output { get; } = new();
     public string UpdateButtonText => IsCheckingForUpdates ? Loc["BotView_Checking"] : IsUpdateAvailable ? Loc["BotView_UpdateButton"] : Loc["BotView_CheckUpdates"];
 
     public string StatusText => State switch
@@ -141,6 +154,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
     public BotViewModel()
     {
+        _logTimer.Tick += (_, _) => FlushLog();
         UpdateChecker.Instance.OnNewVersionFound += OnNewVersionFound;
         LocalizationService.Instance.LanguageChanged += OnLanguageChanged;
     }
@@ -159,6 +173,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _disposed = true;
+        _logTimer.Stop();
         UpdateChecker.Instance.OnNewVersionFound -= OnNewVersionFound;
         LocalizationService.Instance.LanguageChanged -= OnLanguageChanged;
         AvatarImage?.Dispose();
@@ -220,20 +235,47 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         }
 
         Log.Information("Starting bot {BotName}", Bot.Name);
-        Process process;
+        var psi = new ProcessStartInfo
+        {
+            FileName = ExecutablePath,
+            WorkingDirectory = BotPath,
+            UseShellExecute = false,
+            // The output goes to the Log card. Without this, Windows opens a console window for the bot.
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            // NadekoBot waits for a key press after some fatal errors when its input is a console.
+            RedirectStandardInput = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+        psi.Environment["PATH"] = PlatformSpecific.GetToolSearchPath();
+
+        Output.Clear();
+        FlushLog();
+
+        var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
+        process.OutputDataReceived += (_, e) =>
+        {
+            if (e.Data is not null)
+                Output.Add(e.Data, fromStandardError: false);
+        };
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (e.Data is not null)
+                Output.Add(e.Data, fromStandardError: true);
+        };
+
         try
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = ExecutablePath,
-                WorkingDirectory = BotPath,
-                UseShellExecute = false,
-            };
-            psi.Environment["PATH"] = PlatformSpecific.GetToolSearchPath();
-            process = Process.Start(psi) ?? throw new InvalidOperationException("The process did not start.");
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.StandardInput.Close();
         }
         catch (Exception ex)
         {
+            process.Dispose();
             Log.Error(ex, "Failed to start bot {BotName}", Bot.Name);
             Parent.ShowToast(string.Format(Loc["Toast_StartFailed"], Name, ex.Message), ToastKind.Error);
             return;
@@ -244,6 +286,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         Parent.UpdateBot(_bot);
         UpdateCurrentActivity();
 
+        _logTimer.Start();
         _ = WatchProcessAsync(process);
     }
 
@@ -251,7 +294,17 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     {
         try
         {
-            await process.WaitForExitAsync();
+            // WaitForExitAsync also waits for the end of the output. A child process of the bot can keep
+            // the output open after the bot exits, so wait for the exit itself first.
+            var exited = new TaskCompletionSource();
+            process.Exited += (_, _) => exited.TrySetResult();
+            if (process.HasExited)
+                exited.TrySetResult();
+            await exited.Task;
+
+            using var lastLines = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            try { await process.WaitForExitAsync(lastLines.Token); }
+            catch (OperationCanceledException) { }
         }
         catch (Exception ex)
         {
@@ -260,6 +313,8 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
+            FlushLog();
+
             // Stop and exit clear _process themselves; only an exit nobody asked for gets here.
             if (_process != process)
                 return;
@@ -271,11 +326,42 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
             int? exitCode = null;
             try { exitCode = process.ExitCode; } catch { }
-            Log.Warning("Bot {BotName} exited on its own with code {ExitCode}", Bot.Name, exitCode);
-            Parent.ShowToast(string.Format(Loc["Toast_BotExited"], Name), ToastKind.Error);
+            var error = Output.LastError;
+            Log.Warning("Bot {BotName} exited on its own with code {ExitCode}. Last error: {Error}", Bot.Name, exitCode, error);
+            Parent.ShowToast(error is null
+                    ? string.Format(Loc["Toast_BotExited"], Name)
+                    : string.Format(Loc["Toast_BotExitedWithError"], Name, error),
+                ToastKind.Error);
         });
 
         process.Dispose();
+    }
+
+    /// <summary>
+    /// Shows the new output lines. Runs on a timer, so a bot that writes many lines does not flood the UI.
+    /// </summary>
+    private void FlushLog()
+    {
+        var version = Output.Version;
+        if (version != _shownLogVersion)
+        {
+            _shownLogVersion = version;
+            LogText = Output.Text;
+        }
+
+        if (_process is null)
+            _logTimer.Stop();
+    }
+
+    [RelayCommand]
+    private async Task CopyLog()
+    {
+        var clipboard = TopLevel.GetTopLevel(App.MainWindow)?.Clipboard;
+        if (clipboard is null)
+            return;
+
+        await clipboard.SetTextAsync(Output.Text);
+        Parent.ShowToast(Loc["Toast_LogCopied"], ToastKind.Success);
     }
 
     [RelayCommand]

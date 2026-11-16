@@ -157,4 +157,10 @@
     <!-- Updates while Upeko runs -->
     <x:String x:Key="Notify_BotUpdate">Вышел NadekoBot {0}. Откройте Upeko, чтобы обновить ботов.</x:String>
     <x:String x:Key="Progress_StoppingBot">Остановка бота...</x:String>
+    <!-- Bot output -->
+    <x:String x:Key="BotView_Log">Журнал</x:String>
+    <x:String x:Key="BotView_CopyLog">Копировать</x:String>
+    <x:String x:Key="BotView_LogEmpty">Запустите бота, чтобы увидеть здесь его вывод.</x:String>
+    <x:String x:Key="Toast_LogCopied">Журнал скопирован</x:String>
+    <x:String x:Key="Toast_BotExitedWithError">{0} остановился: {1}</x:String>
 </ResourceDictionary>

@@ -365,6 +365,43 @@
                         </Border>
                     </StackPanel>
                 </Border>
+                <!-- Bot output -->
+                <Border Classes="card" IsVisible="{Binding IsBotDownloaded}">
+                    <StackPanel>
+                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1"
+                                Padding="16,12,12,12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="{DynamicResource BotView_Log}" FontSize="13" FontWeight="Medium"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <Button Grid.Column="1" Classes="btn-ghost-sm"
+                                        Command="{Binding CopyLogCommand}"
+                                        IsEnabled="{Binding HasLog}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Viewbox Width="12" Height="12" VerticalAlignment="Center">
+                                            <Path Data="M10 8H18A2 2 0 0 1 20 10V18A2 2 0 0 1 18 20H10A2 2 0 0 1 8 18V10A2 2 0 0 1 10 8Z M16 8V6A2 2 0 0 0 14 4H6A2 2 0 0 0 4 6V14A2 2 0 0 0 6 16H8"
+                                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="1.8"
+                                                  StrokeLineCap="Round" StrokeJoin="Round"/>
+                                        </Viewbox>
+                                        <TextBlock Text="{DynamicResource BotView_CopyLog}" FontSize="12"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <TextBlock IsVisible="{Binding !HasLog}" Margin="16"
+                                   Text="{DynamicResource BotView_LogEmpty}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondary}"/>
+                        <ScrollViewer x:Name="LogScroll" IsVisible="{Binding HasLog}" MaxHeight="280"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Background="{DynamicResource SecondaryBackground}">
+                            <SelectableTextBlock Text="{Binding LogText}" Margin="16,12"
+                                                 FontFamily="JetBrains Mono,Consolas,monospace" FontSize="11"
+                                                 LineHeight="17" TextWrapping="Wrap"
+                                                 Foreground="{DynamicResource TextSecondary}"/>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
             </StackPanel>
 
             <!-- Right Column (Sidebar) -->

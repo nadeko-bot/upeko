@@ -157,4 +157,10 @@
     <!-- Updates while Upeko runs -->
     <x:String x:Key="Notify_BotUpdate">NadekoBot {0} 已发布。打开 Upeko 以更新您的机器人。</x:String>
     <x:String x:Key="Progress_StoppingBot">正在停止机器人...</x:String>
+    <!-- Bot output -->
+    <x:String x:Key="BotView_Log">日志</x:String>
+    <x:String x:Key="BotView_CopyLog">复制</x:String>
+    <x:String x:Key="BotView_LogEmpty">启动机器人后，可在此查看其输出。</x:String>
+    <x:String x:Key="Toast_LogCopied">日志已复制</x:String>
+    <x:String x:Key="Toast_BotExitedWithError">{0} 已停止：{1}</x:String>
 </ResourceDictionary>
