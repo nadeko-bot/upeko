@@ -136,12 +136,8 @@ public partial class MainWindowViewModel : ViewModelBase
         });
     }
 
-    private async Task CheckDepsAsync()
-    {
-        await Ffmpeg.CheckAsync();
-        await Ytdlp.CheckAsync();
-        await Js.CheckAsync();
-    }
+    private Task CheckDepsAsync()
+        => Task.WhenAll(Ffmpeg.CheckAsync(), Ytdlp.CheckAsync(), Js.CheckAsync());
 
     private void OnLanguageChanged()
     {

@@ -21,6 +21,8 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     private readonly BotModel _bot = null!;
     private bool _isDownloading;
     private Process? _process;
+    private int _avatarLoad;
+    private bool _disposed;
 
     public BotModel Bot => _bot;
     public BotListViewModel Parent { get; } = null!;
@@ -110,6 +112,11 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
     public string? Version => Bot?.Version;
 
+    /// <summary>
+    /// Completes when the version of the installed bot is read. Until then, State comes from the saved version.
+    /// </summary>
+    public Task VersionLoaded { get; } = Task.CompletedTask;
+
     public BotViewModel()
     {
         UpdateChecker.Instance.OnNewVersionFound += OnNewVersionFound;
@@ -120,12 +127,15 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     {
         _bot = model;
         Parent = parent;
-        LoadAvatar();
+        UpdateCurrentActivity();
+        _ = LoadAvatarAsync();
+        VersionLoaded = ReloadVersionFromPathAsync();
         _ = InitAsync();
     }
 
     public void Dispose()
     {
+        _disposed = true;
         UpdateChecker.Instance.OnNewVersionFound -= OnNewVersionFound;
         LocalizationService.Instance.LanguageChanged -= OnLanguageChanged;
         AvatarImage?.Dispose();
@@ -153,7 +163,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
     private async Task InitAsync()
     {
-        await ReloadVersionFromPathAsync();
+        await VersionLoaded;
         if (UpdateChecker.Instance.LatestRelease is null)
             await UpdateChecker.Instance.CheckForUpdatesAsync();
         await UpdateDiskSpaceInfoAsync();
@@ -425,32 +435,48 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         {
             _bot.IconUri = new Uri(result[0].Path.LocalPath).ToString();
             Parent?.UpdateBot(Bot);
-            LoadAvatar();
+            await LoadAvatarAsync();
         }
     }
 
-    private void LoadAvatar()
+    private async Task LoadAvatarAsync()
     {
+        var load = ++_avatarLoad;
         var old = AvatarImage;
         AvatarImage = null;
         old?.Dispose();
 
-        if (string.IsNullOrWhiteSpace(Bot.IconUri))
+        var iconUri = Bot.IconUri;
+        if (string.IsNullOrWhiteSpace(iconUri))
             return;
 
+        Bitmap? bitmap = null;
         try
         {
-            var path = new Uri(Bot.IconUri).LocalPath;
-            if (!File.Exists(path))
-                return;
+            // A large picture takes long enough to decode to hold up the window at startup.
+            bitmap = await Task.Run(() =>
+            {
+                var path = new Uri(iconUri).LocalPath;
+                if (!File.Exists(path))
+                    return null;
 
-            using var stream = File.OpenRead(path);
-            AvatarImage = Bitmap.DecodeToWidth(stream, 160);
+                using var stream = File.OpenRead(path);
+                return Bitmap.DecodeToWidth(stream, 160);
+            });
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Could not load avatar for {BotName}", Bot.Name);
         }
+
+        // Another picture was chosen, or the bot was removed, while this one was decoded.
+        if (load != _avatarLoad || _disposed)
+        {
+            bitmap?.Dispose();
+            return;
+        }
+
+        AvatarImage = bitmap;
     }
 
     [RelayCommand]
@@ -493,11 +519,11 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         if (string.IsNullOrWhiteSpace(BotPath))
             return;
 
+        var savedVersion = Bot.Version;
         if (!File.Exists(ExecutablePath))
         {
             Bot.Version = null;
-            OnPropertyChanged(nameof(Version));
-            UpdateCurrentActivity();
+            OnVersionRead(savedVersion);
             return;
         }
 
@@ -540,6 +566,15 @@ public partial class BotViewModel : ViewModelBase, IDisposable
             Log.Warning(ex, "Could not read the version of {BotName}", Bot.Name);
             Bot.Version = null;
         }
+
+        OnVersionRead(savedVersion);
+    }
+
+    private void OnVersionRead(string? savedVersion)
+    {
+        // The saved version sets the state at the next startup, before the version is read again.
+        if (Bot.Version != savedVersion)
+            Parent?.UpdateBot(_bot);
 
         OnPropertyChanged(nameof(Version));
         UpdateCurrentActivity();

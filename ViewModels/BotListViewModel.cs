@@ -53,8 +53,15 @@ public partial class BotListViewModel : ViewModelBase
 
     private async Task ResumeSessionAsync()
     {
-        // Give the bots a moment to read their versions, so IsReady is known.
-        await Task.Delay(1000);
+        // IsReady is certain only after each bot has read its version, which can take seconds on a slow disk.
+        try
+        {
+            await Task.WhenAll(Bots.Select(b => b.VersionLoaded));
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not read the version of every bot before resuming");
+        }
 
         var botsToResume = Bots.Where(b => b.Bot.WasRunning && b.IsReady).ToList();
         if (botsToResume.Count == 0)
