@@ -131,10 +131,12 @@ namespace upeko.Services
             _downloadCts?.Cancel();
         }
 
+        /// <param name="beforeInstall">Runs after the download and extraction, before the bot folder is replaced.</param>
         public async Task<DownloadResult> DownloadAndInstallBotAsync(
             string botName,
             string botPath,
-            Action<DownloadProgressInfo> onProgress)
+            Action<DownloadProgressInfo> onProgress,
+            Func<Task>? beforeInstall = null)
         {
             if (string.IsNullOrWhiteSpace(botPath))
                 throw new ArgumentNullException(nameof(botPath));
@@ -218,6 +220,8 @@ namespace upeko.Services
 
                 // Past this point the old install is touched, so the download can no longer be cancelled.
                 ct.ThrowIfCancellationRequested();
+                if (beforeInstall is not null)
+                    await beforeInstall();
                 onProgress(new DownloadProgressInfo(1, 0, 0, null, null, Loc["Progress_Installing"]));
 
                 InstallExtractedRelease(Path.Combine(extractPath, $"nadeko-{os}-{arch}"), botPath, botName);

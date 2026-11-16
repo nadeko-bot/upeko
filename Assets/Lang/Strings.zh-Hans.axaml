@@ -111,7 +111,6 @@
     <x:String x:Key="Toast_OpenFailed">无法打开：{0}</x:String>
     <x:String x:Key="Toast_UpdateCheckFailed">无法检查更新：{0}</x:String>
     <x:String x:Key="Toast_UpToDate">NadekoBot 已是最新版本</x:String>
-    <x:String x:Key="Toast_StopBeforeUpdate">请先停止机器人再更新</x:String>
     <x:String x:Key="Toast_BotInstalled">{0} 已就绪（v{1}）</x:String>
     <x:String x:Key="Toast_DownloadCancelled">已取消下载</x:String>
     <x:String x:Key="Toast_DownloadFailed">下载失败：{0}</x:String>
@@ -155,4 +154,7 @@
     <x:String x:Key="Toast_TokenSaved">令牌已保存</x:String>
     <x:String x:Key="Toast_TokenSavedRestart">令牌已保存。重启机器人后生效。</x:String>
     <x:String x:Key="Toast_TokenSaveFailed">无法保存令牌：{0}</x:String>
+    <!-- Updates while Upeko runs -->
+    <x:String x:Key="Notify_BotUpdate">NadekoBot {0} 已发布。打开 Upeko 以更新您的机器人。</x:String>
+    <x:String x:Key="Progress_StoppingBot">正在停止机器人...</x:String>
 </ResourceDictionary>

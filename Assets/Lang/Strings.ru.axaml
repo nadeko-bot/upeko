@@ -111,7 +111,6 @@
     <x:String x:Key="Toast_OpenFailed">Не удалось открыть: {0}</x:String>
     <x:String x:Key="Toast_UpdateCheckFailed">Не удалось проверить обновления: {0}</x:String>
     <x:String x:Key="Toast_UpToDate">У вас последняя версия NadekoBot</x:String>
-    <x:String x:Key="Toast_StopBeforeUpdate">Остановите бота перед обновлением</x:String>
     <x:String x:Key="Toast_BotInstalled">{0} готов (v{1})</x:String>
     <x:String x:Key="Toast_DownloadCancelled">Скачивание отменено</x:String>
     <x:String x:Key="Toast_DownloadFailed">Не удалось скачать: {0}</x:String>
@@ -155,4 +154,7 @@
     <x:String x:Key="Toast_TokenSaved">Токен сохранён</x:String>
     <x:String x:Key="Toast_TokenSavedRestart">Токен сохранён. Перезапустите бота, чтобы применить его.</x:String>
     <x:String x:Key="Toast_TokenSaveFailed">Не удалось сохранить токен: {0}</x:String>
+    <!-- Updates while Upeko runs -->
+    <x:String x:Key="Notify_BotUpdate">Вышел NadekoBot {0}. Откройте Upeko, чтобы обновить ботов.</x:String>
+    <x:String x:Key="Progress_StoppingBot">Остановка бота...</x:String>
 </ResourceDictionary>

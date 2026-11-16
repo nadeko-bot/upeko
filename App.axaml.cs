@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -23,7 +24,7 @@ public partial class App : Application
     private TrayIcon? _trayIcon;
     private NativeMenuItem? _showItem;
     private NativeMenuItem? _exitItem;
-    private DateTime _lastNotification = DateTime.MinValue;
+    private readonly Dictionary<string, DateTime> _lastNotification = new();
     private bool _quitting;
 
     public override void Initialize()
@@ -159,10 +160,11 @@ public partial class App : Application
 
     public void SendSystemNotification(string title, string message)
     {
-        if (DateTime.UtcNow - _lastNotification < TimeSpan.FromMinutes(5))
+        // Limit each message on its own, so that the tray message does not hide an update message.
+        if (_lastNotification.TryGetValue(message, out var last) && DateTime.UtcNow - last < TimeSpan.FromMinutes(5))
             return;
 
-        _lastNotification = DateTime.UtcNow;
+        _lastNotification[message] = DateTime.UtcNow;
 
         try
         {

@@ -114,7 +114,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
     public bool IsReady => State == MainActivityState.Runnable || State == MainActivityState.Updatable;
     public bool IsMissing => State == MainActivityState.Downloadable;
     public bool ShowStartStop => IsRunning || IsReady;
-    public bool CanUpdate => State == MainActivityState.Updatable;
+    public bool CanUpdate => IsUpdateAvailable;
     public bool CanChangePath => !IsRunning && !IsProgressVisible;
     public bool IsUpdateAvailable => IsBotDownloaded && UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
     public bool IsBotDownloaded => !string.IsNullOrWhiteSpace(Bot?.Version);
@@ -179,6 +179,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         {
             UpdateCurrentActivity();
             OnPropertyChanged(nameof(IsUpdateAvailable));
+            OnPropertyChanged(nameof(CanUpdate));
             OnPropertyChanged(nameof(UpdateButtonText));
             _ = UpdateDiskSpaceInfoAsync();
         });
@@ -677,6 +678,8 @@ public partial class BotViewModel : ViewModelBase, IDisposable
             Parent?.UpdateBot(_bot);
 
         OnPropertyChanged(nameof(Version));
+        OnPropertyChanged(nameof(IsUpdateAvailable));
+        OnPropertyChanged(nameof(CanUpdate));
         UpdateCurrentActivity();
         RefreshToken();
     }
@@ -702,6 +705,7 @@ public partial class BotViewModel : ViewModelBase, IDisposable
             UpdateCurrentActivity();
             OnPropertyChanged(nameof(UpdateButtonText));
             OnPropertyChanged(nameof(IsUpdateAvailable));
+            OnPropertyChanged(nameof(CanUpdate));
             _ = UpdateDiskSpaceInfoAsync();
 
             if (error is not null)
@@ -748,12 +752,6 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         if (_isDownloading)
             return;
 
-        if (IsRunning)
-        {
-            Parent.ShowToast(Loc["Toast_StopBeforeUpdate"], ToastKind.Info);
-            return;
-        }
-
         if (UpdateChecker.Instance.IsDownloading)
         {
             Parent.ShowToast(Loc["Error_DownloadInProgress"], ToastKind.Info);
@@ -771,10 +769,20 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         DownloadBytes = string.Empty;
         IsProgressVisible = true;
 
+        // A running bot keeps running during the download and stops only for the file swap.
+        var stoppedForUpdate = false;
+        async Task StopBeforeInstall()
+        {
+            if (_process is null)
+                return;
+            stoppedForUpdate = true;
+            await Dispatcher.UIThread.InvokeAsync(StopForUpdateAsync);
+        }
+
         DownloadResult result;
         try
         {
-            result = await UpdateChecker.Instance.DownloadAndInstallBotAsync(Bot.Name, BotPath, OnDownloadProgress);
+            result = await UpdateChecker.Instance.DownloadAndInstallBotAsync(Bot.Name, BotPath, OnDownloadProgress, StopBeforeInstall);
         }
         catch (Exception ex)
         {
@@ -785,10 +793,12 @@ public partial class BotViewModel : ViewModelBase, IDisposable
         _isDownloading = false;
         IsProgressVisible = false;
 
+        if (result.Success || stoppedForUpdate)
+            await ReloadVersionFromPathAsync();
+
         if (result.Success)
         {
             Log.Information("Download completed for {BotName}", Bot.Name);
-            await ReloadVersionFromPathAsync();
             Parent.ShowToast(string.Format(Loc["Toast_BotInstalled"], Name, Version), ToastKind.Success);
         }
         else if (result.Cancelled)
@@ -804,6 +814,46 @@ public partial class BotViewModel : ViewModelBase, IDisposable
 
         UpdateCurrentActivity();
         _ = UpdateDiskSpaceInfoAsync();
+
+        if (stoppedForUpdate)
+        {
+            // The new version, or the old one when the swap failed.
+            if (IsReady)
+                StartBot();
+
+            if (!IsRunning)
+            {
+                _bot.WasRunning = false;
+                Parent.UpdateBot(_bot);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Stops the bot so that the update can replace its folder. WasRunning stays set, so the bot also starts
+    /// again if upeko is closed during the update.
+    /// </summary>
+    private async Task StopForUpdateAsync()
+    {
+        var process = _process;
+        if (process is null)
+            return;
+
+        Log.Information("Stopping bot {BotName} to update it", Bot.Name);
+        ProgressTitle = Loc["Progress_StoppingBot"];
+        KillProcess();
+        UpdateCurrentActivity();
+
+        try
+        {
+            // Windows keeps the files of a running program locked, and the update moves the whole folder.
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await process.WaitForExitAsync(cts.Token);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Bot {BotName} did not exit before the update", Bot.Name);
+        }
     }
 
     private void OnDownloadProgress(DownloadProgressInfo info)

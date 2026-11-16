@@ -111,7 +111,6 @@
     <x:String x:Key="Toast_OpenFailed">Nie udało się otworzyć: {0}</x:String>
     <x:String x:Key="Toast_UpdateCheckFailed">Nie udało się sprawdzić aktualizacji: {0}</x:String>
     <x:String x:Key="Toast_UpToDate">NadekoBot jest aktualny</x:String>
-    <x:String x:Key="Toast_StopBeforeUpdate">Zatrzymaj bota przed aktualizacją</x:String>
     <x:String x:Key="Toast_BotInstalled">{0} jest gotowy (v{1})</x:String>
     <x:String x:Key="Toast_DownloadCancelled">Pobieranie anulowane</x:String>
     <x:String x:Key="Toast_DownloadFailed">Pobieranie nie powiodło się: {0}</x:String>
@@ -155,4 +154,7 @@
     <x:String x:Key="Toast_TokenSaved">Token zapisany</x:String>
     <x:String x:Key="Toast_TokenSavedRestart">Token zapisany. Uruchom bota ponownie, aby go użyć.</x:String>
     <x:String x:Key="Toast_TokenSaveFailed">Nie udało się zapisać tokenu: {0}</x:String>
+    <!-- Updates while Upeko runs -->
+    <x:String x:Key="Notify_BotUpdate">NadekoBot {0} jest już dostępny. Otwórz Upeko, aby zaktualizować boty.</x:String>
+    <x:String x:Key="Progress_StoppingBot">Zatrzymywanie bota...</x:String>
 </ResourceDictionary>

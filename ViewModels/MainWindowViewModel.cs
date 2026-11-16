@@ -84,7 +84,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public YtdlDepViewModel Ytdlp { get; }
     public JsDepViewModel Js { get; }
 
+    private static readonly TimeSpan UpdateCheckInterval = TimeSpan.FromHours(6);
+
     private readonly BotListViewModel _botListViewModel;
+    private readonly DispatcherTimer _updateTimer;
     private DispatcherTimer? _toastTimer;
 
     public string CurrentVersion { get; }
@@ -134,6 +137,32 @@ public partial class MainWindowViewModel : ViewModelBase
                 CheckDepsAsync(),
                 CheckForUpEkoUpdatesAsync());
         });
+
+        // Upeko often runs in the tray for days; check again for releases that come out in that time.
+        _updateTimer = new DispatcherTimer { Interval = UpdateCheckInterval };
+        _updateTimer.Tick += async (_, _) => await RunUpdateChecksAsync();
+        _updateTimer.Start();
+    }
+
+    /// <summary>
+    /// Checks for new NadekoBot and Upeko releases. Tells the user when a new NadekoBot release can update a bot.
+    /// </summary>
+    public async Task RunUpdateChecksAsync()
+    {
+        var before = UpdateChecker.Instance.LatestRelease?.TagName;
+        var error = await UpdateChecker.Instance.CheckForUpdatesAsync();
+        var latest = UpdateChecker.Instance.LatestRelease?.TagName;
+
+        if (error is null && latest is not null && latest != before
+            && _botListViewModel.Bots.Any(b => b.IsUpdateAvailable))
+        {
+            var message = string.Format(Loc["Notify_BotUpdate"], UpdateChecker.Instance.LatestVersion);
+            ShowToast(message);
+            if (Application.Current is App app)
+                app.SendSystemNotification(Loc["Tray_Tooltip"], message);
+        }
+
+        await CheckForUpEkoUpdatesAsync();
     }
 
     private Task CheckDepsAsync()
