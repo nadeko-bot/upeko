@@ -16,9 +16,11 @@ Get the latest build for your system from the [releases page](https://github.com
 ## Features
 
 - **Several bots**: install and manage any number of NadekoBot instances from one window.
-- **Updates**: see when a new NadekoBot version is out and update with one click. Your `data` folder (creds, database, configs) is kept.
+- **Bot token**: paste the token on the bot page. Upeko does not start a bot that has no token.
+- **Updates**: Upeko checks for a new NadekoBot version at startup and every 6 hours, and sends a notification. Update with one click, also while the bot runs: the bot stays online during the download and starts again on the new version. Your `data` folder (creds, database, configs) is kept.
+- **Log**: the bot page shows the last 500 lines of the bot's output, with a Copy button. When a bot stops by itself, Upeko shows its last error.
 - **Music tools**: install ffmpeg, yt-dlp and a JavaScript runtime (deno) from the top bar.
-- **Runs in the background**: closing the window keeps Upeko in the system tray, and bots that were running start again the next time Upeko opens.
+- **Runs in the background**: closing the window keeps Upeko in the system tray, and bots that were running start again the next time Upeko opens. If you start Upeko again, the window of the running Upeko opens.
 - **Light and dark theme**, and 7 languages: English, Français, Deutsch, Español, Polski, Русский, 中文.
 
 ## Don't want to host it yourself?
@@ -30,8 +32,9 @@ Get the latest build for your system from the [releases page](https://github.com
 1. Start Upeko.
 2. Click **Add Instance**. Upeko creates a bot in `Documents/upeko/<bot name>`. Open the bot and click **Browse** to pick another folder.
 3. Click **Download & Install**.
-4. Click **creds.yml** under *Shortcuts* and fill in your bot's credentials. The [creds guide](https://docs.nadeko.bot/creds-guide) explains each field.
+4. Paste your bot's token in **Bot token** and click **Save**. The [creds guide](https://docs.nadeko.bot/creds-guide) tells how to get a token.
 5. Click **Start**.
+6. Click **creds.yml** under *Shortcuts* to set the other fields, for example your owner ID.
 
 ### Music
 
@@ -47,6 +50,7 @@ The dots at the top right show whether **ffmpeg**, **yt-dlp** and a **js** runti
 | --- | --- |
 | Settings and bot list | `Documents/upeko/upeko.json`, with backups `upeko.json.bak.1` to `.bak.5` |
 | Logs | `Documents/upeko/logs/` |
+| Lock file that stops a second Upeko | `Documents/upeko/upeko.lock` |
 | Previous version of a bot after an update | `.old-<bot name>` next to the bot's folder |
 
 Removing an instance in Upeko does not delete the bot's folder.
